@@ -63,6 +63,7 @@ checks listed above have been verified so far.
 cd code
 python3.9 -m venv .venv
 . .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -e .
 python -m caprls_core.build_identity_primitives
 python -B study/run_campaign.py
