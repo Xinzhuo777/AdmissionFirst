@@ -1,5 +1,5 @@
 schema: caprls-final-af-content-compatibility-v1
-base_spec: specs/af_a009_content_cells_r03_2026_10_29.yaml
+base_spec: specs/content_cases_full_predicate.yaml
 execution_families: [E2, E3, E10]
 expected_cells: 52
 family_cells: {E2: 8, E3: 33, E10: 11}

@@ -153,14 +153,7 @@ class SelectionCostError(RuntimeError):
 
 
 class SystematicStop(SelectionCostError):
-    """A stop rule fired.  Carries the evidence already collected.
-
-    R3's F8 lesson, third occurrence: a stop path that discards the diagnostic
-    it had already collected leaves a sealed package that cannot tell an auditor
-    why its cells failed.  Everything this exception carries has **already been
-    written to disk** by the time it is raised - the payload exists so the
-    summary can count it, not so it can be rescued.
-    """
+    """Stop the run and retain the receipts and failures collected so far."""
 
     def __init__(
         self,

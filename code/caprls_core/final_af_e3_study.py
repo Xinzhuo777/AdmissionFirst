@@ -218,7 +218,9 @@ def source_identity(source: Path) -> dict[str, Any]:
         for suffix in ("*.sql", "*.yaml", "*.json"):
             paths.extend((source / directory).rglob(suffix))
     files = {str(path.relative_to(source)): digest_bytes(path.read_bytes())
-             for path in sorted(paths) if "__pycache__" not in path.parts}
+             for path in sorted(paths)
+             if "__pycache__" not in path.parts
+             and not any(part.startswith("._") for part in path.relative_to(source).parts)}
     if "caprls_core/e3_main.py" not in files or "planner/contracts.py" not in files:
         raise ValueError("source root lacks the E3/planner implementation")
     return {"root": str(source.resolve()), "digest": digest_json(files), "files": files}

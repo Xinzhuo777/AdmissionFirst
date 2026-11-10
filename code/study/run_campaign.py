@@ -23,7 +23,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 SOURCE = ROOT
 BASELINE = ROOT / 'baseline-source'
-OUTPUT = ROOT / 'results/raw/a018-unified'
+OUTPUT = ROOT / 'results/raw/experiments'
 PROFILE = {'shared_buffers':'2GB','work_mem':'16MB',
            'effective_cache_size':'8GB','max_wal_size':'4GB'}
 # Keep PostgreSQL's Unix socket path short; callers can select another parent.
@@ -58,7 +58,7 @@ def load(name, path):
 
 
 def tools_and_controls():
-    c = load('_a018_controls', HERE/'full-study/campaign_controller.py')
+    c = load('_a018_controls', HERE/'drivers/campaign_controller.py')
     return c.load_tools(), c
 
 
@@ -119,7 +119,7 @@ def stage_command(stage):
     if stage == 'admission21':
         return py+[str(HERE/'run_admission.py'),'--output',str(OUTPUT/stage)]
     if stage in {'CONTENT','STABILITY'}:
-        return py+[str(HERE/'support-study/run_profile_support.py'),
+        return py+[str(HERE/'checks/run_profile_support.py'),
             '--root',str(ROOT),'--source-root',str(SOURCE),
             '--manifest',str(HERE/'inputs/mixed-input-manifest.yaml'),
             '--profiles',str(HERE/'database-profiles.json'),'--profile','shared_host_2gb',
@@ -159,7 +159,7 @@ def run_workload(workload, tools, controls, env):
             'artifacts_file_sha256':sha(shared/'artifacts.json'),
             'setup_wall_ms':(time.perf_counter()-started)*1000,
             'scope':'New data/artifact build for this sole profile and campaign; not reused old results.'})
-        command=[sys.executable,'-B',str(HERE/'full-study/final_af_e3_study.py'),
+        command=[sys.executable,'-B',str(HERE/'drivers/performance.py'),
             '--root',str(ROOT),'--source-root',str(SOURCE),'--baseline-source',str(BASELINE),
             '--manifest',str(manifest_path),'--output-dir',str(base/'primary'),
             '--host',pg_env.host,'--port',str(pg_env.port),'--user',pg_env.user,
@@ -188,7 +188,7 @@ def protocol():
         'sources':freeze,'profile':PROFILE,'stage_order':ORDER,
         'commands':{s:(stage_command(s) if s not in {'mixed','sf10'} else
           {'operation':'run_workload','manifest':str(HERE/'inputs'/(s+'-input-manifest.yaml')),
-           'driver':str(HERE/'full-study/final_af_e3_study.py'),
+           'driver':str(HERE/'drivers/performance.py'),
            'arguments':['--measured','30','--normal-entry-check','--sampling-schedule','af_ip_adjacent_block_v1'],
            'dynamic_arguments':'fresh private PG host/port and newly built same-stage shared preparation recorded before execution'}) for s in ORDER},
         'budgets':{'mixed':{'cases':33,'declared_modes':7,'natural_unavailable_preserved':True,
@@ -202,13 +202,11 @@ def protocol():
             'E7':{'tests':5,'scope':'full audit/positive/error controls'},
             'CONTENT':{'logical_cases':52,'E2':8,'E3':33,'E10':11},
             'STABILITY':{'queries':11,'rebuilds':10,'observations':110}},
-        'exclusions':['old R08 comparator','16MB profile','second block','internal four-choice R08/r02 comparisons','new optimization','old raw substitution'],
-        'adoption':'Use this complete campaign in full after completion; no favorable run/case selection. Retain history separately.',
-        'failure_policy':'Stop on actual failure; preserve output; do not assemble partial runs. A same-protocol full failed-stage restart requires a new stage directory and explicit event record; algorithm changes require escalation.',
+        'failure_policy':'Stop on failure and keep the output for inspection.',
         'temporary_data_directory':str(TMP),'resource_sampling_seconds':30,
         'analysis_policy':'Run pure estimators only after all database timing and support execution end.',
         'coordinator_sha256':sha(__file__),
-        'adapter_sha256':{str(p.relative_to(HERE)):sha(p) for folder in ['full-study','support-study'] for p in sorted((HERE/folder).glob('*.py'))}}
+        'adapter_sha256':{str(p.relative_to(HERE)):sha(p) for folder in ['drivers','checks'] for p in sorted((HERE/folder).glob('*.py'))}}
 
 
 def main():

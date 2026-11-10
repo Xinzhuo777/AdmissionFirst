@@ -225,7 +225,7 @@ def run_stage(root: Path, output: Path, stage: str, *, warmup: int | None = None
     output.mkdir(parents=True, exist_ok=False)
     driver_files = ("caprls_core/final_af_auxiliary_study.py",)
     if stage == "content-e2-e10":
-        driver_files += ("caprls_core/final_af_content_study.py", "specs/final_af_content_compatibility_2026_10_28.yaml")
+        driver_files += ("caprls_core/final_af_content_study.py", "specs/content_compatibility.yaml")
     source = _snapshot(root, driver_files=driver_files)
     protected = {name: _sha(root / name) for name in PROTECTED if (root / name).is_file()}
     _write(output / "source-snapshot.json", source)

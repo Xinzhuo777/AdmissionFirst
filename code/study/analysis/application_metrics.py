@@ -17,7 +17,7 @@ import random
 import statistics
 import sys
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from caprls_core import reporting as rep
 from caprls_core import bootstrap_geomean_ci as boot

@@ -1716,13 +1716,7 @@ class _E10Session:
     def _artifact_freshness_evidence(
         self, artifact_ids: Mapping[str, str]
     ) -> Dict[str, Any]:
-        """Z5-2 — pair every dependency's `version_at_build` with the live epoch.
-
-        The freshness predicate that decides `usable` compares exactly these two
-        numbers.  Recording the pair turns a categorical "artifact unusable"
-        into an attributable operand, and lets a leak be blamed on the cell that
-        caused it rather than on the cell that first observes it.
-        """
+        """Record each artifact dependency's build version and live version."""
 
         from caprls_core.content_psql import quote_literal as _q, run_command
 
@@ -1780,11 +1774,7 @@ class _E10Session:
         case_artifact_rows = dict(self.artifact_rows[relname])
         case_build_ms = dict(self.build_ms[relname])
         case_storage_bytes = dict(self.storage_bytes[relname])
-        # Z5-2 — assert the epoch invariant BEFORE materializing anything, so a
-        # leak from an earlier cell is attributed to that cell and not to this
-        # one.  A mismatch this cell did not create is a cross-cell state leak
-        # and refuses loudly; the artifact is never silently excluded, which is
-        # what turned this into a three-round investigation.
+        # Check for stale artifacts before this case changes database state.
         freshness_pre = self._artifact_freshness_evidence(case_artifact_ids)
         stale_pre = [d for d in freshness_pre["dependencies"] if not d["fresh"]]
         if stale_pre:
@@ -1798,8 +1788,7 @@ class _E10Session:
                     "stale_dependencies": stale_pre,
                     "created_by_this_cell": False,
                     "diagnosis": (
-                        "an earlier negative-state cell advanced an epoch and did not "
-                        "restore it; see e10_study.py:12591 and memo Y3.1/Z5-1"
+                        "an earlier case advanced an epoch without restoring it"
                     ),
                 }},
             )
@@ -2003,7 +1992,7 @@ class _E10Session:
         )
         proof["mav_physical_relation"] = mav_physical_relation
         proof["artifact_ids"] = dict(case_artifact_ids)
-        # Z5-2 — the epoch operands, on every E10 receipt.
+        # Record the versions used in the freshness check.
         proof["artifact_freshness_evidence"] = freshness_pre
         proof["artifact_assessments"] = [
             {
@@ -2750,7 +2739,7 @@ def verify_cell(
     receipt["candidate"] = _candidate_block(
         cell, candidate, selection_identity, runner_identity, classification
     )
-    # Z5-2 / Z5-3 — E10 artifact-lifecycle evidence, on the receipt.
+    # Record E10 artifact-lifecycle evidence.
     proof = candidate.extraction_proof or {}
     if proof.get("artifact_freshness_evidence") is not None:
         receipt["artifact_freshness_evidence"] = proof["artifact_freshness_evidence"]

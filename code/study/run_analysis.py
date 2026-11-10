@@ -10,8 +10,8 @@ import time
 
 HERE=Path(__file__).resolve().parent
 ROOT=HERE.parent
-RUN=ROOT/'results/raw/a018-unified'
-OUT=ROOT/'results/analysis/a018-unified'
+RUN=ROOT/'results/raw/experiments'
+OUT=ROOT/'results/analysis/experiments'
 
 
 def sha(path):return 'sha256:'+hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -35,8 +35,7 @@ def main():
                  '--input-dir',str(input_dir),'--output-dir',str(OUT/family)]
         if family!='E10':command+=['--draws','10000']
         env=dict(os.environ);env['PYTHONDONTWRITEBYTECODE']='1'
-        # E10 loads its pinned external pure method from project/output; all
-        # algorithm modules there are byte-identical to the frozen source.
+        # E10 loads the pinned analysis method from study/analysis.
         module_root=ROOT
         env['PYTHONPATH']=str(module_root)
         record={'command':command,'cwd':str(module_root),'started_at':datetime.now(timezone.utc).isoformat()}

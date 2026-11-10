@@ -721,7 +721,7 @@ def cmd_run_b(args: argparse.Namespace) -> int:
         except scc.SystematicStop as exc:
             # Evidence is already on disk (see _persist_*); the payload is here
             # so the summary can count what actually happened rather than
-            # reporting only the stop reason.  R3 F8, third occurrence.
+            # reporting only the stop reason.
             status = "incomplete_stopped"
             receipts.extend(exc.receipts)
             failures.extend(exc.failures)

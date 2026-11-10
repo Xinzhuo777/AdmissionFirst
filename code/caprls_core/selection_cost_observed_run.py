@@ -66,7 +66,7 @@ def source_snapshot():
     paths += list((ROOT / "sql").rglob("*.sql"))
     paths += list((ROOT / "manifests/experiments").glob("*.yaml"))
     paths += [ROOT / "configs/pg_smoke.yaml", E3_MANIFEST, E10_MANIFEST, AUX_HELPER,
-              OLD / "independent_analysis/analyze_original.py",
+              ROOT / "study/analysis/application_metrics.py",
               ROOT / "specs/selection_difference_classification.yaml"]
     return {str(p.relative_to(ROOT)): sha(p) for p in sorted(set(paths))
             if p.exists() and not p.name.startswith("._")}
@@ -244,7 +244,7 @@ def adjudicate_preflight():
         backup = BASE / "pre_optimization_sources/caprls_core" / (Path(name).stem + ".preflight_v1.py")
         if sha(backup) != prior[name]:
             raise RuntimeError("preflight reader/gate backup does not match sampled snapshot")
-    if sha(ROOT / "caprls_core/selection_cost_observed_analyze.py") != "103780ecff1ea95286e944bc413d81ef5ea6af20e56fd7480370a643d34e8c0e":
+    if sha(ROOT / "caprls_core/selection_cost_observed_analyze.py") != "bf20b53220a6bb90c378dd0a0c0b12a4a12b1dc2b33f6557cac94aad201eea41":
         raise RuntimeError("reader differs from staged analyzer")
     records = [json.loads(line) for line in (preflight / "choice_costs.jsonl").read_text().splitlines() if line.strip()]
     keys = sorted({(row["family"], row.get("query_id", row.get("case_id")), row.get("policy_id", "") if row["family"] == "E3" else "")

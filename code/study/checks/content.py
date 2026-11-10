@@ -14,13 +14,13 @@ from pathlib import Path
 import sys
 import traceback
 
-from support_r02 import DEFAULT_MANIFEST, DEFAULT_SOURCE, PairedSupport, sha
+from support import DEFAULT_MANIFEST, DEFAULT_SOURCE, PairedSupport, sha
 
 
 ROOT = Path(__file__).resolve().parents[2]
-COMPATIBILITY = "specs/af_a009_content_compatibility_r03_2026_10_29.yaml"
+COMPATIBILITY = "specs/content_compatibility_full_predicate.yaml"
 SPEC_SHA = "sha256:e214d0f590f304792f62432b884cff1b175353eec0c5909fbe944711bcde0086"
-COMPATIBILITY_SHA = "sha256:21dc0d24678de73f0031881fe18a283bc1f6cedaf92a17aa4de271d1d160ac9a"
+COMPATIBILITY_SHA = "sha256:7a2af11aabfcac505e114299684486942a2463d01d5fe4403bb7f987ca30569f"
 
 
 def paired_session_class(module, support):

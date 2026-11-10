@@ -37,7 +37,7 @@ def main():
     profiles_path = Path(args.profiles).resolve()
     profile_bytes = profiles_path.read_bytes()
     profile = json.loads(profile_bytes)['profiles'][args.profile]
-    controller = load('_a016_support_profile_controls',folder.parent/'full-study/campaign_controller.py')
+    controller = load('_a016_support_profile_controls',folder.parent/'drivers/campaign_controller.py')
     tools = controller.load_tools()
     if args.stage == 'STABILITY':
         tools.activate_source(source)
@@ -66,11 +66,11 @@ def main():
     pg.temporary_cluster = explicit_cluster
     try:
         if args.stage == 'CONTENT':
-            adapter = load('_a016_selected_content',folder/'content_r02.py')
+            adapter = load('_a016_selected_content',folder/'content.py')
             result = adapter.run(root,source,Path(args.manifest).resolve(),
-                root/'specs/af_a009_content_compatibility_r03_2026_10_29.yaml',output)
+                root/'specs/content_compatibility_full_predicate.yaml',output)
         else:
-            adapter = load('_a016_selected_stability',folder/'stability_r02.py')
+            adapter = load('_a016_selected_stability',folder/'stability.py')
             namespace = argparse.Namespace(root=str(root),source_root=str(source),manifest=args.manifest,
                 output_dir=str(output),worker_timeout=1800)
             result = adapter.run_study(namespace)

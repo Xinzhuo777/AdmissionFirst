@@ -11,7 +11,7 @@ from typing import Any, Mapping, Sequence
 
 from .final_af_auxiliary_study import ROOT, PROTECTED, _sha, _snapshot, _source_inventory, _freeze_driver_files, _drift, _utc, _write
 
-PANEL_MAPPING = "figures/evaluation-composite/original-protocol-20261011/full_source_mapping.json"
+PANEL_MAPPING = "study/inputs/admission_cases.json"
 
 
 def expected_panel_cases(root: Path) -> dict[str, bool]:

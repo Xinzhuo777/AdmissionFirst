@@ -21,8 +21,8 @@ from typing import Any, Iterable, Mapping, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 ACTIVITY = "ORIGINAL_PROTOCOL_OBSERVED_20261010_V1"
-PURE_REDUCER = ROOT / "output/section65_original_protocol_execution_2026-10-06/independent_analysis/analyze_original.py"
-PURE_REDUCER_SHA256 = "4d1b4a368fc154585fed8dce5cba5229c95248de6c59f7720993bd3d1fc40905"
+PURE_REDUCER = ROOT / "study/analysis/application_metrics.py"
+PURE_REDUCER_SHA256 = "bdd60a841d53b7bdd96824cf0f1be47597c4a5df6e24ff475f09e9d4008af557"
 CATEGORIES = (
     "admission", "certificate_checker", "candidate_construction",
     "postgres_explain", "database_other", "selection_other",

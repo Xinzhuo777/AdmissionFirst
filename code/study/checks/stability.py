@@ -160,7 +160,7 @@ def run_round(*, support: Any, legacy: Any, driver: Any, e3: Any,
 def run_study(args: argparse.Namespace) -> dict[str, Any]:
     # Import only the stdlib-based adapter support before the frozen original
     # driver activates its issuer. Do not import root caprls_core here.
-    from support_r02 import PairedSupport
+    from support import PairedSupport
 
     root = Path(args.root).resolve()
     source = Path(args.source_root)

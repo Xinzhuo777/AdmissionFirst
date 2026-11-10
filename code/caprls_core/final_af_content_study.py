@@ -27,7 +27,7 @@ from . import content_spec_audit as audit
 from . import content_verify as content
 from .final_af_auxiliary_study import ROOT, PROTECTED, _sha, _snapshot, _source_inventory, _freeze_driver_files, _drift, _utc, _write
 
-COMPATIBILITY = "specs/final_af_content_compatibility_2026_10_28.yaml"
+COMPATIBILITY = "specs/content_compatibility.yaml"
 FINAL_AF_SOURCE = "AF-wiki/raw/checkpoints/af-a007-canonical-policy-check-2026-10-26/source"
 E3_MANIFEST = "output/section65_original_protocol_execution_2026-10-06/e3_original_30.yaml"
 ARTIFACT_VALIDATION_TAG_PREFIX = "artifact_validation_"
