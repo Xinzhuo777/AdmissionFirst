@@ -1,0 +1,6 @@
+profile: pg_perf
+postgres:
+  database: caprls_perf
+  gucs:
+    jit: "off"
+    max_parallel_workers_per_gather: "0"

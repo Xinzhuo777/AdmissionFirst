@@ -1,0 +1,31 @@
+manifest_id: e7_runtime_audit_smoke_v1
+experiment: E7
+stage: smoke
+execution_tier: smoke
+ae_required: true
+timeout_s: 300
+repetitions: {warmup: 1, measured: 1}
+dataset: {name: synthetic_saas, scale: 1e3, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+queries:
+  - {query_id: E7_contract_unsafe_where, path: workloads/e7/unsafe_where.sql}
+  - {query_id: E7_positive_raw_pushdown, path: workloads/e7/unsafe_where.sql}
+  - {query_id: E7_guard_late_before_unsafe, path: workloads/e7/unsafe_where.sql}
+  - {query_id: E7_guard_mandatory_discharge, path: workloads/e7/unsafe_where.sql}
+  - {query_id: E7_unsafe_throw, path: workloads/e7/unsafe_throw.sql}
+modes:
+  - contract-aware
+  - unsafe-pushdown-positive-control
+  - guard-late-only
+  - guard-mandatory-discharge
+smoke_expectations:
+  - {test_id: E7_contract_unsafe_where, expected: zero_unauthorized_observations}
+  - {test_id: E7_positive_raw_pushdown, expected: unauthorized_observations}
+  - {test_id: E7_guard_late_before_unsafe, expected: unsafe_observation_or_verifier_reject}
+  - {test_id: E7_guard_mandatory_discharge, expected: zero_unauthorized_observations}
+  - {test_id: E7_unsafe_throw, expected: client_error_or_notice_captured}
+outputs:
+  raw_dir: results/raw/E7/
+  summary_dir: results/summarized/E7/

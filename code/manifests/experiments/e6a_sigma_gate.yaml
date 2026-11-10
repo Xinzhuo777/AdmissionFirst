@@ -1,0 +1,40 @@
+manifest_id: e6a_sigma_gate_v1
+experiment: E6
+stage: sigma_gate
+execution_tier: smoke
+ae_required: true
+timeout_s: 300
+repetitions: {warmup: 1, measured: 1}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 49}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+queries:
+  - {query_id: E6a_no_domain_self_join, path: workloads/e6/sigma_gate.sql}
+  - {query_id: E6a_no_residual, path: workloads/e6/sigma_gate.sql}
+  - {query_id: E6a_no_freshness, path: workloads/e6/sigma_gate.sql}
+  - {query_id: E6a_no_context_scope, path: workloads/e6/sigma_gate.sql}
+  - {query_id: E6a_no_rid_props, path: workloads/e6/sigma_gate.sql}
+  - {query_id: E6a_no_safety_level, path: workloads/e6/sigma_gate.sql}
+  - {query_id: E6a_no_branch_lineage, path: workloads/e6/sigma_gate.sql}
+  - {query_id: E6a_no_physprops, path: workloads/e6/sigma_gate.sql}
+modes:
+  - contract-aware
+  - no-domain
+  - no-residual
+  - no-freshness
+  - no-context-scope
+  - no-rid-props
+  - no-safety-level
+  - no-branch-lineage
+  - no-phys-props
+ablation_components:
+  - NoDomain
+  - NoResidual
+  - NoFreshness
+  - NoContextScope
+  - NoRIDMatProps
+  - NoSafetyLevel
+  - NoBranchLineage
+  - NoPhysProps
+outputs:
+  raw_dir: results/raw/E6/
+  summary_dir: results/summarized/E6/

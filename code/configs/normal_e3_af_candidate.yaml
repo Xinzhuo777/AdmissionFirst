@@ -1,0 +1,8 @@
+schema: normal_e3_af_runtime_v1
+name: candidate_trusted_physical_recipe_choice
+configuration_status: candidate_not_accepted
+execution_profile: trusted_explicit
+access_root_wrapper: not_materialized_single_reference
+access_root_materialized_by_template:
+  auth_index_enum_v1: true
+physical_recipe_strategy: strong_handoff_min_full_cost_v1

@@ -1,0 +1,77 @@
+manifest_id: e5_regret_reduced_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e5_regret_reduced.yaml
+  predecessor_sha256: sha256:e54d9a6786322de5420ac8b1b22598ba137f0df31c10f5ba0f28878a5f8add0e
+  migration: admission-first-taxonomy-v3
+experiment: E5
+stage: regret_reduced
+execution_tier: main
+ae_required: true
+timeout_s: 900
+repetitions: {warmup: 5, measured: 10}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 46}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+queries:
+  - {query_id: E5_regret, path: workloads/e5/witness_smoke.sql}
+N: [10000, 100000]
+modes:
+  - barrier-only
+  - injection-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - mav-only
+  - guard-mandatory-discharge
+  - admission-first
+  - template-oracle
+policy_applications:
+  - {policy_id: e5_singleton_document, relation: document}
+  - {policy_id: e5_all_document, relation: document}
+witnesses:
+  - id: barrier_bad_auth_singleton
+    witness_kind: regret_witness
+    policy_cost: [cheap]
+    artifact_configs: [auth_idx]
+    theory_witness: W1
+    fixed_mode_under_test: barrier-only
+    expected_best_mode: auth-index-enum-only
+  - id: auth_enum_bad_point_query
+    witness_kind: regret_witness
+    policy_cost: [cheap]
+    artifact_configs: [auth_idx]
+    theory_witness: W2
+    fixed_mode_under_test: auth-index-enum-only
+    expected_best_mode: injection-only
+  - id: mav_bad_single_use_refresh
+    witness_kind: regret_witness
+    policy_cost: [cheap]
+    artifact_configs: [mav]
+    theory_witness: W3
+    fixed_mode_under_test: mav-only
+    expected_best_mode: injection-only
+    amortization: {Q: 1, U: 0}
+  - id: guard_bad_unselective_residual
+    witness_kind: regret_witness
+    policy_cost: [cheap]
+    artifact_configs: [auth_idx]
+    theory_witness: W4
+    fixed_mode_under_test: guard-mandatory-discharge
+    expected_best_mode: auth-index-enum-only
+  - id: injection_bad_expensive_singleton
+    witness_kind: regret_witness
+    policy_cost: [cheap]
+    artifact_configs: [auth_idx]
+    theory_witness: W5
+    fixed_mode_under_test: injection-only
+    expected_best_mode: auth-index-enum-only
+  - id: mav_good_repeated_dashboard
+    witness_kind: positive_control
+    policy_cost: [cheap]
+    artifact_configs: [mav]
+    theory_witness: positive_control
+    fixed_mode_under_test: mav-only
+    expected_best_mode: mav-only
+    amortization: {Q: 10, U: 0}
+outputs:
+  raw_dir: results/v3/raw/E5/
+  summary_dir: results/v3/summarized/E5/

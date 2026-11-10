@@ -1,0 +1,42 @@
+manifest_id: e2_alternative_matrix_smoke_v1
+experiment: E2
+stage: alternative_matrix_smoke
+execution_tier: smoke
+ae_required: true
+timeout_s: 300
+repetitions: {warmup: 1, measured: 1}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+modes:
+  - contract-aware
+  - template-oracle
+  - barrier-only
+  - auth-index-enum-only
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+queries:
+  - {query_id: E2_range_count, path: workloads/e2/range_count.sql}
+variables:
+  s_auth: [0.01]
+  s_q: [0.01]
+  policy_cost: [cheap]
+  contexts: [1000]
+  artifact_availability: [none, auth_idx]
+  guard_fpr: [1]
+template_candidates:
+  - barrier_filter_v1
+  - safe_predicate_injection_v1
+  - auth_view_scan_v1
+  - auth_index_enum_v1
+  - strong_auth_index_keyed_v1
+  - mav_scan_v1
+  - guard_candidate_plus_residual_v1
+  - hybrid_intersect_v1
+ranking_metric: execution_time_ms
+applicability_policy:
+  artifact_missing: record_template_applicability_artifact_unavailable
+  metadata_invalid: record_template_applicability_metadata_invalid
+  plot_unavailable_as: N.A.
+outputs:
+  raw_dir: results/raw/E2/
+  summary_dir: results/summarized/E2/

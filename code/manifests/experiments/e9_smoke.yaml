@@ -1,0 +1,27 @@
+manifest_id: e9_smoke_v1
+experiment: E9
+stage: smoke
+execution_tier: smoke
+evidence_role: diagnostic_only
+promotion_eligible: false
+feasibility_search_budget: 0
+ae_required: true
+timeout_s: 300
+repetitions: {warmup: 1, measured: 1}
+dataset: {name: synthetic_planner_stress, scale: generated, seed: 48}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+queries:
+  - {query_id: E9_smoke_occurrences, path: workloads/e9/planner_stress_smoke.sql}
+modes: [contract-aware, contract-aware-no-dominance, local-greedy]
+synthetic_generator:
+  protected_relations: [1, 2]
+  policy_shapes: [tenant_group]
+  residual_shapes: [none, one_per_occurrence]
+  seed: 48
+tiers:
+  - name: smoke_occurrences
+    protected_occurrences: [1, 2]
+    fixed: {joins: 1, alternatives_per_occurrence: 2, residuals: 1}
+outputs:
+  raw_dir: results/raw/E9/
+  summary_dir: results/summarized/E9/

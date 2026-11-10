@@ -1,0 +1,41 @@
+manifest_id: e8a_artifact_validity_gate_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e8a_artifact_validity_gate.yaml
+  predecessor_sha256: sha256:850be79ac7ac92a730cde0a1c272c1f549dae26511be4fcec89f8354a2f939ea
+  migration: admission-first-taxonomy-v3
+experiment: E8
+stage: freshness_gate
+execution_tier: smoke
+ae_required: true
+timeout_s: 300
+repetitions: {warmup: 1, measured: 1}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 47}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+queries:
+  - {query_id: E8a_revocation_after_artifact, path: workloads/e8/artifact_validity_gate.sql}
+  - {query_id: E8a_context_hash_purpose_mismatch, path: workloads/e8/artifact_validity_gate.sql}
+  - {query_id: E8a_context_hash_group_order_permutation, path: workloads/e8/artifact_validity_gate.sql}
+  - {query_id: E8a_rid_domain_mismatch, path: workloads/e8/artifact_validity_gate.sql}
+  - {query_id: E8a_toctou_between_plan_and_execute, path: workloads/e8/artifact_validity_gate.sql}
+  - {query_id: E8a_prepared_plan_stale, path: workloads/e8/artifact_validity_gate.sql}
+modes:
+  - admission-first
+  - conservative-barrier
+  - naive-artifact-only
+  - mav-no-version
+  - naive-auth-index-no-scope
+  - stale-artifact-user
+  - wrong-context-artifact-user
+scenarios:
+  - {id: E8a_revocation_after_artifact, expected_action: fallback}
+  - {id: E8a_context_hash_purpose_mismatch, expected_action: reject}
+  - {id: E8a_context_hash_group_order_permutation, expected_action: execute}
+  - {id: E8a_rid_domain_mismatch, expected_action: reject}
+  - {id: E8a_toctou_between_plan_and_execute, expected_action: replan}
+  - {id: E8a_prepared_plan_stale, expected_action: reject}
+outputs:
+  raw_dir: results/v3/raw/E8/
+  summary_dir: results/v3/summarized/E8/

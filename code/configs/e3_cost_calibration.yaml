@@ -1,0 +1,61 @@
+version: e3_calibration_v1
+ranker: calibrated-explain
+description: >
+  Transparent E3 ranking calibration for the finite-template prototype. The
+  model does not use measured TemplateOracle outcomes from the evaluated cell.
+  It adjusts PostgreSQL EXPLAIN Total Cost with template-shape multipliers so
+  unnecessary materialized fences are not favored over safe exact predicates.
+
+default_alpha: 1.0
+default_intercept: 0.0
+default_multiplier: 1.0
+
+templates:
+  ordinary_first_exact_check_v1:
+    multiplier: 0.97
+  safe_predicate_injection_v1:
+    multiplier: 0.98
+  barrier_filter_inline_v1:
+    multiplier: 1.00
+  barrier_filter_v1:
+    multiplier: 1.04
+    materialized_cte_multiplier: 1.20
+    cte_scan_multiplier: 1.08
+  auth_index_enum_v1:
+    multiplier: 1.02
+  strong_auth_index_keyed_v1:
+    multiplier: 1.06
+  hybrid_intersect_v1:
+    multiplier: 1.00
+
+policy_multipliers:
+  cheap_tenant_sargable:
+    ordinary_first_exact_check_v1: 0.96
+    safe_predicate_injection_v1: 0.97
+    barrier_filter_inline_v1: 1.01
+    barrier_filter_v1: 1.18
+  group_acl_expensive:
+    auth_index_enum_v1: 0.98
+    barrier_filter_v1: 1.04
+  hybrid_selective_key:
+    hybrid_intersect_v1: 0.97
+    strong_auth_index_keyed_v1: 1.08
+    auth_index_enum_v1: 1.02
+
+source_multipliers:
+  direct: 0.99
+  barrier_inline: 1.00
+  barrier: 1.04
+  auth_idx: 1.00
+  auth_idx_keyed: 1.02
+  hybrid: 0.99
+
+dominance_rules:
+  unnecessary_materialized_barrier:
+    enabled: true
+    multiplier: 3.0
+    rationale: >
+      In cheap exact-policy cells with a transparent parent and no unsafe
+      boundary, a materialized barrier is not needed for safety. Keep it in the
+      measured TemplateOracle pool, but make the declared ranker prefer direct
+      or inline exact paths unless their PostgreSQL cost is much worse.

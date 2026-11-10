@@ -1,0 +1,136 @@
+schema: caprls-selection-difference-classification-v1
+authority: predeclared experiment protocol
+role: pre_signed_human_classification_intake
+binding_rule: 'The harness NEVER self-classifies. On selection_identity: differs it may set selection_difference_cause from this table ONLY when the observed template is in that cell''s admissible_observed_templates. Every other difference sets unknown and REFUSES, as required by the declared protocol.'
+default_for_unlisted_cells: unknown_refuse
+forbidden:
+- no VACUUM of auth_idx
+- no per-cell artifact tables
+- no statistics pinning
+- no planner-input change of any kind to make selections match the frozen assignment
+- no re-running to obtain a better selection_identity_same n
+forbidden_rationale: adopting such a change after observing that it favours the frozen template is not permitted by the declared protocol
+scope:
+  classified_cells: 11
+  classified_scope: the 11 E3 group_acl_expensive cells
+  unlisted_cells: 41
+  unlisted_behaviour: unknown => refuse
+  robust_e3_cells: '22 of 33: cheap_tenant_sargable builds no artifact, and hybrid_selective_key wins by orders of magnitude'
+  e10_structural_exposure: Q3/Q9 (auth_index_enum_v1) and Q2/Q7 (mav_scan_v1) are structurally exposed to the same mechanism; not pre-classified, so a divergence there refuses
+entries:
+- cell_id: E3_SF1_RAWPG_V1|query=Q3|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=tpch_customer
+  short_id: E3_Q3_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: barrier_filter_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  cause: statistics
+  selection_stability: stable_differs
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=Q5|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=tpch_customer
+  short_id: E3_Q5_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  cause: statistics
+  selection_stability: stable_same
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=Q7|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=tpch_customer
+  short_id: E3_Q7_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  cause: statistics
+  selection_stability: stable_same
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=Q10|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=tpch_customer
+  short_id: E3_Q10_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  cause: statistics
+  selection_stability: stable_same
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=Q12|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=tpch_customer
+  short_id: E3_Q12_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  cause: statistics
+  selection_stability: stable_same
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=JOB_1a|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=job_title
+  short_id: E3_JOB_1a_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  - barrier_filter_v1
+  cause: statistics
+  selection_stability: non_deterministic
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=JOB_2a|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=job_title
+  short_id: E3_JOB_2a_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  - barrier_filter_v1
+  cause: statistics
+  selection_stability: non_deterministic
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=JOB_3c|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=job_title
+  short_id: E3_JOB_3c_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  - barrier_filter_v1
+  cause: statistics
+  selection_stability: non_deterministic
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=JOB_6d|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=job_title
+  short_id: E3_JOB_6d_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  - barrier_filter_v1
+  cause: statistics
+  selection_stability: non_deterministic
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=JOB_10a|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=job_title
+  short_id: E3_JOB_10a_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  - barrier_filter_v1
+  cause: statistics
+  selection_stability: non_deterministic
+  note: Predeclared classification.
+  evidence_ref: predeclared classification
+- cell_id: E3_SF1_RAWPG_V1|query=JOB_16b|policy=group_acl_expensive|context=e3_main_ctx|policy_config_id=group_acl_expensive|protected_relation=job_title
+  short_id: E3_JOB_16b_group_acl_expensive
+  family: E3
+  frozen_selected_template_id: auth_index_enum_v1
+  admissible_observed_templates:
+  - auth_index_enum_v1
+  - barrier_filter_v1
+  cause: statistics
+  selection_stability: non_deterministic
+  note: Predeclared classification.
+  evidence_ref: predeclared classification

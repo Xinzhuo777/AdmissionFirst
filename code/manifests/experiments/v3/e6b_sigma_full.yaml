@@ -1,0 +1,61 @@
+manifest_id: e6b_sigma_full_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e6b_sigma_full.yaml
+  predecessor_sha256: sha256:095d32345a1548e4c08993eac8a55ec6fca6f1bdfa3182cef3d08b24cbb71fa6
+  migration: admission-first-taxonomy-v3
+experiment: E6
+stage: sigma_full
+execution_tier: main
+ae_required: true
+timeout_s: 14400
+repetitions: {warmup: 5, measured: 10}
+datasets:
+  - {name: synthetic_saas, scale: 1e5, seed: 50}
+  - {name: tpch, scale: SF10, seed: 50}
+  - {name: job, scale: full, seed: 50}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+queries:
+  - {query_id: E6b_self_join_branch_domain, path: workloads/e6/sigma_full.sql}
+  - {query_id: E6b_guard_join_residual, path: workloads/e6/sigma_full.sql}
+  - {query_id: E6b_revocation_refresh, path: workloads/e6/sigma_full.sql}
+  - {query_id: E6b_cross_purpose_dashboard, path: workloads/e6/sigma_full.sql}
+  - {query_id: E6b_join_rid_intersection, path: workloads/e6/sigma_full.sql}
+  - {query_id: E6b_audit_after_candidate, path: workloads/e6/sigma_full.sql}
+  - {query_id: E6b_union_distinct_branch, path: workloads/e6/sigma_full.sql}
+  - {query_id: E6b_ordered_export_cost, path: workloads/e6/sigma_full.sql}
+modes:
+  - admission-first
+  - no-domain
+  - no-residual
+  - no-freshness
+  - no-context-scope
+  - no-rid-props
+  - no-safety-level
+  - no-branch-lineage
+  - no-phys-props
+ablation_components:
+  - NoDomain
+  - NoResidual
+  - NoFreshness
+  - NoContextScope
+  - NoRIDMatProps
+  - NoSafetyLevel
+  - NoBranchLineage
+  - NoPhysProps
+study_cases:
+  - {component: NoDomain, query_id: E6b_self_join_branch_domain, dataset: synthetic_saas, expected_effect: wrong_result}
+  - {component: NoResidual, query_id: E6b_guard_join_residual, dataset: tpch, expected_effect: wrong_result}
+  - {component: NoFreshness, query_id: E6b_revocation_refresh, dataset: synthetic_saas, expected_effect: stale_artifact_use}
+  - {component: NoContextScope, query_id: E6b_cross_purpose_dashboard, dataset: synthetic_saas, expected_effect: wrong_context_artifact_use}
+  - {component: NoRIDMatProps, query_id: E6b_join_rid_intersection, dataset: job, expected_effect: rid_domain_mismatch}
+  - {component: NoSafetyLevel, query_id: E6b_audit_after_candidate, dataset: synthetic_saas, expected_effect: unsafe_observation}
+  - {component: NoBranchLineage, query_id: E6b_union_distinct_branch, dataset: synthetic_saas, expected_effect: wrong_result}
+  - {component: NoPhysProps, query_id: E6b_ordered_export_cost, dataset: tpch, expected_effect: performance_loss}
+performance_effects:
+  report_speedup_lost: true
+  report_known_valid_rejection: true
+  report_missed_optimization: true
+outputs:
+  raw_dir: results/v3/raw/E6/
+  summary_dir: results/v3/summarized/E6/

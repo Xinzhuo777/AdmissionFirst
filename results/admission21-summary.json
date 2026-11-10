@@ -1,0 +1,12 @@
+{
+  "schema": "caprls-final-af-admission-summary-v1",
+  "finished_at": "2026-11-05T21:15:56+00:00",
+  "status": "pass",
+  "cases": 21,
+  "expected_cases": 21,
+  "matched": 21,
+  "admitted": 11,
+  "rejected": 10,
+  "elapsed_seconds": 1.0978555829999999,
+  "failure": null
+}

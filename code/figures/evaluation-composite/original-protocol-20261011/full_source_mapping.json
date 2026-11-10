@@ -1,0 +1,88 @@
+{
+  "panel_a": [
+    {
+      "test_id": "E1_context_scope_mismatch",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_duplicate_union_lineage_loss",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_incomplete_guard",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_projection_drops_carrier",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_query_filtered_as_bare_policyaccess",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_rid_domain_mismatch",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_stale_auth_idx",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_unsafe_udf_before_auth",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E1_valid_barrier_exact",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E1_valid_guard_late",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E1_valid_query_filtered_target",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E1_valid_unionall_branch_tags",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E1_valid_visible_projection_hidden_rid",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E6a_no_branch_lineage",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E6a_no_context_scope",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E6a_no_domain_self_join",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E6a_no_freshness",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E6a_no_physprops",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E6a_no_residual",
+      "expected_query_plan_ok": true
+    },
+    {
+      "test_id": "E6a_no_rid_props",
+      "expected_query_plan_ok": false
+    },
+    {
+      "test_id": "E6a_no_safety_level",
+      "expected_query_plan_ok": true
+    }
+  ]
+}

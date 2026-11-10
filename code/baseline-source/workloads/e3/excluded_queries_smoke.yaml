@@ -1,0 +1,20 @@
+schema_version: caprls-excluded-queries-v1
+workload: tpch
+included_queries: [Q3]
+excluded_queries:
+  - query_id: Q5
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.
+  - query_id: Q7
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.
+  - query_id: Q8
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.
+  - query_id: Q9
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.
+  - query_id: Q10
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.
+  - query_id: Q12
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.
+  - query_id: Q18
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.
+  - query_id: Q21
+    reason: smoke tier adapts only Q3; main E3 manifest covers the fixed TPC-H list.

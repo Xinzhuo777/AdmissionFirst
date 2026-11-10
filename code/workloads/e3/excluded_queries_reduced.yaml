@@ -1,0 +1,18 @@
+schema_version: caprls-excluded-queries-v1
+workloads: [tpch, job]
+included_queries: [Q3, Q5, JOB_1a, JOB_6d]
+excluded_queries:
+  - query_id: Q7
+    reason: reduced E3 runner keeps Q3/Q5 plus JOB_1a/JOB_6d; full E3 main is future work.
+  - query_id: Q8
+    reason: reduced E3 runner keeps Q3/Q5 plus JOB_1a/JOB_6d; full E3 main is future work.
+  - query_id: Q9
+    reason: reduced E3 runner keeps Q3/Q5 plus JOB_1a/JOB_6d; full E3 main is future work.
+  - query_id: Q10
+    reason: reduced E3 runner keeps Q3/Q5 plus JOB_1a/JOB_6d; full E3 main is future work.
+  - query_id: Q12
+    reason: reduced E3 runner keeps Q3/Q5 plus JOB_1a/JOB_6d; full E3 main is future work.
+  - query_id: Q18
+    reason: reduced E3 runner keeps Q3/Q5 plus JOB_1a/JOB_6d; full E3 main is future work.
+  - query_id: Q21
+    reason: reduced E3 runner keeps Q3/Q5 plus JOB_1a/JOB_6d; full E3 main is future work.

@@ -1,0 +1,37 @@
+manifest_id: e1_smoke_v1
+experiment: E1
+stage: smoke
+execution_tier: smoke
+ae_required: true
+timeout_s: 300
+repetitions: {warmup: 1, measured: 1}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+modes:
+  - contract-aware
+  - ordinary-no-contract
+  - incomplete-guard-candidate
+  - stale-artifact-user
+  - wrong-context-artifact-user
+  - rid-domain-blind-intersection
+  - unsafe-pushdown-positive-control
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+queries:
+  - {query_id: E1_incomplete_guard, path: workloads/e1/incomplete_guard.sql}
+  - {query_id: E1_stale_auth_idx, path: workloads/e1/stale_auth_idx.sql}
+  - {query_id: E1_context_scope_mismatch, path: workloads/e1/context_scope_mismatch.sql}
+  - {query_id: E1_rid_domain_mismatch, path: workloads/e1/rid_domain_mismatch.sql}
+  - {query_id: E1_unsafe_udf_before_auth, path: workloads/e1/unsafe_udf_before_auth.sql}
+  - {query_id: E1_projection_drops_carrier, path: workloads/e1/projection_drop.sql}
+  - {query_id: E1_duplicate_union_lineage_loss, path: workloads/e1/duplicate_union_lineage_loss.sql}
+  - {query_id: E1_query_filtered_as_bare_policyaccess, path: workloads/e1/query_filtered_as_bare_policyaccess.sql}
+  - {query_id: E1_valid_barrier_exact, path: workloads/e1/valid_barrier_exact.sql}
+  - {query_id: E1_valid_guard_late, path: workloads/e1/valid_guard_late.sql}
+  - {query_id: E1_valid_visible_projection_hidden_rid, path: workloads/e1/valid_visible_projection_hidden_rid.sql}
+  - {query_id: E1_valid_unionall_branch_tags, path: workloads/e1/valid_unionall_branch_tags.sql}
+  - {query_id: E1_valid_query_filtered_target, path: workloads/e1/valid_query_filtered_target.sql}
+variables: {}
+outputs:
+  raw_dir: results/raw/E1/
+  summary_dir: results/summarized/E1/

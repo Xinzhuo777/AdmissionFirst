@@ -1,0 +1,122 @@
+schema_version: caprls-policy-catalog-v1
+policies:
+  tenant_group:
+    exact_sql: sql/policies/synthetic/tenant_group_exact.sql
+    guard_sql: sql/policies/synthetic/tenant_public_guard.sql
+    rid_exact_sql: sql/policies/synthetic/tenant_group_rid_exact.sql
+    policy_eval_abi: sql_snippet
+    applicable_relations: [document]
+    exact_sql_template: "({alias}.tenant_id = :ctx_tenant_id OR {alias}.owner_id = :user_id OR {alias}.public = true OR EXISTS (SELECT 1 FROM share_acl a JOIN group_membership gm ON gm.group_id = a.group_id WHERE a.rid = {alias}.{rid_col} AND a.relname = :relname AND gm.user_id = :user_id AND a.permission IN ('read','owner') AND :now BETWEEN a.valid_from AND a.valid_to))"
+    guard_sql_template: "({alias}.tenant_id = :ctx_tenant_id OR {alias}.owner_id = :user_id OR {alias}.public = true OR EXISTS (SELECT 1 FROM share_acl a WHERE a.rid = {alias}.{rid_col} AND a.relname = :relname AND a.permission IN ('read','owner') AND :now BETWEEN a.valid_from AND a.valid_to))"
+    rid_exact_sql_template: "(:tenant_id = :ctx_tenant_id OR :owner_id = :user_id OR :public = true OR EXISTS (SELECT 1 FROM share_acl a JOIN group_membership gm ON gm.group_id = a.group_id WHERE a.rid = :__rid AND a.relname = :relname AND gm.user_id = :user_id AND a.permission IN ('read','owner') AND :now BETWEEN a.valid_from AND a.valid_to))"
+    required_attrs: [tenant_id, owner_id, public]
+    required_ctx: [user_id, tenant_id, now]
+    required_bindings: [relname, rid_domain_id]
+    bindings:
+      ctx_tenant_id: context.tenant_id
+      user_id: context.user_id
+      now: execution.timestamp
+      relname: target.relname
+      rid_domain_id: rid_domain.domain_id
+      rid_col: rid_domain.surrogate_col
+      __rid: carrier.__rid
+      tenant_id: carrier.tenant_id
+      owner_id: carrier.owner_id
+      public: carrier.public
+    supports_guard: true
+    guard_completeness: complete
+  e5_singleton_document:
+    exact_sql: null
+    guard_sql: null
+    rid_exact_sql: null
+    policy_eval_abi: sql_snippet
+    applicable_relations: [document]
+    exact_sql_template: "(({alias}.{rid_col} % 100000) = 1)"
+    guard_sql_template: "(({alias}.{rid_col} % 100000) = 1)"
+    rid_exact_sql_template: "((:__rid % 100000) = 1)"
+    required_attrs: []
+    required_ctx: []
+    required_bindings: [__rid, rid_domain_id]
+    bindings:
+      __rid: carrier.__rid
+      rid_col: rid_domain.surrogate_col
+      rid_domain_id: rid_domain.domain_id
+  e5_all_document:
+    exact_sql: null
+    guard_sql: null
+    rid_exact_sql: null
+    policy_eval_abi: sql_snippet
+    applicable_relations: [document]
+    exact_sql_template: "true"
+    guard_sql_template: "true"
+    rid_exact_sql_template: "true"
+    required_attrs: []
+    required_ctx: []
+    required_bindings: [__rid, rid_domain_id]
+    bindings:
+      __rid: carrier.__rid
+      rid_col: rid_domain.surrogate_col
+      rid_domain_id: rid_domain.domain_id
+  tenant_only_ticket:
+    exact_sql: sql/policies/synthetic/tenant_only_ticket_exact.sql
+    guard_sql: null
+    rid_exact_sql: sql/policies/synthetic/tenant_only_ticket_rid_exact.sql
+    policy_eval_abi: sql_snippet
+    applicable_relations: [ticket]
+    exact_sql_template: "({alias}.tenant_id = :ctx_tenant_id OR {alias}.owner_id = :user_id)"
+    guard_sql_template: null
+    rid_exact_sql_template: "(:tenant_id = :ctx_tenant_id OR :owner_id = :user_id)"
+    required_attrs: [tenant_id, owner_id]
+    required_ctx: [user_id, tenant_id]
+    required_bindings: [relname, rid_domain_id]
+    bindings:
+      ctx_tenant_id: context.tenant_id
+      user_id: context.user_id
+      relname: target.relname
+      rid_domain_id: rid_domain.domain_id
+      rid_col: rid_domain.surrogate_col
+      __rid: carrier.__rid
+      tenant_id: carrier.tenant_id
+      owner_id: carrier.owner_id
+  purpose_region:
+    exact_sql: sql/policies/synthetic/purpose_region_exact.sql
+    guard_sql: null
+    rid_exact_sql: sql/policies/synthetic/purpose_region_rid_exact.sql
+    policy_eval_abi: sql_snippet
+    applicable_relations: [document]
+    exact_sql_template: "({alias}.region = :ctx_region AND {alias}.class <= :ctx_clearance AND EXISTS (SELECT 1 FROM purpose_policy pp WHERE pp.rid = {alias}.{rid_col} AND pp.relname = :relname AND pp.purpose = :ctx_purpose AND pp.allowed = true))"
+    guard_sql_template: null
+    rid_exact_sql_template: "(:region = :ctx_region AND :class <= :ctx_clearance AND EXISTS (SELECT 1 FROM purpose_policy pp WHERE pp.rid = :__rid AND pp.relname = :relname AND pp.purpose = :ctx_purpose AND pp.allowed = true))"
+    required_attrs: [region, class]
+    required_ctx: [purpose, region, clearance]
+    required_bindings: [relname, rid_domain_id]
+    bindings:
+      ctx_purpose: context.purpose
+      ctx_region: context.region
+      ctx_clearance: context.clearance
+      relname: target.relname
+      rid_domain_id: rid_domain.domain_id
+      rid_col: rid_domain.surrogate_col
+      __rid: carrier.__rid
+      region: carrier.region
+      class: carrier.class
+  purpose_region_invoice:
+    exact_sql: sql/policies/synthetic/purpose_region_invoice_exact.sql
+    guard_sql: null
+    rid_exact_sql: sql/policies/synthetic/purpose_region_invoice_rid_exact.sql
+    policy_eval_abi: sql_snippet
+    applicable_relations: [invoice]
+    exact_sql_template: "({alias}.region = :ctx_region AND EXISTS (SELECT 1 FROM purpose_policy pp WHERE pp.rid = {alias}.{rid_col} AND pp.relname = :relname AND pp.purpose = :ctx_purpose AND pp.allowed = true))"
+    guard_sql_template: null
+    rid_exact_sql_template: "(:region = :ctx_region AND EXISTS (SELECT 1 FROM purpose_policy pp WHERE pp.rid = :__rid AND pp.relname = :relname AND pp.purpose = :ctx_purpose AND pp.allowed = true))"
+    required_attrs: [region]
+    required_ctx: [purpose, region]
+    required_bindings: [relname, rid_domain_id]
+    bindings:
+      ctx_purpose: context.purpose
+      ctx_region: context.region
+      relname: target.relname
+      rid_domain_id: rid_domain.domain_id
+      rid_col: rid_domain.surrogate_col
+      __rid: carrier.__rid
+      region: carrier.region

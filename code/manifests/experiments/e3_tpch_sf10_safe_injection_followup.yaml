@@ -1,0 +1,59 @@
+manifest_id: e3_tpch_sf10_safe_injection_followup_rlsfix_rotate_v3
+experiment: E3
+stage: standard_workloads_sf10_scale_check
+execution_tier: main
+ae_required: false
+timeout_s: 14400
+repetitions: {warmup: 5, measured: 10}
+datasets:
+  - {name: tpch, scale: SF10, seed: 42}
+  - {name: job, scale: reduced_1500_title_4000_companies_8000_cast, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+ranker: {name: pg-explain-raw}
+query_sets:
+  tpch_scale_check: [Q3, Q5, Q7, Q10, Q12]
+queries:
+  - {query_id: Q3, path: workloads/e3/tpch_q3_smoke.sql}
+  - {query_id: Q5, path: workloads/e3/tpch_q5_reduced.sql}
+  - {query_id: Q7, path: workloads/e3/tpch_q7_mini.sql}
+  - {query_id: Q10, path: workloads/e3/tpch_q10_mini.sql}
+  - {query_id: Q12, path: workloads/e3/tpch_q12_mini.sql}
+excluded_queries_path: workloads/e3/excluded_queries_mini_plus.yaml
+parameter_instances_per_template: 1
+policy_configs:
+  - {id: cheap_tenant_sargable, selectivity: 0.1, policy_cost: cheap, artifacts: none}
+  - {id: group_acl_expensive, selectivity: 0.1, policy_cost: expensive_acl, artifacts: auth_idx}
+  - {id: hybrid_selective_key, selectivity: 0.02, policy_cost: 100us, artifacts: both_keyed}
+artifact_configs:
+  none: []
+  auth_idx: [auth_idx]
+  both_keyed: [auth_idx, auth_idx_keyed]
+modes:
+  - native-pg-rls
+  - native-pg-rls-physical-design
+  - security-barrier
+  - barrier-only
+  - injection-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - local-greedy
+  - contract-aware
+scale_check:
+  evidence_role: prospective_safe_injection_followup
+  logical_cells: 15
+  execution_modes:
+    - native-pg-rls
+    - injection-only
+    - barrier-only
+    - local-greedy
+    - contract-aware
+  primary_metric: median_end_to_end_ms_including_validation_and_client
+  mode_schedule: deterministic_rotating_rounds
+  ratio_direction: comparator_over_contract_aware
+  ratio_tie_band_inclusive: [0.99, 1.01]
+  denominator: all_15_declared_query_policy_cells
+  merge_into_main_52_cell_authority: false
+  bound_runner_wrapper: not_materialized_single_reference
+outputs:
+  raw_dir: results/raw/P3_E3_TPCH_SF10_INJECTION_RLSFIX_ROTATE_V3/
+  summary_dir: results/summarized/P3_E3_TPCH_SF10_INJECTION_RLSFIX_ROTATE_V3/

@@ -1,0 +1,24 @@
+schema: caprls-final-af-content-compatibility-v1
+base_spec: specs/content_cells.yaml
+execution_families: [E2, E3, E10]
+expected_cells: 52
+family_cells: {E2: 8, E3: 33, E10: 11}
+comparison: actual selected protected boundary against independent reference in one repeatable-read snapshot
+historical_selection: recorded as provenance; fresh multiset verification decides correctness
+templates:
+  - {template_id: barrier_filter_v1, emitter: _lower_barrier_filter, carries_query_predicate: "no", in_default_registry: true}
+  - {template_id: barrier_filter_continuation_v1, emitter: _lower_continuation_filtered_barrier_filter, carries_query_predicate: "yes", in_default_registry: false}
+  - {template_id: barrier_filter_query_v1, emitter: _lower_query_filtered_barrier_filter, carries_query_predicate: "yes", in_default_registry: true}
+  - {template_id: barrier_filter_inline_v1, emitter: _lower_inline_barrier_filter, carries_query_predicate: "no", in_default_registry: true}
+  - {template_id: safe_predicate_injection_v1, emitter: _lower_safe_predicate_injection, carries_query_predicate: "yes", in_default_registry: true}
+  - {template_id: native_pg_rls_v1, emitter: _lower_native_pg_rls, carries_query_predicate: "yes", in_default_registry: true}
+  - {template_id: raw_pushdown_positive_control_v1, emitter: _lower_diagnostic_only_scan, carries_query_predicate: "no", in_default_registry: false}
+  - {template_id: ordinary_first_exact_check_v1, emitter: _lower_ordinary_first_exact_check, carries_query_predicate: "yes", in_default_registry: true}
+  - {template_id: auth_view_scan_v1, emitter: _lower_auth_view_scan, carries_query_predicate: "no", in_default_registry: true}
+  - {template_id: auth_index_enum_v1, emitter: _lower_auth_index_enum, carries_query_predicate: "no", in_default_registry: true}
+  - {template_id: auth_index_semijoin_v1, emitter: _lower_auth_index_semijoin, carries_query_predicate: "yes", in_default_registry: true}
+  - {template_id: strong_auth_index_keyed_v1, emitter: _lower_strong_auth_index_keyed, carries_query_predicate: "no", in_default_registry: true}
+  - {template_id: auth_index_keyed_semijoin_v1, emitter: _lower_auth_index_keyed_semijoin, carries_query_predicate: "yes", in_default_registry: true}
+  - {template_id: mav_scan_v1, emitter: _lower_mav_scan, carries_query_predicate: conditional, in_default_registry: true}
+  - {template_id: guard_candidate_plus_residual_v1, emitter: _lower_guard_candidate, carries_query_predicate: "no", in_default_registry: true}
+  - {template_id: hybrid_intersect_v1, emitter: _lower_hybrid_intersect, carries_query_predicate: "yes", in_default_registry: true}

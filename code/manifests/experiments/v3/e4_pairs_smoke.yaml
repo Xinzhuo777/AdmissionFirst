@@ -1,0 +1,63 @@
+manifest_id: e4_pairs_smoke_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e4_pairs_smoke.yaml
+  predecessor_sha256: sha256:2c6cb91671eab797275844533aed8f8935fe351cd0dd0c0e09ed1fa1e164c8ad
+  migration: admission-first-taxonomy-v3
+experiment: E4
+stage: controlled_pairs_smoke
+execution_tier: smoke
+ae_required: true
+timeout_s: 300
+planner_level: B
+repetitions: {warmup: 1, measured: 1}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 45}
+modes:
+  - local-greedy
+  - admission-first
+  - template-oracle
+queries:
+  - {query_id: E4_selective_ordinary_predicate_A, path: workloads/e4/selective_ordinary_predicate_A.sql}
+  - {query_id: E4_selective_ordinary_predicate_B, path: workloads/e4/selective_ordinary_predicate_B.sql}
+  - {query_id: E4_unsafe_downstream_expression_A, path: workloads/e4/unsafe_downstream_expression_A.sql}
+  - {query_id: E4_unsafe_downstream_expression_B, path: workloads/e4/unsafe_downstream_expression_B.sql}
+  - {query_id: E4_parent_requires_order_A, path: workloads/e4/parent_requires_order_A.sql}
+  - {query_id: E4_parent_requires_order_B, path: workloads/e4/parent_requires_order_B.sql}
+  - {query_id: E4_join_continuation_A, path: workloads/e4/join_continuation_A.sql}
+  - {query_id: E4_join_continuation_B, path: workloads/e4/join_continuation_B.sql}
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+plan_shape_controls:
+  join_collapse_limit: 1
+  from_collapse_limit: 1
+  require_plan_hash_stability: true
+template_oracle:
+  max_templates_per_query: 4
+  ranking_metric: execution_time_ms
+  timeout_policy: exclude_from_main_pool
+pair_validity_check: require_identical_local_feature_vector
+parent_requirement_fields:
+  - ordinary_predicate_class
+  - required_order
+  - unsafe_boundary_position
+  - join_fanout
+pairs:
+  - pair_id: selective_ordinary_predicate
+    local_vector_id: lv_auth50_idx
+    parent_A: no_query_predicate
+    parent_B: key_point_predicate
+  - pair_id: unsafe_downstream_expression
+    local_vector_id: lv_guard_complete_expensive
+    parent_A: safe_join_then_residual
+    parent_B: immediate_unsafe_log
+  - pair_id: parent_requires_order
+    local_vector_id: lv_unordered_authidx
+    parent_A: hash_join
+    parent_B: merge_join_order_by
+  - pair_id: join_continuation
+    local_vector_id: lv_same_policy
+    parent_A: selective_dimension_first
+    parent_B: high_fanout_before_boundary
+outputs:
+  raw_dir: results/v3/raw/E4/
+  summary_dir: results/v3/summarized/E4/

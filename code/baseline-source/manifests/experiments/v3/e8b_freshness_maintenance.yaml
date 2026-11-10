@@ -1,0 +1,54 @@
+manifest_id: e8b_freshness_maintenance_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e8b_freshness_maintenance.yaml
+  predecessor_sha256: sha256:5578dfe44ee0b94959db04eae352468ce8c0c2cb433c7628071826752c1a8a45
+  migration: admission-first-taxonomy-v3
+experiment: E8
+stage: freshness_maintenance
+execution_tier: main
+ae_required: true
+timeout_s: 900
+repetitions: {warmup: 5, measured: 10}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 51}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+queries:
+  - {query_id: E8b_low_update_auth_idx_lookup, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8b_revocation_fallback_latency, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8b_mav_refresh_latency, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8b_context_scope_explosion, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8b_rid_snapshot_mismatch, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8b_ttl_expired_valid_versions, path: workloads/e8/freshness_maintenance.sql}
+modes:
+  - admission-first
+  - conservative-barrier
+  - naive-artifact-only
+  - mav-no-version
+  - naive-auth-index-no-scope
+  - native-pg-rls
+  - native-pg-rls-physical-design
+maintenance_cases:
+  - {id: E8b_low_update_auth_idx_lookup, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 10, expected_action: execute}
+  - {id: E8b_revocation_fallback_latency, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: fallback}
+  - {id: E8b_mav_refresh_latency, artifact_type: mav, update_rate_per_hour: 0.01, ttl_s: 60, contexts: 1000, expected_action: refresh}
+  - {id: E8b_context_scope_explosion, artifact_type: both, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 100000, expected_action: reject}
+  - {id: E8b_rid_snapshot_mismatch, artifact_type: both, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: replan}
+  - {id: E8b_ttl_expired_valid_versions, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 1, contexts: 1000, expected_action: refresh}
+variables:
+  update_rate_per_hour: [0.0, 0.001, 0.01, 0.1]
+  ttl_s: [1, 60, 3600]
+  contexts: [10, 1000, 100000]
+  artifact_type: [auth_idx, mav, both]
+metrics:
+  - stale_artifact_rejection_count
+  - wrong_results
+  - fallback_latency_ms
+  - refresh_latency_ms
+  - artifact_hit_rate
+  - maintenance_storage_bytes
+  - version_check_overhead_ms
+outputs:
+  raw_dir: results/v3/raw/E8/
+  summary_dir: results/v3/summarized/E8/

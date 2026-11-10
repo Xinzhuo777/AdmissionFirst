@@ -1,0 +1,136 @@
+manifest_id: e8_cost_update_rate_v1
+experiment: E8
+stage: artifact_cost_update_rate
+execution_tier: main
+ae_required: true
+timeout_s: 7200
+repetitions: {warmup: 5, measured: 10}
+dataset: {name: synthetic_saas, scale: 1e6, seed: 47}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+queries:
+  - {query_id: E8cost_mav_dash_Q1_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q1_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q1_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q1_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q10_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q10_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q10_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q10_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q10_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q10_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q10_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q10_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q10_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q10_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q10_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q10_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q100_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q100_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q100_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q100_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q100_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q100_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q100_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q100_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q100_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q100_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q100_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q100_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q1000_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1000_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1000_U0pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q1000_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1000_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1000_U0_1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q1000_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1000_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1000_U1pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_mav_dash_Q1000_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_authidx_sparse_Q1000_U10pct, path: workloads/e8/freshness_maintenance.sql}
+  - {query_id: E8cost_stale_fallback_Q1000_U10pct, path: workloads/e8/freshness_maintenance.sql}
+modes:
+  - contract-aware
+  - conservative-barrier
+  - native-pg-rls-physical-design
+  - auth-index-enum-only
+  - mav-only
+  - naive-artifact-only
+  - mav-no-version
+  - stale-artifact-user
+maintenance_cases:
+  - {id: E8cost_mav_dash_Q1_U0pct, artifact_type: mav, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_authidx_sparse_Q1_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_stale_fallback_Q1_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1}
+  - {id: E8cost_mav_dash_Q1_U0_1pct, artifact_type: mav, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_authidx_sparse_Q1_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_stale_fallback_Q1_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1}
+  - {id: E8cost_mav_dash_Q1_U1pct, artifact_type: mav, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_authidx_sparse_Q1_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_stale_fallback_Q1_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1}
+  - {id: E8cost_mav_dash_Q1_U10pct, artifact_type: mav, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_authidx_sparse_Q1_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1}
+  - {id: E8cost_stale_fallback_Q1_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1}
+  - {id: E8cost_mav_dash_Q10_U0pct, artifact_type: mav, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_authidx_sparse_Q10_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_stale_fallback_Q10_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 10}
+  - {id: E8cost_mav_dash_Q10_U0_1pct, artifact_type: mav, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_authidx_sparse_Q10_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_stale_fallback_Q10_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 10}
+  - {id: E8cost_mav_dash_Q10_U1pct, artifact_type: mav, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_authidx_sparse_Q10_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_stale_fallback_Q10_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 10}
+  - {id: E8cost_mav_dash_Q10_U10pct, artifact_type: mav, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_authidx_sparse_Q10_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 10}
+  - {id: E8cost_stale_fallback_Q10_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 10}
+  - {id: E8cost_mav_dash_Q100_U0pct, artifact_type: mav, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_authidx_sparse_Q100_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_stale_fallback_Q100_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 100}
+  - {id: E8cost_mav_dash_Q100_U0_1pct, artifact_type: mav, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_authidx_sparse_Q100_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_stale_fallback_Q100_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 100}
+  - {id: E8cost_mav_dash_Q100_U1pct, artifact_type: mav, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_authidx_sparse_Q100_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_stale_fallback_Q100_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 100}
+  - {id: E8cost_mav_dash_Q100_U10pct, artifact_type: mav, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_authidx_sparse_Q100_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 100}
+  - {id: E8cost_stale_fallback_Q100_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 100}
+  - {id: E8cost_mav_dash_Q1000_U0pct, artifact_type: mav, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_authidx_sparse_Q1000_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_stale_fallback_Q1000_U0pct, artifact_type: auth_idx, update_rate_per_hour: 0.0, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1000}
+  - {id: E8cost_mav_dash_Q1000_U0_1pct, artifact_type: mav, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_authidx_sparse_Q1000_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_stale_fallback_Q1000_U0_1pct, artifact_type: auth_idx, update_rate_per_hour: 0.001, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1000}
+  - {id: E8cost_mav_dash_Q1000_U1pct, artifact_type: mav, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_authidx_sparse_Q1000_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_stale_fallback_Q1000_U1pct, artifact_type: auth_idx, update_rate_per_hour: 0.01, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1000}
+  - {id: E8cost_mav_dash_Q1000_U10pct, artifact_type: mav, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_authidx_sparse_Q1000_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 100000, expected_action: execute, amortization_q: 1000}
+  - {id: E8cost_stale_fallback_Q1000_U10pct, artifact_type: auth_idx, update_rate_per_hour: 0.1, ttl_s: 3600, contexts: 1000, expected_action: fallback, amortization_q: 1000}
+variables:
+  Q: [1, 10, 100, 1000]
+  update_rate_per_hour: [0.0, 0.001, 0.01, 0.1]
+  ttl_s: [3600]
+  contexts: [1000, 100000]
+  artifact_type: [auth_idx, mav]
+metrics:
+  - query_only_latency_ms
+  - build_ms
+  - refresh_unit_ms
+  - maintenance_ms_total
+  - storage_bytes
+  - invalidated_rows
+  - fallback_ms
+  - amortized_declared_q_u_ms
+outputs:
+  raw_dir: results/raw/E8_COST_1E6/
+  summary_dir: results/summarized/E8_COST_1E6/

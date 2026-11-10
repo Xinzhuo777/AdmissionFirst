@@ -1,0 +1,42 @@
+manifest_id: e3_to_main_oracle_smoke_v1
+experiment: E3
+stage: standard_workloads_reduced_to_main_oracle_smoke
+execution_tier: main
+ae_required: true
+timeout_s: 1800
+repetitions: {warmup: 1, measured: 1}
+datasets:
+  - {name: tpch, scale: reduced_1k_customer_2k_orders_6k_lineitem, seed: 42}
+  - {name: job, scale: reduced_1500_title_4000_companies_8000_cast, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+ranker: {name: calibrated-explain, calibration_path: configs/e3_cost_calibration.yaml}
+query_sets:
+  reviewer_minimal_to_main: [JOB_1a]
+queries:
+  - {query_id: JOB_1a, path: workloads/e3/job_1a_reduced.sql}
+excluded_queries_path: workloads/e3/excluded_queries_mini_plus.yaml
+policy_configs:
+  - {id: cheap_tenant_sargable, selectivity: 0.1, policy_cost: cheap, artifacts: none}
+  - {id: hybrid_selective_key, selectivity: 0.1, policy_cost: 100us, artifacts: both_keyed}
+artifact_configs:
+  none: []
+  both_keyed: [auth_idx, auth_idx_keyed]
+modes:
+  - native-pg-rls
+  - native-pg-rls-physical-design
+  - security-barrier
+  - barrier-only
+  - injection-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - local-greedy
+  - contract-aware
+oracle:
+  type: measured_finite_template_oracle
+  run_kind: template_candidate
+  selected_cells: true
+  ranking_metric: measured_median_execution_ms
+  purpose: reviewer_minimal_to_main_oracle_cells
+outputs:
+  raw_dir: results/raw/E3_TO_MAIN_ORACLE_SMOKE/
+  summary_dir: results/summarized/E3_TO_MAIN_ORACLE_SMOKE/

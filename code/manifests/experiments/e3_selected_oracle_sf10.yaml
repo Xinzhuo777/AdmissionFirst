@@ -1,0 +1,35 @@
+manifest_id: e3_selected_oracle_sf10_v1
+experiment: E3
+stage: main
+execution_tier: main
+ae_required: true
+timeout_s: 7200
+repetitions: {warmup: 5, measured: 10}
+datasets:
+  - {name: tpch, scale: SF10, seed: 42, loader: datasets/tpch/dbgen}
+  - {name: job, scale: full, seed: 42, loader: datasets/job}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+ranker: {name: calibrated-explain, calibration_path: configs/e3_cost_calibration.yaml}
+queries:
+  - {query_id: JOB_1a, path: workloads/e3/job_1a_reduced.sql}
+  - {query_id: JOB_10a, path: workloads/e3/job_10a_mini.sql}
+policy_configs:
+  - {id: cheap_tenant_sargable, artifacts: none}
+  - {id: hybrid_selective_key, artifacts: both_keyed}
+modes:
+  - native-pg-rls
+  - native-pg-rls-physical-design
+  - security-barrier
+  - barrier-only
+  - injection-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - local-greedy
+  - contract-aware
+oracle:
+  type: measured_finite_template_oracle
+  run_kind: template_candidate
+  selected_cells: true
+outputs:
+  raw_dir: results/raw/E3_SELECTED_SF10/
+  summary_dir: results/summarized/E3_SELECTED_SF10/

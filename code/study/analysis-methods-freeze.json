@@ -1,0 +1,13 @@
+{
+  "method_files": {
+    "output/section65_original_protocol_execution_2026-10-06/independent_analysis/analyze_original.py": "sha256:4d1b4a368fc154585fed8dce5cba5229c95248de6c59f7720993bd3d1fc40905",
+    "caprls_core/final_af_e3_analyze.py": "sha256:3007751c875f97ed2de362cad0cd2457fe17aba9b3d20f7b5180f68524f51f1c",
+    "caprls_core/final_af_e10_analyze.py": "sha256:ff5734f5d23c5fa94be2b9db45dae66ea2911ce75a2c462bac6e47e536658b4f",
+    "caprls_core/selection_cost_observed_analyze.py": "sha256:103780ecff1ea95286e944bc413d81ef5ea6af20e56fd7480370a643d34e8c0e",
+    "caprls_core/reporting.py": "sha256:36583ecb4a2acbd2dba3d6c9ddb0b2af23d46f4c299d2bdb8c5dfe2019f7238c",
+    "caprls_core/bootstrap_geomean_ci.py": "sha256:b4203a57b7a3afddc661206e165cd8511337e4fc060c49faedf5418e827fbd28",
+    "caprls_core/baselines.py": "sha256:0788cf4bd916d43c3d94315a6604ad2cc3a04e544642c336a3aabe2010a6fcc0",
+    "caprls_core/af_pareto_analyze.py": "sha256:52bcd9d9df75e8f21f0b162a4aae05f9e5a316d251a120988535614969e5c4c6",
+    "planner/pc_scope.py": "sha256:bc60e6003799082402c3e6956a0c7e06b82b584126662bea1af80ec4fc8aeaba"
+  }
+}

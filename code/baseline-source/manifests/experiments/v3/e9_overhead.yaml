@@ -1,0 +1,48 @@
+manifest_id: e9_overhead_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e9_overhead.yaml
+  predecessor_sha256: sha256:e5cd1e248982c83e4e6b4945ce27cee2f8fa9e3d2d71a3fb876445bc9b8d5b9e
+  migration: admission-first-taxonomy-v3
+experiment: E9
+stage: tiered
+execution_tier: main
+evidence_role: diagnostic_only
+promotion_eligible: false
+feasibility_search_budget: 0
+ae_required: true
+timeout_s: 1200
+repetitions: {warmup: 5, measured: 10}
+dataset: {name: synthetic_planner_stress, scale: generated, seed: 48}
+queries:
+  - {query_id: E9_tiered_overhead, path: workloads/e9/planner_overhead.sql}
+modes:
+  - admission-first
+  - admission-first-no-dominance
+  - local-greedy
+synthetic_generator:
+  protected_relations: [1, 2, 4, 8, 16]
+  policy_shapes: [tenant_group, purpose_region, guard_residual]
+  residual_shapes: [none, one_per_occurrence, branch_tagged]
+  seed: 48
+template_oracle_subset:
+  enabled: true
+  max_templates_per_query: 8
+  tiers: [one_axis_occurrences, selected_interactions]
+tiers:
+  - name: one_axis_occurrences
+    protected_occurrences: [1, 2, 4, 8, 16, 32]
+    fixed: {joins: 4, alternatives_per_occurrence: 6, residuals: 2}
+  - name: one_axis_alternatives
+    alternatives_per_occurrence: [2, 4, 6, 8]
+    fixed: {protected_occurrences: 8, joins: 4, residuals: 2}
+  - name: selected_interactions
+    points:
+      - {protected_occurrences: 8, joins: 8, alternatives_per_occurrence: 8, residuals: 8}
+      - {protected_occurrences: 16, joins: 12, alternatives_per_occurrence: 6, residuals: 16}
+  - name: no_dominance_small
+    protected_occurrences: [2, 4, 8]
+    fixed: {joins: 4, alternatives_per_occurrence: 6, residuals: 4}
+outputs:
+  raw_dir: results/v3/raw/E9/
+  summary_dir: results/v3/summarized/E9/

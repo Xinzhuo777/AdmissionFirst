@@ -1,0 +1,50 @@
+manifest_id: e10_case_study_v1
+experiment: E10
+stage: case_study
+execution_tier: main
+ae_required: true
+timeout_s: 1200
+repetitions: {warmup: 5, measured: 10}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 52}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+  - {policy_id: tenant_only_ticket, relation: ticket}
+  - {policy_id: purpose_region_invoice, relation: invoice}
+queries:
+  - {query_id: E10_Q1_support_ticket_lookup, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q2_tenant_dashboard, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q3_cross_tenant_admin_audit, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q4_shared_document_search_audit, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q5_invoice_region_purpose_join, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q6_own_plus_group_shared_union, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q7_ordered_export, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q11_ticket_exact_injection, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q8_stale_dashboard_mav, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q9_wrong_context_mav, path: workloads/e10/case_study.sql}
+  - {query_id: E10_Q10_revoked_membership_mav, path: workloads/e10/case_study.sql}
+modes:
+  - native-pg-rls
+  - native-pg-rls-physical-design
+  - barrier-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - mav-only
+  - guard-mandatory-discharge
+  - local-greedy
+  - contract-aware
+case_queries:
+  - {id: E10_Q1_support_ticket_lookup, policy_mix: tenant_isolation_break_glass, expected_contract_choice: HybridIndexIntersect}
+  - {id: E10_Q2_tenant_dashboard, policy_mix: tenant_group_dashboard, expected_contract_choice: MaterializedAuthorizedViewScan}
+  - {id: E10_Q3_cross_tenant_admin_audit, policy_mix: admin_audit_group_acl, expected_contract_choice: AuthorizationIndexSeek}
+  - {id: E10_Q4_shared_document_search_audit, policy_mix: owner_shared_audit_logging, expected_contract_choice: BarrierFilter}
+  - {id: E10_Q5_invoice_region_purpose_join, policy_mix: purpose_region_join, expected_contract_choice: Guard+LateResidual}
+  - {id: E10_Q6_own_plus_group_shared_union, policy_mix: branch_lineage_union, expected_contract_choice: BarrierFilter}
+  - {id: E10_Q7_ordered_export, policy_mix: ordered_tenant_export, expected_contract_choice: MaterializedAuthorizedViewScan}
+  - {id: E10_Q11_ticket_exact_injection, policy_mix: tenant_owner_ticket_sargable, expected_contract_choice: SafePredicateInjection}
+  - {id: E10_Q8_stale_dashboard_mav, policy_mix: tenant_group_dashboard_stale_mav, expected_contract_choice: BarrierFilter}
+  - {id: E10_Q9_wrong_context_mav, policy_mix: admin_audit_wrong_context_mav, expected_contract_choice: AuthorizationIndexSeek}
+  - {id: E10_Q10_revoked_membership_mav, policy_mix: ordered_tenant_export_revoked_mav, expected_contract_choice: BarrierFilter}
+outputs:
+  raw_dir: results/raw/E10/
+  summary_dir: results/summarized/E10/

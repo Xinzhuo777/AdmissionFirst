@@ -1,0 +1,56 @@
+manifest_id: e3_standard_full_portfolio_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e3_standard_full_portfolio.yaml
+  predecessor_sha256: sha256:febd9688357329f42f03b58a1b533498fb54317f12d48f0e2f062ff3d1e3b5ae
+  migration: admission-first-taxonomy-v3
+experiment: E3
+stage: standard_workloads_reduced_full_portfolio
+execution_tier: main
+ae_required: false
+timeout_s: 1200
+repetitions: {warmup: 5, measured: 10}
+datasets:
+  - {name: tpch, scale: reduced_1k_customer_2k_orders_6k_lineitem, seed: 42}
+  - {name: job, scale: reduced_1500_title_4000_companies_8000_cast, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+ranker: {name: calibrated-explain, calibration_path: configs/e3_cost_calibration.yaml}
+portfolio_candidates: {include_engine_rls: true, include_semijoin: true}
+query_sets:
+  tpch: [Q3, Q5, Q7, Q10, Q12]
+  job_selected_policy_stress: [JOB_1a, JOB_2a, JOB_3c, JOB_6d, JOB_10a, JOB_16b]
+queries:
+  - {query_id: Q3, path: workloads/e3/tpch_q3_smoke.sql}
+  - {query_id: Q5, path: workloads/e3/tpch_q5_reduced.sql}
+  - {query_id: Q7, path: workloads/e3/tpch_q7_mini.sql}
+  - {query_id: Q10, path: workloads/e3/tpch_q10_mini.sql}
+  - {query_id: Q12, path: workloads/e3/tpch_q12_mini.sql}
+  - {query_id: JOB_1a, path: workloads/e3/job_1a_reduced.sql}
+  - {query_id: JOB_2a, path: workloads/e3/job_2a_mini.sql}
+  - {query_id: JOB_3c, path: workloads/e3/job_3c_mini.sql}
+  - {query_id: JOB_6d, path: workloads/e3/job_6d_reduced.sql}
+  - {query_id: JOB_10a, path: workloads/e3/job_10a_mini.sql}
+  - {query_id: JOB_16b, path: workloads/e3/job_16b_mini.sql}
+excluded_queries_path: workloads/e3/excluded_queries_mini_plus.yaml
+parameter_instances_per_template: 1
+policy_configs:
+  - {id: cheap_tenant_sargable, selectivity: 0.1, policy_cost: cheap, artifacts: none}
+  - {id: group_acl_expensive, selectivity: 0.1, policy_cost: expensive_acl, artifacts: auth_idx}
+  - {id: hybrid_selective_key, selectivity: 0.1, policy_cost: 100us, artifacts: both_keyed}
+artifact_configs:
+  none: []
+  auth_idx: [auth_idx]
+  both_keyed: [auth_idx, auth_idx_keyed]
+modes:
+  - native-pg-rls
+  - native-pg-rls-physical-design
+  - security-barrier
+  - barrier-only
+  - injection-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - local-greedy
+  - admission-first
+outputs:
+  raw_dir: results/v3/raw/E3_MINIPLUS_PORTFOLIO/
+  summary_dir: results/v3/summarized/E3_MINIPLUS_PORTFOLIO/

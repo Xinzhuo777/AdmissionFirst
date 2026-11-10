@@ -1,0 +1,4 @@
+comment = 'CAPRLS metadata catalog and validation witness'
+default_version = '1.0'
+relocatable = false
+trusted = false

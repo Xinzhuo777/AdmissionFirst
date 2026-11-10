@@ -1,0 +1,64 @@
+manifest_id: e2_alternative_matrix_reduced_v2_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e2_alternative_matrix_reduced.yaml
+  predecessor_sha256: sha256:d5492fd25287af565e7d685a698e458d35ac9f1baf234f3871fcf0ab164a247c
+  migration: admission-first-taxonomy-v3
+experiment: E2
+stage: alternative_matrix_reduced
+execution_tier: main
+ae_required: true
+timeout_s: 900
+repetitions: {warmup: 5, measured: 10}
+dataset: {name: synthetic_saas, scale: 1e5, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+ranker:
+  name: pg-explain-raw
+  version: pg_explain_raw_v1
+  calibration: zero
+  analyze: false
+  incomplete_pool: error
+  tie_break: rawpg_then_heuristic_then_template_id
+timing_contract:
+  ranking_metric: postgres_server_execution_ms
+  query_only: postgres_server_planning_plus_execution_ms
+  total: query_only_plus_artifact_validation_ms
+  prospective_selection: cell_level_full_selection_client_wall_ms_not_amortized
+modes:
+  - admission-first
+  - template-oracle
+  - barrier-only
+  - injection-only
+  - auth-view-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - mav-only
+  - guard-mandatory-discharge
+policy_applications:
+  - {policy_id: tenant_group, relation: document}
+queries:
+  - {query_id: E2_range_count, path: workloads/e2/range_count.sql}
+variables:
+  s_auth: [0.01]
+  s_q: [0.001, 0.01]
+  policy_cost: [cheap]
+  contexts: [1000]
+  artifact_availability: [none, auth_idx, mav, both_keyed]
+  guard_fpr: [1]
+template_candidates:
+  - barrier_filter_v1
+  - safe_predicate_injection_v1
+  - auth_view_scan_v1
+  - auth_index_enum_v1
+  - strong_auth_index_keyed_v1
+  - mav_scan_v1
+  - guard_candidate_plus_residual_v1
+  - hybrid_intersect_v1
+ranking_metric: execution_time_ms
+applicability_policy:
+  artifact_missing: record_template_applicability_artifact_unavailable
+  metadata_invalid: record_template_applicability_metadata_invalid
+  plot_unavailable_as: N.A.
+outputs:
+  raw_dir: results/v3/raw/E2_PROTOCOL/
+  summary_dir: results/v3/summarized/E2_PROTOCOL/

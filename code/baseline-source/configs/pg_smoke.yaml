@@ -1,0 +1,7 @@
+profile: pg_smoke
+postgres:
+  database: caprls_smoke
+  gucs:
+    jit: "off"
+    max_parallel_workers_per_gather: "0"
+    plan_cache_mode: force_custom_plan

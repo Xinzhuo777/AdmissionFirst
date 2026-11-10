@@ -1,0 +1,70 @@
+manifest_id: e3_outlier_oracle_sf10_v1_taxonomy_v3
+manifest_schema: caprls-experiment-manifest-v3
+lineage:
+  predecessor_path: manifests/experiments/e3_outlier_oracle_sf10.yaml
+  predecessor_sha256: sha256:216c49ae540815d8c875e4416ce131916bac1685fecd6ffd0fd0cf26077f0122
+  migration: admission-first-taxonomy-v3
+experiment: E3
+stage: main
+execution_tier: main
+ae_required: false
+timeout_s: 14400
+repetitions: {warmup: 5, measured: 10}
+datasets:
+  - {name: tpch, scale: SF10, seed: 42, loader: datasets/tpch/dbgen}
+  - {name: job, scale: full, seed: 42, loader: datasets/job}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+ranker: {name: calibrated-explain, calibration_path: configs/e3_cost_calibration.yaml}
+query_sets:
+  tpch_reduced_oracle_gap_outliers: [Q10, Q12]
+  job_reduced_oracle_gap_outliers: [JOB_2a, JOB_3c, JOB_6d, JOB_10a]
+queries:
+  - {query_id: Q10, path: workloads/e3/tpch_q10_mini.sql}
+  - {query_id: Q12, path: workloads/e3/tpch_q12_mini.sql}
+  - {query_id: JOB_2a, path: workloads/e3/job_2a_mini.sql}
+  - {query_id: JOB_3c, path: workloads/e3/job_3c_mini.sql}
+  - {query_id: JOB_6d, path: workloads/e3/job_6d_reduced.sql}
+  - {query_id: JOB_10a, path: workloads/e3/job_10a_mini.sql}
+excluded_queries_path: workloads/e3/excluded_queries_mini_plus.yaml
+selection_rationale:
+  source_summary_dir: results/v3/summarized/E3_MINIPLUS_REDUCED/
+  purpose: >
+    Validate the largest measured TemplateOracle misses from the reduced
+    E3-MINI+ run at real TPC-H SF10/JOB scale without claiming full SF10
+    workload coverage.
+  predeclared_cells:
+    - {query_id: Q10, policy_config: cheap_tenant_sargable, reduced_gap_driver: safe_predicate_injection_vs_barrier}
+    - {query_id: Q12, policy_config: group_acl_expensive, reduced_gap_driver: auth_index_enum_vs_barrier}
+    - {query_id: JOB_2a, policy_config: hybrid_selective_key, reduced_gap_driver: hybrid_intersect_vs_strong_auth_index}
+    - {query_id: JOB_3c, policy_config: cheap_tenant_sargable, reduced_gap_driver: safe_predicate_injection_vs_barrier}
+    - {query_id: JOB_6d, policy_config: hybrid_selective_key, reduced_gap_driver: hybrid_intersect_vs_strong_auth_index}
+    - {query_id: JOB_10a, policy_config: hybrid_selective_key, reduced_gap_driver: barrier_vs_strong_auth_index}
+policy_configs:
+  - {id: cheap_tenant_sargable, selectivity: 0.1, policy_cost: cheap, artifacts: none}
+  - {id: group_acl_expensive, selectivity: 0.1, policy_cost: expensive_acl, artifacts: auth_idx}
+  - {id: hybrid_selective_key, selectivity: 0.1, policy_cost: 100us, artifacts: both_keyed}
+artifact_configs:
+  none: []
+  auth_idx: [auth_idx]
+  both_keyed: [auth_idx, auth_idx_keyed]
+modes:
+  - native-pg-rls
+  - native-pg-rls-physical-design
+  - security-barrier
+  - barrier-only
+  - injection-only
+  - auth-index-enum-only
+  - strong-auth-index
+  - local-greedy
+  - admission-first
+oracle:
+  type: measured_finite_template_oracle
+  run_kind: template_candidate
+  selected_cells: true
+  ranking_metric: measured_median_execution_ms
+  interpretation: >
+    Report oracle gaps as selected SF10 validation of reduced-run outliers.
+    Do not merge this directory into full-workload SF10 geomeans.
+outputs:
+  raw_dir: results/v3/raw/E3_OUTLIER_SF10/
+  summary_dir: results/v3/summarized/E3_OUTLIER_SF10/

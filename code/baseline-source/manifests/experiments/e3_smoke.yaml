@@ -1,0 +1,32 @@
+manifest_id: e3_smoke_v1
+experiment: E3
+stage: smoke
+execution_tier: smoke
+ae_required: true
+timeout_s: 600
+repetitions: {warmup: 1, measured: 1}
+datasets:
+  - {name: tpch, scale: reduced_1k_customer_2k_orders_6k_lineitem, seed: 42}
+postgres: {config: configs/pg_smoke.yaml, warm_cache: true}
+query_sets:
+  tpch: [Q3]
+queries:
+  - {query_id: Q3, path: workloads/e3/tpch_q3_smoke.sql}
+excluded_queries_path: workloads/e3/excluded_queries_smoke.yaml
+parameter_instances_per_template: 1
+policy_configs:
+  - {id: cheap_tenant_sargable, selectivity: 0.1, policy_cost: cheap, artifacts: none}
+  - {id: hybrid_selective_key, selectivity: 0.1, policy_cost: 100us, artifacts: both_keyed}
+artifact_configs:
+  none: []
+  both_keyed: [auth_idx, auth_idx_keyed, auth_mv]
+modes:
+  - native-pg-rls
+  - native-pg-rls-physical-design
+  - barrier-only
+  - strong-auth-index
+  - local-greedy
+  - contract-aware
+outputs:
+  raw_dir: results/raw/E3/
+  summary_dir: results/summarized/E3/

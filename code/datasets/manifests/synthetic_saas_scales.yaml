@@ -1,0 +1,47 @@
+dataset_manifest_version: caprls-dataset-manifest-v1
+name: synthetic_saas
+modules: [tenant, group_acl, role, purpose, region, event_log]
+output_schema: public
+base_version_initial: 0
+context_manifest_pattern: contexts/synthetic_saas_contexts_seed{seed}.yaml
+synthetic_saas_scale_profiles:
+  1e3:
+    tenants: 10
+    users: 200
+    documents: 1000
+    tickets: 1000
+    invoices: 500
+    events: 2000
+    acl_edges: 2000
+    group_edges: 1000
+    contexts: 50
+  1e5:
+    tenants: 100
+    users: 10000
+    documents: 100000
+    tickets: 100000
+    invoices: 50000
+    events: 500000
+    acl_edges: 200000
+    group_edges: 50000
+    contexts: 1000
+  1e6:
+    tenants: 1000
+    users: 100000
+    documents: 1000000
+    tickets: 1000000
+    invoices: 500000
+    events: 5000000
+    acl_edges: 2000000
+    group_edges: 500000
+    contexts: 1000
+  1e7:
+    tenants: 1000
+    users: 1000000
+    documents: 10000000
+    tickets: 5000000
+    invoices: 3000000
+    events: 50000000
+    acl_edges: 20000000
+    group_edges: 5000000
+    contexts: 10000

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "shared_host_2gb": {
+      "shared_buffers": "2GB",
+      "work_mem": "16MB",
+      "effective_cache_size": "8GB",
+      "max_wal_size": "4GB"
+    }
+  }
+}

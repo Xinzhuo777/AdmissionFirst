@@ -1,0 +1,20 @@
+schema_version: caprls-excluded-queries-v1
+workloads: [tpch, job]
+included_queries: [Q3, Q5, Q7, Q10, Q12, JOB_1a, JOB_2a, JOB_3c, JOB_6d, JOB_10a, JOB_16b]
+adapter_boundary: >
+  E3-MINI+ uses PostgreSQL-backed protected-relation adapters over real TPC-H
+  SF10 and JOB/full data. Authorization is discharged on the protected
+  customer/title stream before aggregate, order, limit, or non-transparent
+  boundaries. These are bounded standard-workload stress adapters, not a claim
+  of full TPC-H/JOB SQL coverage.
+excluded_queries:
+  - query_id: Q8
+    reason: P1 join-heavy analytical stress; excluded from P0 per roadmap.
+  - query_id: Q9
+    reason: P1 join-heavy analytical stress; excluded from P0 per roadmap.
+  - query_id: Q18
+    reason: Adds heavier subquery/HAVING boundary; appendix engineering stress only.
+  - query_id: Q21
+    reason: Adds semijoin/anti-join and top-k boundary complications; appendix only.
+  - query_id: TPC-DS
+    reason: Explicitly excluded from P0; adds SQL-feature risk without addressing the core reviewer objection.

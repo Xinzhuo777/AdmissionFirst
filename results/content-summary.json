@@ -1,0 +1,17 @@
+{
+  "schema": "caprls-final-af-content-summary-v1",
+  "finished_at": "2026-11-06T01:17:47+00:00",
+  "status": "pass",
+  "declared_full_cells": 52,
+  "requested_cells": 52,
+  "receipts": 52,
+  "passed": 52,
+  "full_52_cell_coverage": true,
+  "families_requested": [
+    "E10",
+    "E2",
+    "E3"
+  ],
+  "elapsed_seconds": 575.877438958,
+  "failure": null
+}

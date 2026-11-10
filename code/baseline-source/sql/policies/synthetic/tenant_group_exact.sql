@@ -1,0 +1,1 @@
+({alias}.tenant_id = :ctx_tenant_id OR {alias}.owner_id = :user_id OR {alias}.public = true OR EXISTS (SELECT 1 FROM share_acl a JOIN group_membership gm ON gm.group_id = a.group_id WHERE a.rid = {alias}.{rid_col} AND a.relname = :relname AND gm.user_id = :user_id AND a.permission IN ('read','owner') AND :now BETWEEN a.valid_from AND a.valid_to))

@@ -1,0 +1,140 @@
+schema_version: caprls-baseline-modes-v2
+modes:
+  admission-first:
+    evaluation_role: policy_enforcement
+    paper_label: AdmissionFirst
+    execution_order_key: 4
+  admission-first-no-dominance:
+    evaluation_role: conservative_control
+    paper_label: AdmissionFirst-NoDom
+    execution_order_key: 5
+  no-domain:
+    evaluation_role: contract_violation_control
+    paper_label: NoDomain
+    execution_order_key: 20
+  no-residual:
+    evaluation_role: contract_violation_control
+    paper_label: NoResidual
+    execution_order_key: 23
+  no-freshness:
+    evaluation_role: contract_violation_control
+    paper_label: NoFreshness
+    execution_order_key: 21
+  no-context-scope:
+    evaluation_role: contract_violation_control
+    paper_label: NoContextScope
+    execution_order_key: 19
+  no-rid-props:
+    evaluation_role: contract_violation_control
+    paper_label: NoRIDMatProps
+    execution_order_key: 24
+  no-safety-level:
+    evaluation_role: contract_violation_control
+    paper_label: NoSafetyLevel
+    execution_order_key: 25
+  no-branch-lineage:
+    evaluation_role: contract_violation_control
+    paper_label: NoBranchLineage
+    execution_order_key: 18
+  no-phys-props:
+    evaluation_role: conservative_control
+    paper_label: NoPhysProps
+    execution_order_key: 22
+  native-pg-rls:
+    evaluation_role: policy_enforcement
+    paper_label: NativePG-RLS
+    execution_order_key: 16
+  native-pg-rls-physical-design:
+    evaluation_role: policy_enforcement
+    paper_label: NativePG-RLS+PD
+    execution_order_key: 17
+  security-barrier:
+    evaluation_role: policy_enforcement
+    paper_label: SecurityBarrier
+    execution_order_key: 28
+  barrier-only:
+    evaluation_role: policy_enforcement
+    paper_label: BarrierOnly
+    execution_order_key: 2
+  injection-only:
+    evaluation_role: policy_enforcement
+    paper_label: ExactInjectionOnly
+    execution_order_key: 9
+  auth-view-only:
+    evaluation_role: policy_enforcement
+    paper_label: AuthViewOnly
+    execution_order_key: 1
+  auth-index-enum-only:
+    evaluation_role: policy_enforcement
+    paper_label: AuthIndexEnumOnly
+    execution_order_key: 0
+  strong-auth-index:
+    evaluation_role: policy_enforcement
+    paper_label: StrongAuthIndex
+    execution_order_key: 30
+  mav-only:
+    evaluation_role: policy_enforcement
+    paper_label: MAVOnly
+    execution_order_key: 13
+  guard-late-only:
+    evaluation_role: policy_enforcement
+    paper_label: GuardLateOnly
+    execution_order_key: 6
+    notes: Applicable only when no unsafe or non-transparent boundary intervenes.
+  guard-mandatory-discharge:
+    evaluation_role: policy_enforcement
+    paper_label: GuardMandatoryDischarge
+    execution_order_key: 7
+  local-greedy:
+    evaluation_role: policy_enforcement
+    paper_label: LocalGreedy
+    execution_order_key: 10
+    notes: Applicable only with the shared contract checker.
+  ordinary-no-contract:
+    evaluation_role: contract_violation_control
+    paper_label: OrdinaryNoContract
+    execution_order_key: 26
+  template-oracle:
+    evaluation_role: finite_template_upper_bound
+    paper_label: TemplateOracle
+    execution_order_key: 31
+  manual-sql-rewrite-best-effort:
+    evaluation_role: policy_enforcement
+    paper_label: ManualSQLRewrite
+    execution_order_key: 11
+  conservative-barrier:
+    evaluation_role: conservative_control
+    paper_label: ConservativeBarrier
+    execution_order_key: 3
+  naive-artifact-only:
+    evaluation_role: contract_violation_control
+    paper_label: NaiveArtifactOnly
+    execution_order_key: 14
+  mav-no-version:
+    evaluation_role: contract_violation_control
+    paper_label: MAVNoVersion
+    execution_order_key: 12
+  naive-auth-index-no-scope:
+    evaluation_role: contract_violation_control
+    paper_label: NaiveAuthIndexNoScope
+    execution_order_key: 15
+  stale-artifact-user:
+    evaluation_role: contract_violation_control
+    paper_label: StaleArtifactUser
+    execution_order_key: 29
+  wrong-context-artifact-user:
+    evaluation_role: contract_violation_control
+    paper_label: WrongContextArtifactUser
+    execution_order_key: 33
+  incomplete-guard-candidate:
+    evaluation_role: contract_violation_control
+    paper_label: IncompleteGuardCandidate
+    execution_order_key: 8
+  rid-domain-blind-intersection:
+    evaluation_role: contract_violation_control
+    paper_label: RIDDomainBlindIntersection
+    execution_order_key: 27
+  unsafe-pushdown-positive-control:
+    evaluation_role: contract_violation_control
+    paper_label: UnsafePushdownControl
+    execution_order_key: 32

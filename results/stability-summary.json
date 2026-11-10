@@ -1,0 +1,167 @@
+{
+  "schema": "final_af_stability_summary_v1",
+  "status": "pass",
+  "expected_observations": 110,
+  "completed_observations": 110,
+  "failed_observations": 0,
+  "cells": [
+    {
+      "query_id": "Q3",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "auth_index_enum_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "Q5",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "auth_index_enum_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "Q7",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "auth_index_enum_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "Q10",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "auth_index_enum_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "Q12",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "auth_index_enum_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "JOB_1a",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "barrier_filter_query_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "JOB_2a",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "barrier_filter_query_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "JOB_3c",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "barrier_filter_query_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "JOB_6d",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "barrier_filter_query_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "JOB_10a",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "barrier_filter_query_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    },
+    {
+      "query_id": "JOB_16b",
+      "policy_id": "group_acl_expensive",
+      "selected_template_counts": {
+        "barrier_filter_query_v1": 10
+      },
+      "completed_rounds": 10,
+      "declared_rounds": 10,
+      "failed_rounds": [],
+      "switches_template": false,
+      "selection_frequencies_are_ordered_observations_not_probabilities": true
+    }
+  ],
+  "query_latency_measured": false,
+  "scope": "successive rebuild-and-ANALYZE states with deterministic query-order rotation",
+  "completed_at": "2026-11-06T01:57:00.429627+00:00",
+  "source_unchanged": true,
+  "protected_unchanged": true,
+  "final_artifact_state": {
+    "relations": [
+      {
+        "relation": "auth_idx",
+        "relpages": 307028,
+        "reltuples": 263164,
+        "relation_size_bytes": 2515173376,
+        "n_live_tup": 263164,
+        "n_dead_tup": 15657967
+      },
+      {
+        "relation": "auth_idx_keyed",
+        "relpages": 351628,
+        "reltuples": 263240,
+        "relation_size_bytes": 2880536576,
+        "n_live_tup": 263240,
+        "n_dead_tup": 15658511
+      }
+    ],
+    "fingerprint": "sha256:44d6e38dd33d90bfcf20b9d0cdaddc2d1ea4541d5206b65191a3bcdf9ad02dd9"
+  }
+}

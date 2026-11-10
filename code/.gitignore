@@ -1,0 +1,16 @@
+# Local runtime and build output
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+*.o
+._*
+.DS_Store
+.venv/
+configs/identity_primitives_build.yaml
+results/raw/
+results/analysis/
+.pg-a018/
+datasets/tpch/
+datasets/imdb/
+datasets/downloads/
