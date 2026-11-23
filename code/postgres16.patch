@@ -1,0 +1,1245 @@
+--- a/src/backend/access/heap/heapam_handler.c
++++ b/src/backend/access/heap/heapam_handler.c
+@@ -105,6 +105,8 @@
+ 
+ 	heapam_index_fetch_reset(scan);
+ 
++	FreeAccessStrategy(hscan->xs_strategy);
++	hscan->xs_strategy = NULL;
+ 	pfree(hscan);
+ }
+ 
+@@ -124,18 +126,52 @@
+ 	/* We can skip the buffer-switching logic if we're in mid-HOT chain. */
+ 	if (!*call_again)
+ 	{
+-		/* Switch to correct buffer if we don't have it already */
+-		Buffer		prev_buf = hscan->xs_cbuf;
++		if (hscan->xs_strategy == NULL)
++		{
++			/* Switch to correct buffer if we don't have it already */
++			Buffer		prev_buf = hscan->xs_cbuf;
+ 
+-		hscan->xs_cbuf = ReleaseAndReadBuffer(hscan->xs_cbuf,
+-											  hscan->xs_base.rel,
+-											  ItemPointerGetBlockNumber(tid));
++			hscan->xs_cbuf = ReleaseAndReadBuffer(hscan->xs_cbuf,
++												  hscan->xs_base.rel,
++												  ItemPointerGetBlockNumber(tid));
+ 
+-		/*
+-		 * Prune page, but only if we weren't already on this page
+-		 */
+-		if (prev_buf != hscan->xs_cbuf)
+-			heap_page_prune_opt(hscan->xs_base.rel, hscan->xs_cbuf);
++			/*
++			 * Prune page, but only if we weren't already on this page
++			 */
++			if (prev_buf != hscan->xs_cbuf)
++				heap_page_prune_opt(hscan->xs_base.rel, hscan->xs_cbuf);
++		}
++		else
++		{
++			BlockNumber block = ItemPointerGetBlockNumber(tid);
++			bool		same_page = false;
++
++			if (BufferIsValid(hscan->xs_cbuf))
++			{
++				RelFileLocator locator;
++				ForkNumber	fork;
++				BlockNumber oldblock;
++
++				/* A pin keeps this tag stable, including for local buffers. */
++				BufferGetTag(hscan->xs_cbuf, &locator, &fork, &oldblock);
++				same_page = oldblock == block && fork == MAIN_FORKNUM &&
++					RelFileLocatorEquals(locator, hscan->xs_base.rel->rd_locator);
++			}
++
++			if (!same_page)
++			{
++				/* Leave no stale pin in the descriptor if the read errors. */
++				if (BufferIsValid(hscan->xs_cbuf))
++					ReleaseBuffer(hscan->xs_cbuf);
++				hscan->xs_cbuf = InvalidBuffer;
++				hscan->xs_cbuf = ReadBufferExtended(hscan->xs_base.rel,
++												  MAIN_FORKNUM, block,
++												  RBM_NORMAL, hscan->xs_strategy);
++
++				/* A ring can reuse a buffer ID for a different page. */
++				heap_page_prune_opt(hscan->xs_base.rel, hscan->xs_cbuf);
++			}
++		}
+ 	}
+ 
+ 	/* Obtain share-lock on the buffer so we can examine visibility */
+--- a/src/backend/access/nbtree/nbtpage.c
++++ b/src/backend/access/nbtree/nbtpage.c
+@@ -24,11 +24,13 @@
+ 
+ #include "access/nbtree.h"
+ #include "access/nbtxlog.h"
++#include "access/relscan.h"
+ #include "access/tableam.h"
+ #include "access/transam.h"
+ #include "access/xlog.h"
+ #include "access/xloginsert.h"
+ #include "miscadmin.h"
++#include "optimizer/native_af.h"
+ #include "storage/indexfsm.h"
+ #include "storage/lmgr.h"
+ #include "storage/predicate.h"
+@@ -36,6 +38,23 @@
+ #include "utils/memdebug.h"
+ #include "utils/memutils.h"
+ #include "utils/snapmgr.h"
++
++/* A context is useful only for its exact, serial, owning B-tree scan. */
++static BTAFReadContext
++_bt_af_read_context(Relation rel, int access, BTAFReadContext context)
++{
++	BTScanOpaque opaque;
++
++	if (context == NULL || access != BT_READ || context->strategy == NULL ||
++		context->owner == NULL || context->relation != rel ||
++		context->owner->indexRelation != rel ||
++		context->owner->parallel_scan != NULL || context->owner->opaque == NULL)
++		return NULL;
++	opaque = (BTScanOpaque) context->owner->opaque;
++	if (context != &opaque->af_read_context)
++		return NULL;
++	return context;
++}
+ 
+ static BTMetaPageData *_bt_getmeta(Relation rel, Buffer metabuf);
+ static void _bt_delitems_delete(Relation rel, Buffer buf,
+@@ -343,6 +362,13 @@
+ Buffer
+ _bt_getroot(Relation rel, Relation heaprel, int access)
+ {
++	return _bt_getroot_with_context(rel, heaprel, access, NULL);
++}
++
++Buffer
++_bt_getroot_with_context(Relation rel, Relation heaprel, int access,
++						 BTAFReadContext context)
++{
+ 	Buffer		metabuf;
+ 	Buffer		rootbuf;
+ 	Page		rootpage;
+@@ -350,6 +376,9 @@
+ 	BlockNumber rootblkno;
+ 	uint32		rootlevel;
+ 	BTMetaPageData *metad;
++
++	/* Insertion/root creation never inherits a scan read strategy. */
++	context = heaprel == NULL ? _bt_af_read_context(rel, access, context) : NULL;
+ 
+ 	Assert(access == BT_READ || heaprel != NULL);
+ 
+@@ -373,7 +402,7 @@
+ 		Assert(rootblkno != P_NONE);
+ 		rootlevel = metad->btm_fastlevel;
+ 
+-		rootbuf = _bt_getbuf(rel, rootblkno, BT_READ);
++		rootbuf = _bt_getbuf_with_context(rel, rootblkno, BT_READ, context);
+ 		rootpage = BufferGetPage(rootbuf);
+ 		rootopaque = BTPageGetOpaque(rootpage);
+ 
+@@ -399,7 +428,7 @@
+ 		rel->rd_amcache = NULL;
+ 	}
+ 
+-	metabuf = _bt_getbuf(rel, BTREE_METAPAGE, BT_READ);
++	metabuf = _bt_getbuf_with_context(rel, BTREE_METAPAGE, BT_READ, context);
+ 	metad = _bt_getmeta(rel, metabuf);
+ 
+ 	/* if no root page initialized yet, do it */
+@@ -432,7 +461,7 @@
+ 			 * to optimize this case.)
+ 			 */
+ 			_bt_relbuf(rel, metabuf);
+-			return _bt_getroot(rel, heaprel, access);
++			return _bt_getroot_with_context(rel, heaprel, access, context);
+ 		}
+ 
+ 		/*
+@@ -535,7 +564,8 @@
+ 
+ 		for (;;)
+ 		{
+-			rootbuf = _bt_relandgetbuf(rel, rootbuf, rootblkno, BT_READ);
++			rootbuf = _bt_relandgetbuf_with_context(rel, rootbuf, rootblkno,
++													 BT_READ, context);
+ 			rootpage = BufferGetPage(rootbuf);
+ 			rootopaque = BTPageGetOpaque(rootpage);
+ 
+@@ -738,13 +768,22 @@
+ void
+ _bt_metaversion(Relation rel, bool *heapkeyspace, bool *allequalimage)
+ {
++	_bt_metaversion_with_context(rel, heapkeyspace, allequalimage, NULL);
++}
++
++void
++_bt_metaversion_with_context(Relation rel, bool *heapkeyspace,
++							 bool *allequalimage, BTAFReadContext context)
++{
+ 	BTMetaPageData *metad;
+ 
++	context = _bt_af_read_context(rel, BT_READ, context);
++
+ 	if (rel->rd_amcache == NULL)
+ 	{
+ 		Buffer		metabuf;
+ 
+-		metabuf = _bt_getbuf(rel, BTREE_METAPAGE, BT_READ);
++		metabuf = _bt_getbuf_with_context(rel, BTREE_METAPAGE, BT_READ, context);
+ 		metad = _bt_getmeta(rel, metabuf);
+ 
+ 		/*
+@@ -843,13 +882,31 @@
+  */
+ Buffer
+ _bt_getbuf(Relation rel, BlockNumber blkno, int access)
++{
++	return _bt_getbuf_with_context(rel, blkno, access, NULL);
++}
++
++Buffer
++_bt_getbuf_with_context(Relation rel, BlockNumber blkno, int access,
++						BTAFReadContext context)
+ {
+ 	Buffer		buf;
+ 
++	context = _bt_af_read_context(rel, access, context);
++	if (!BlockNumberIsValid(blkno) || blkno == P_NEW)
++		context = NULL;
+ 	Assert(BlockNumberIsValid(blkno));
+ 
+ 	/* Read an existing block of the relation */
+-	buf = ReadBuffer(rel, blkno);
++	if (context == NULL)
++		buf = ReadBuffer(rel, blkno);
++	else
++	{
++		buf = ReadBufferExtended(rel, MAIN_FORKNUM, blkno, RBM_NORMAL,
++								 context->strategy);
++		context->read_calls++;
++		native_af_note_stream_index_read();
++	}
+ 	_bt_lockbuf(rel, buf, access);
+ 	_bt_checkpage(rel, buf);
+ 
+@@ -1002,12 +1059,53 @@
+ Buffer
+ _bt_relandgetbuf(Relation rel, Buffer obuf, BlockNumber blkno, int access)
+ {
++	return _bt_relandgetbuf_with_context(rel, obuf, blkno, access, NULL);
++}
++
++Buffer
++_bt_relandgetbuf_with_context(Relation rel, Buffer obuf, BlockNumber blkno,
++							  int access, BTAFReadContext context)
++{
+ 	Buffer		buf;
+ 
++	context = _bt_af_read_context(rel, access, context);
++	if (!BlockNumberIsValid(blkno) || blkno == P_NEW)
++		context = NULL;
+ 	Assert(BlockNumberIsValid(blkno));
+ 	if (BufferIsValid(obuf))
+ 		_bt_unlockbuf(rel, obuf);
+-	buf = ReleaseAndReadBuffer(obuf, rel, blkno);
++	if (context == NULL)
++		buf = ReleaseAndReadBuffer(obuf, rel, blkno);
++	else
++	{
++		bool		same_page = false;
++
++		if (BufferIsValid(obuf))
++		{
++			RelFileLocator locator;
++			ForkNumber	fork;
++			BlockNumber oldblock;
++
++			/* The existing pin keeps this tag stable after unlocking. */
++			BufferGetTag(obuf, &locator, &fork, &oldblock);
++			same_page = oldblock == blkno && fork == MAIN_FORKNUM &&
++				RelFileLocatorEquals(locator, rel->rd_locator);
++		}
++		if (same_page)
++			buf = obuf;
++		else
++		{
++			/* Do not retain a released pin locally if the new read errors. */
++			if (BufferIsValid(obuf))
++				ReleaseBuffer(obuf);
++			obuf = InvalidBuffer;
++			buf = InvalidBuffer;
++			buf = ReadBufferExtended(rel, MAIN_FORKNUM, blkno, RBM_NORMAL,
++									 context->strategy);
++			context->read_calls++;
++			native_af_note_stream_index_read();
++		}
++	}
+ 	_bt_lockbuf(rel, buf, access);
+ 
+ 	_bt_checkpage(rel, buf);
+--- a/src/backend/access/nbtree/nbtree.c
++++ b/src/backend/access/nbtree/nbtree.c
+@@ -356,6 +356,10 @@
+ 
+ 	/* allocate private workspace */
+ 	so = (BTScanOpaque) palloc(sizeof(BTScanOpaqueData));
++	so->af_read_context.owner = NULL;
++	so->af_read_context.relation = NULL;
++	so->af_read_context.strategy = NULL;
++	so->af_read_context.read_calls = 0;
+ 	BTScanPosInvalidate(so->currPos);
+ 	BTScanPosInvalidate(so->markPos);
+ 	if (scan->numberOfKeys > 0)
+@@ -478,6 +482,12 @@
+ 	if (so->currTuples != NULL)
+ 		pfree(so->currTuples);
+ 	/* so->markTuples should not be pfree'd, see btrescan */
++	if (so->af_read_context.strategy != NULL)
++		FreeAccessStrategy(so->af_read_context.strategy);
++	so->af_read_context.strategy = NULL;
++	so->af_read_context.owner = NULL;
++	so->af_read_context.relation = NULL;
++	so->af_read_context.read_calls = 0;
+ 	pfree(so);
+ }
+ 
+--- a/src/backend/access/nbtree/nbtsearch.c
++++ b/src/backend/access/nbtree/nbtsearch.c
+@@ -23,6 +23,7 @@
+ #include "storage/predicate.h"
+ #include "utils/lsyscache.h"
+ #include "utils/rel.h"
++#include "utils/fmgroids.h"
+ 
+ 
+ static void _bt_drop_lock_and_maybe_pin(IndexScanDesc scan, BTScanPos sp);
+@@ -100,15 +101,26 @@
+ _bt_search(Relation rel, Relation heaprel, BTScanInsert key, Buffer *bufP,
+ 		   int access, Snapshot snapshot)
+ {
++    return _bt_search_with_context(rel, heaprel, key, bufP, access, snapshot, NULL);
++}
++
++BTStack
++_bt_search_with_context(Relation rel, Relation heaprel, BTScanInsert key, Buffer *bufP,
++                        int access, Snapshot snapshot, BTAFReadContext context)
++{
+ 	BTStack		stack_in = NULL;
+ 	int			page_access = BT_READ;
+ 
++    /* Write descent also uses BT_READ internally; never inherit a scan ring. */
++    if (access != BT_READ || heaprel != NULL)
++        context = NULL;
++
+ 	/* heaprel must be set whenever _bt_allocbuf is reachable */
+ 	Assert(access == BT_READ || access == BT_WRITE);
+ 	Assert(access == BT_READ || heaprel != NULL);
+ 
+ 	/* Get the root page to start with */
+-	*bufP = _bt_getroot(rel, heaprel, access);
++	*bufP = _bt_getroot_with_context(rel, heaprel, access, context);
+ 
+ 	/* If index is empty and access = BT_READ, no root page is created. */
+ 	if (!BufferIsValid(*bufP))
+@@ -137,8 +149,8 @@
+ 		 * also taken care of in _bt_getstackbuf).  But this is a good
+ 		 * opportunity to finish splits of internal pages too.
+ 		 */
+-		*bufP = _bt_moveright(rel, heaprel, key, *bufP, (access == BT_WRITE),
+-							  stack_in, page_access, snapshot);
++		*bufP = _bt_moveright_with_context(rel, heaprel, key, *bufP, (access == BT_WRITE),
++							  stack_in, page_access, snapshot, context);
+ 
+ 		/* if this is a leaf page, we're done */
+ 		page = BufferGetPage(*bufP);
+@@ -176,7 +188,7 @@
+ 			page_access = BT_WRITE;
+ 
+ 		/* drop the read lock on the page, then acquire one on its child */
+-		*bufP = _bt_relandgetbuf(rel, *bufP, child, page_access);
++		*bufP = _bt_relandgetbuf_with_context(rel, *bufP, child, page_access, context);
+ 
+ 		/* okay, all set to move down a level */
+ 		stack_in = new_stack;
+@@ -198,8 +210,8 @@
+ 		 * but before we acquired a write lock.  If it has, we may need to
+ 		 * move right to its new sibling.  Do that.
+ 		 */
+-		*bufP = _bt_moveright(rel, heaprel, key, *bufP, true, stack_in, BT_WRITE,
+-							  snapshot);
++		*bufP = _bt_moveright_with_context(rel, heaprel, key, *bufP, true, stack_in, BT_WRITE,
++							  snapshot, context);
+ 	}
+ 
+ 	return stack_in;
+@@ -250,10 +262,22 @@
+ 			  int access,
+ 			  Snapshot snapshot)
+ {
++    return _bt_moveright_with_context(rel, heaprel, key, buf, forupdate, stack,
++                                      access, snapshot, NULL);
++}
++
++Buffer
++_bt_moveright_with_context(Relation rel, Relation heaprel, BTScanInsert key,
++                           Buffer buf, bool forupdate, BTStack stack,
++                           int access, Snapshot snapshot, BTAFReadContext context)
++{
+ 	Page		page;
+ 	BTPageOpaque opaque;
+ 	int32		cmpval;
+ 
++    if (forupdate || access != BT_READ || heaprel != NULL)
++        context = NULL;
++
+ 	Assert(!forupdate || heaprel != NULL);
+ 
+ 	/*
+@@ -304,14 +328,14 @@
+ 				_bt_relbuf(rel, buf);
+ 
+ 			/* re-acquire the lock in the right mode, and re-check */
+-			buf = _bt_getbuf(rel, blkno, access);
++			buf = _bt_getbuf_with_context(rel, blkno, access, context);
+ 			continue;
+ 		}
+ 
+ 		if (P_IGNORE(opaque) || _bt_compare(rel, key, page, P_HIKEY) >= cmpval)
+ 		{
+ 			/* step right one page */
+-			buf = _bt_relandgetbuf(rel, buf, opaque->btpo_next, access);
++			buf = _bt_relandgetbuf_with_context(rel, buf, opaque->btpo_next, access, context);
+ 			continue;
+ 		}
+ 		else
+@@ -845,6 +869,31 @@
+ 	}
+ 
+ 	return 0;
++}
++
++/* No ambient Relation/OID state: each read chain gets this scan's context.
++ * Unsupported direction/keys/parallel scans retain the public NULL policy. */
++static BTAFReadContext
++_bt_af_scan_context(IndexScanDesc scan, ScanDirection dir)
++{
++    BTScanOpaque so = (BTScanOpaque) scan->opaque;
++    int i;
++    bool leading = false;
++    if (!ScanDirectionIsForward(dir) || scan->parallel_scan != NULL ||
++        scan->xs_want_itup || so->af_read_context.strategy == NULL ||
++        so->af_read_context.owner != scan ||
++        so->af_read_context.relation != scan->indexRelation)
++        return NULL;
++    for (i = 0; i < scan->numberOfKeys; i++)
++    {
++        ScanKey key = &scan->keyData[i];
++        if (key->sk_flags != 0)
++            return NULL;
++        if (key->sk_attno == 1 && key->sk_strategy == BTEqualStrategyNumber &&
++            key->sk_func.fn_oid == F_INT8EQ)
++            leading = true;
++    }
++    return leading ? &so->af_read_context : NULL;
+ }
+ 
+ /*
+@@ -1363,7 +1412,8 @@
+ 	}
+ 
+ 	/* Initialize remaining insertion scan key fields */
+-	_bt_metaversion(rel, &inskey.heapkeyspace, &inskey.allequalimage);
++	_bt_metaversion_with_context(rel, &inskey.heapkeyspace, &inskey.allequalimage,
++                                    _bt_af_scan_context(scan, dir));
+ 	inskey.anynullkeys = false; /* unused */
+ 	inskey.nextkey = nextkey;
+ 	inskey.pivotsearch = false;
+@@ -1374,7 +1424,8 @@
+ 	 * Use the manufactured insertion scan key to descend the tree and
+ 	 * position ourselves on the target leaf page.
+ 	 */
+-	stack = _bt_search(rel, NULL, &inskey, &buf, BT_READ, scan->xs_snapshot);
++	stack = _bt_search_with_context(rel, NULL, &inskey, &buf, BT_READ, scan->xs_snapshot,
++                                    _bt_af_scan_context(scan, dir));
+ 
+ 	/* don't need to keep the stack around... */
+ 	_bt_freestack(stack);
+@@ -1393,8 +1444,8 @@
+ 		if (IsolationIsSerializable())
+ 		{
+ 			PredicateLockRelation(rel, scan->xs_snapshot);
+-			stack = _bt_search(rel, NULL, &inskey, &buf, BT_READ,
+-							   scan->xs_snapshot);
++			stack = _bt_search_with_context(rel, NULL, &inskey, &buf, BT_READ,
++                                    scan->xs_snapshot, _bt_af_scan_context(scan, dir));
+ 			_bt_freestack(stack);
+ 		}
+ 
+@@ -2027,7 +2078,8 @@
+ 			/* check for interrupts while we're not holding any buffer lock */
+ 			CHECK_FOR_INTERRUPTS();
+ 			/* step right one page */
+-			so->currPos.buf = _bt_getbuf(rel, blkno, BT_READ);
++			so->currPos.buf = _bt_getbuf_with_context(rel, blkno, BT_READ,
++                                                        _bt_af_scan_context(scan, dir));
+ 			page = BufferGetPage(so->currPos.buf);
+ 			TestForOldSnapshot(scan->xs_snapshot, rel, page);
+ 			opaque = BTPageGetOpaque(page);
+--- a/src/backend/commands/explain.c
++++ b/src/backend/commands/explain.c
+@@ -13,6 +13,10 @@
+  */
+ #include "postgres.h"
+ 
++#include "access/genam.h"
++#include "access/heapam.h"
++#include "access/nbtree.h"
++#include "access/relscan.h"
+ #include "access/xact.h"
+ #include "catalog/pg_type.h"
+ #include "commands/createas.h"
+@@ -31,6 +35,7 @@
+ #include "tcop/tcopprot.h"
+ #include "utils/builtins.h"
+ #include "utils/guc_tables.h"
++#include "utils/fmgroids.h"
+ #include "utils/json.h"
+ #include "utils/lsyscache.h"
+ #include "utils/rel.h"
+@@ -1776,6 +1781,44 @@
+ 	switch (nodeTag(plan))
+ 	{
+ 		case T_IndexScan:
++			{
++				IndexScanState *indexstate = (IndexScanState *) planstate;
++
++				if (indexstate->iss_AFStreamHeapAllowed)
++				{
++					IndexScanDesc scandesc = indexstate->iss_ScanDesc;
++
++					ExplainPropertyText("AF Heap Access Strategy", "bulkread", es);
++					if (scandesc != NULL && scandesc->xs_heapfetch != NULL)
++					{
++						IndexFetchHeapData *hscan =
++							(IndexFetchHeapData *) scandesc->xs_heapfetch;
++
++						if (hscan->xs_strategy != NULL)
++							ExplainPropertyInteger("AF Heap Ring Buffers", NULL,
++								GetAccessStrategyBufferCount(hscan->xs_strategy), es);
++					}
++				}
++                if (indexstate->iss_AFStreamIndexAllowed &&
++                    indexstate->iss_ScanDesc != NULL &&
++                    indexstate->iss_ScanDesc->opaque != NULL &&
++                    indexstate->iss_ScanDesc->indexRelation->rd_rel->relam == BTREE_AM_OID &&
++                    indexstate->iss_ScanDesc->indexRelation->rd_amhandler == F_BTHANDLER)
++                {
++                    IndexScanDesc scan = indexstate->iss_ScanDesc;
++                    BTScanOpaque so = (BTScanOpaque) scan->opaque;
++                    if (so->af_read_context.strategy != NULL &&
++                        so->af_read_context.owner == scan &&
++                        so->af_read_context.relation == scan->indexRelation)
++                    {
++                        ExplainPropertyText("AF Index Access Strategy", "bulkread", es);
++                        ExplainPropertyInteger("AF Index Ring Buffers", NULL,
++                            GetAccessStrategyBufferCount(so->af_read_context.strategy), es);
++                        ExplainPropertyInteger("AF Index Strategy Read Calls", NULL,
++                            so->af_read_context.read_calls, es);
++                    }
++                }
++			}
+ 			show_scan_qual(((IndexScan *) plan)->indexqualorig,
+ 						   "Index Cond", planstate, ancestors, es);
+ 			if (((IndexScan *) plan)->indexqualorig)
+--- a/src/backend/executor/nodeIndexscan.c
++++ b/src/backend/executor/nodeIndexscan.c
+@@ -29,7 +29,9 @@
+  */
+ #include "postgres.h"
+ 
++#include "access/heapam.h"
+ #include "access/nbtree.h"
++#include "access/parallel.h"
+ #include "access/relscan.h"
+ #include "access/tableam.h"
+ #include "catalog/pg_am.h"
+@@ -38,9 +40,12 @@
+ #include "lib/pairingheap.h"
+ #include "miscadmin.h"
+ #include "nodes/nodeFuncs.h"
++#include "optimizer/native_af.h"
++#include "storage/bufmgr.h"
+ #include "utils/array.h"
+ #include "utils/datum.h"
+ #include "utils/lsyscache.h"
++#include "utils/fmgroids.h"
+ #include "utils/memutils.h"
+ #include "utils/rel.h"
+ 
+@@ -70,6 +75,79 @@
+ static HeapTuple reorderqueue_pop(IndexScanState *node);
+ 
+ 
++/*
++ * Attach the one scan-owned heap strategy only after lazy index_beginscan.
++ * ExecInitIndexScan fixes the AF permission before any query expression runs.
++ * No index-AM pages or parallel scan descriptors acquire this strategy.
++ */
++static void
++IndexScanEnableAFHeapStream(IndexScanState *node, IndexScanDesc scandesc)
++{
++	IndexFetchHeapData *hscan;
++	MemoryContext oldcontext;
++
++	if (!node->iss_AFStreamHeapAllowed || scandesc->parallel_scan != NULL ||
++		scandesc->xs_heapfetch == NULL ||
++		node->ss.ss_currentRelation->rd_tableam != GetHeapamTableAmRoutine())
++		return;
++
++	hscan = (IndexFetchHeapData *) scandesc->xs_heapfetch;
++	if (hscan->xs_strategy != NULL)
++		return;
++
++	/* Runtime-key expression contexts are reset on each outer parameter. */
++	oldcontext = MemoryContextSwitchTo(node->ss.ps.state->es_query_cxt);
++	hscan->xs_strategy = GetAccessStrategy(BAS_BULKREAD);
++	MemoryContextSwitchTo(oldcontext);
++	if (hscan->xs_strategy != NULL)
++		native_af_note_stream_heap_execution();
++}
++
++/* The B-tree ring belongs to this exact marked descriptor, independently of
++ * the heap ring.  This initial read chain excludes backward/mark/ORDER BY. */
++static void
++IndexScanEnableAFIndexStream(IndexScanState *node, IndexScanDesc scan,
++                            ScanDirection direction)
++{
++    IndexScan *plan = (IndexScan *) node->ss.ps.plan;
++    BTScanOpaque so;
++    MemoryContext previous;
++    bool leading = false;
++    int i;
++    if (!node->iss_AFStreamIndexAllowed || !ScanDirectionIsForward(direction) ||
++        scan->parallel_scan != NULL || scan->opaque == NULL || scan->xs_want_itup ||
++        scan->heapRelation != node->ss.ss_currentRelation ||
++        scan->indexRelation != node->iss_RelationDesc ||
++        RelationGetRelid(scan->indexRelation) != plan->indexid ||
++        scan->indexRelation->rd_rel->relam != BTREE_AM_OID ||
++        scan->indexRelation->rd_amhandler != F_BTHANDLER ||
++        scan->numberOfOrderBys != 0)
++        return;
++    for (i = 0; i < node->iss_NumScanKeys; i++)
++    {
++        ScanKey key = &node->iss_ScanKeys[i];
++        if (key->sk_flags != 0)
++            return;
++        if (key->sk_attno == 1 && key->sk_strategy == BTEqualStrategyNumber &&
++            key->sk_func.fn_oid == F_INT8EQ)
++            leading = true;
++    }
++    if (!leading)
++        return;
++    so = (BTScanOpaque) scan->opaque;
++    if (so->af_read_context.strategy != NULL)
++        return;
++    previous = MemoryContextSwitchTo(node->ss.ps.state->es_query_cxt);
++    so->af_read_context.strategy = GetAccessStrategy(BAS_BULKREAD);
++    MemoryContextSwitchTo(previous);
++    if (so->af_read_context.strategy != NULL)
++    {
++        so->af_read_context.owner = scan;
++        so->af_read_context.relation = scan->indexRelation;
++        native_af_note_stream_index_execution();
++    }
++}
++
+ /* ----------------------------------------------------------------
+  *		IndexNext
+  *
+@@ -114,6 +192,8 @@
+ 								   node->iss_NumOrderByKeys);
+ 
+ 		node->iss_ScanDesc = scandesc;
++		IndexScanEnableAFHeapStream(node, scandesc);
++		IndexScanEnableAFIndexStream(node, scandesc, direction);
+ 
+ 		/*
+ 		 * If no run-time keys to calculate or they are ready, go ahead and
+@@ -209,6 +289,8 @@
+ 								   node->iss_NumOrderByKeys);
+ 
+ 		node->iss_ScanDesc = scandesc;
++		IndexScanEnableAFHeapStream(node, scandesc);
++		/* ORDER BY/reorder is outside the first index-ring scope. */
+ 
+ 		/*
+ 		 * If no run-time keys to calculate or they are ready, go ahead and
+@@ -929,6 +1011,17 @@
+ 	indexstate->ss.ss_currentRelation = currentRelation;
+ 	indexstate->ss.ss_currentScanDesc = NULL;	/* no heap scan here */
+ 
++	/* Cached AF plans cannot enable this behavior in Native/IP execution. */
++	indexstate->iss_AFStreamHeapAllowed = node->af_stream_heap &&
++		native_af_stream_execution_allowed() && !IsParallelWorker() &&
++		!node->scan.plan.parallel_aware &&
++		currentRelation->rd_tableam == GetHeapamTableAmRoutine();
++    indexstate->iss_AFStreamIndexAllowed = indexstate->iss_AFStreamHeapAllowed &&
++        !(eflags & (EXEC_FLAG_BACKWARD | EXEC_FLAG_MARK)) &&
++        node->indexorderdir == ForwardScanDirection &&
++        node->indexorderby == NIL && node->indexorderbyorig == NIL &&
++        ScanDirectionIsForward(estate->es_direction);
++
+ 	/*
+ 	 * get the scan type from the relation descriptor.
+ 	 */
+--- a/src/backend/optimizer/path/allpaths.c
++++ b/src/backend/optimizer/path/allpaths.c
+@@ -37,6 +37,7 @@
+ #include "optimizer/geqo.h"
+ #include "optimizer/inherit.h"
+ #include "optimizer/optimizer.h"
++#include "optimizer/native_af.h"
+ #include "optimizer/pathnode.h"
+ #include "optimizer/paths.h"
+ #include "optimizer/plancat.h"
+@@ -319,7 +320,8 @@
+ 		 * consider_parallel flag, and (b) for some RTE types, set_rel_size()
+ 		 * goes ahead and makes paths immediately.
+ 		 */
+-		if (root->glob->parallelModeOK)
++		if (root->glob->parallelModeOK &&
++			!native_af_serial_acl_source(root))
+ 			set_rel_consider_parallel(root, rel, rte);
+ 
+ 		set_rel_size(root, rel, rti, rte);
+@@ -582,6 +584,7 @@
+ 
+ 	/* Mark rel with estimated output rows, width, etc */
+ 	set_baserel_size_estimates(root, rel);
++	native_af_size_paths(root, rel, rte);
+ }
+ 
+ /*
+@@ -787,6 +790,8 @@
+ 
+ 	/* Consider TID scans */
+ 	create_tidscan_paths(root, rel);
++
++	native_af_add_paths(root, rel, rte);
+ }
+ 
+ /*
+--- a/src/backend/optimizer/path/costsize.c
++++ b/src/backend/optimizer/path/costsize.c
+@@ -86,6 +86,7 @@
+ #include "nodes/nodeFuncs.h"
+ #include "optimizer/clauses.h"
+ #include "optimizer/cost.h"
++#include "optimizer/native_af.h"
+ #include "optimizer/optimizer.h"
+ #include "optimizer/pathnode.h"
+ #include "optimizer/paths.h"
+@@ -285,6 +286,9 @@
+ 	 * disk costs
+ 	 */
+ 	disk_run_cost = spc_seq_page_cost * baserel->pages;
++	disk_run_cost *= native_af_cache_io_fraction(root,
++			planner_rt_fetch(baserel->relid, root)->relid, baserel->pages,
++			baserel->pages, 1.0);
+ 
+ 	/* CPU costs */
+ 	get_restriction_qual_cost(root, baserel, param_info, &qpqual_cost);
+@@ -756,6 +760,13 @@
+ 	 */
+ 	csquared = indexCorrelation * indexCorrelation;
+ 
++	/* Initial resident savings are bounded over all repeated scans. */
++	max_IO_cost *= native_af_cache_io_fraction(root,
++		planner_rt_fetch(baserel->relid, root)->relid, baserel->pages,
++		max_IO_cost / spc_random_page_cost, loop_count);
++	min_IO_cost *= native_af_cache_io_fraction(root,
++		planner_rt_fetch(baserel->relid, root)->relid, baserel->pages,
++		loop_count > 1 ? pages_fetched / loop_count : pages_fetched, loop_count);
+ 	run_cost += max_IO_cost + csquared * (min_IO_cost - max_IO_cost);
+ 
+ 	/*
+@@ -1039,7 +1050,9 @@
+ 	else
+ 		cost_per_page = spc_random_page_cost;
+ 
+-	run_cost += pages_fetched * cost_per_page;
++	run_cost += pages_fetched * cost_per_page *
++		native_af_cache_io_fraction(root, planner_rt_fetch(baserel->relid, root)->relid,
++			baserel->pages, pages_fetched, loop_count);
+ 
+ 	/*
+ 	 * Estimate CPU costs per tuple.
+@@ -1055,6 +1068,9 @@
+ 	startup_cost += qpqual_cost.startup;
+ 	cpu_per_tuple = cpu_tuple_cost + qpqual_cost.per_tuple;
+ 	cpu_run_cost = cpu_per_tuple * tuples_fetched;
++	/* Only a proven generated, exact B-tree key can avoid exact-page rechecks. */
++	cpu_run_cost -= Min(cpu_run_cost, native_af_batch_bitmap_savings(root, baserel,
++										bitmapqual, param_info, tuples_fetched));
+ 
+ 	/* Adjust costing for parallelism, if used. */
+ 	if (path->parallel_workers > 0)
+@@ -5096,6 +5112,11 @@
+ 						   SpecialJoinInfo *sjinfo,
+ 						   List *restrictlist)
+ {
++	native_af_batch_join_scope(root, rel, outer_rel, inner_rel);
++	if (native_af_batch_join_rows(root, rel, outer_rel, inner_rel,
++								outer_rel->rows, inner_rel->rows, sjinfo, restrictlist,
++								&rel->rows))
++		return;
+ 	rel->rows = calc_joinrel_size_estimate(root,
+ 										   rel,
+ 										   outer_rel,
+--- a/src/backend/optimizer/plan/Makefile
++++ b/src/backend/optimizer/plan/Makefile
+@@ -19,6 +19,13 @@
+ 	planagg.o \
+ 	planmain.o \
+ 	planner.o \
++	native_af.o \
++	native_af_os_cache.o \
++	native_af_sp.o \
++	native_af_keyed.o \
++	native_af_partial.o \
++	native_af_binding.o \
++	native_af_guard.o \
+ 	setrefs.o \
+ 	subselect.o
+ 
+--- a/src/backend/optimizer/plan/createplan.c
++++ b/src/backend/optimizer/plan/createplan.c
+@@ -28,6 +28,7 @@
+ #include "optimizer/clauses.h"
+ #include "optimizer/cost.h"
+ #include "optimizer/optimizer.h"
++#include "optimizer/native_af.h"
+ #include "optimizer/paramassign.h"
+ #include "optimizer/paths.h"
+ #include "optimizer/placeholder.h"
+@@ -3172,6 +3173,8 @@
+ 											best_path->indexscandir);
+ 
+ 	copy_generic_path_info(&scan_plan->plan, &best_path->path);
++	if (!indexonly)
++		native_af_stream_mark_index(root, best_path, (IndexScan *) scan_plan);
+ 
+ 	return scan_plan;
+ }
+--- a/src/backend/optimizer/plan/planner.c
++++ b/src/backend/optimizer/plan/planner.c
+@@ -47,6 +47,7 @@
+ #include "optimizer/cost.h"
+ #include "optimizer/inherit.h"
+ #include "optimizer/optimizer.h"
++#include "optimizer/native_af.h"
+ #include "optimizer/paramassign.h"
+ #include "optimizer/pathnode.h"
+ #include "optimizer/paths.h"
+@@ -283,11 +284,34 @@
+ 	return result;
+ }
+ 
++static PlannedStmt *
++af_standard_planner(Query *parse, const char *query_string, int cursorOptions,
++                    ParamListInfo boundParams);
++
+ PlannedStmt *
+ standard_planner(Query *parse, const char *query_string, int cursorOptions,
+-				 ParamListInfo boundParams)
++                 ParamListInfo boundParams)
++{
++    void *metadata_scope = native_af_cost_enter(parse);
++    PlannedStmt *result = NULL;
++    PG_TRY();
++    {
++        result = af_standard_planner(parse, query_string, cursorOptions, boundParams);
++    }
++    PG_FINALLY();
++    {
++        native_af_cost_leave(metadata_scope);
++    }
++    PG_END_TRY();
++    return result;
++}
++
++static PlannedStmt *
++af_standard_planner(Query *parse, const char *query_string, int cursorOptions,
++                    ParamListInfo boundParams)
+ {
+ 	PlannedStmt *result;
++	Query	   *native_af_saved;
+ 	PlannerGlobal *glob;
+ 	double		tuple_fraction;
+ 	PlannerInfo *root;
+@@ -296,6 +320,9 @@
+ 	Plan	   *top_plan;
+ 	ListCell   *lp,
+ 			   *lr;
++
++	native_af_saved = native_af_batch_save(parse);
++	native_af_note_planning();
+ 
+ 	/*
+ 	 * Set up global state for this planner invocation.  This data is needed
+@@ -419,6 +446,7 @@
+ 	best_path = get_cheapest_fractional_path(final_rel, tuple_fraction);
+ 
+ 	top_plan = create_plan(root, best_path);
++	native_af_add_join_input_filter(root, top_plan, native_af_saved, cursorOptions);
+ 
+ 	/*
+ 	 * If creating a plan for a scrollable cursor, make sure it can run
+@@ -502,6 +530,8 @@
+ 	Assert(glob->finalrowmarks == NIL);
+ 	Assert(glob->resultRelations == NIL);
+ 	Assert(glob->appendRelations == NIL);
++	/* C7 validates the actual main-root chain while original Vars survive. */
++	native_af_stream_finalize(root, top_plan);
+ 	top_plan = set_plan_references(root, top_plan);
+ 	/* ... and the subplans (both regular subplans and initplans) */
+ 	Assert(list_length(glob->subplans) == list_length(glob->subroots));
+@@ -568,7 +598,8 @@
+ 	if (glob->partition_directory != NULL)
+ 		DestroyPartitionDirectory(glob->partition_directory);
+ 
+-	return result;
++	return native_af_batch_choose(native_af_saved, result, query_string,
++								  cursorOptions, boundParams);
+ }
+ 
+ 
+@@ -668,6 +699,7 @@
+ 	 */
+ 	if (parse->cteList)
+ 		SS_process_ctes(root);
++	native_af_batch_prepare(root);
+ 
+ 	/*
+ 	 * If it's a MERGE command, transform the joinlist as appropriate.
+@@ -984,6 +1016,7 @@
+ 		 * way to get proper canonicalization of AND/OR structure.  Note that
+ 		 * this converts each element into an implicit-AND sublist.
+ 		 */
++		native_af_prepare_membership(root, foreach_current_index(l) + 1, rte);
+ 		foreach(lcsq, rte->securityQuals)
+ 		{
+ 			lfirst(lcsq) = preprocess_expression(root,
+--- a/src/backend/optimizer/util/plancat.c
++++ b/src/backend/optimizer/util/plancat.c
+@@ -39,6 +39,7 @@
+ #include "optimizer/clauses.h"
+ #include "optimizer/cost.h"
+ #include "optimizer/optimizer.h"
++#include "optimizer/native_af.h"
+ #include "optimizer/plancat.h"
+ #include "optimizer/prep.h"
+ #include "parser/parse_relation.h"
+@@ -479,6 +480,7 @@
+ 				info->tree_height = -1;
+ 			}
+ 
++			native_af_collect_index(root, info, RelationGetRelationName(indexRelation));
+ 			index_close(indexRelation, NoLock);
+ 
+ 			/*
+--- a/src/backend/utils/adt/selfuncs.c
++++ b/src/backend/utils/adt/selfuncs.c
+@@ -115,6 +115,7 @@
+ #include "optimizer/clauses.h"
+ #include "optimizer/cost.h"
+ #include "optimizer/optimizer.h"
++#include "optimizer/native_af.h"
+ #include "optimizer/pathnode.h"
+ #include "optimizer/paths.h"
+ #include "optimizer/plancat.h"
+@@ -2107,17 +2108,49 @@
+ 		s1 = useOr ? 0.0 : 1.0;
+ 
+ 		/*
+-		 * Arbitrarily assume 10 elements in the eventual array value (see
+-		 * also estimate_array_length).  We don't risk an assumption of
+-		 * disjoint probabilities here.
++		 * AF's admitted PK membership predicate carries a planner-only estimate
++		 * of distinct keys.  Equality matches on those distinct keys are
++		 * disjoint; use that estimate for heap visits as well as index probes.
++		 * Other Params retain PostgreSQL's original ten-element guess below.
+ 		 */
+-		for (i = 0; i < 10; i++)
++		if (rightop && IsA(rightop, Param) &&
++			((Param *) rightop)->paramkind == PARAM_EXEC &&
++			((Param *) rightop)->native_af_batch_keys &&
++			((Param *) rightop)->native_af_array_length > 0.0)
+ 		{
+-			if (useOr)
+-				s1 = s1 + s2 - s1 * s2;
+-			else
+-				s1 = s1 * s2;
++			/* Unique projected outer keys: only this generated batch Param. */
++			double nkeys = estimate_array_length(rightop);
++			if (isEquality && useOr)
++				s1 = nkeys * s2;
++			else if (useOr)
++				s1 = 1.0 - pow(1.0 - s2, nkeys);
++			else
++				s1 = pow(s2, nkeys);
+ 		}
++		else if (rightop && IsA(rightop, Param) &&
++			((Param *) rightop)->paramkind == PARAM_EXEC &&
++			((Param *) rightop)->native_af_array_length > 0.0)
++		{
++			double		nkeys = estimate_array_length(rightop);
++
++			if (isEquality && useOr)
++				s1 = nkeys * s2;
++			else if (useOr)
++				s1 = 1.0 - pow(1.0 - s2, nkeys);
++			else
++				s1 = pow(s2, nkeys);
++		}
++		else
++		{
++			/* Upstream unknown-array behavior, including its rounding. */
++			for (i = 0; i < 10; i++)
++			{
++				if (useOr)
++					s1 = s1 + s2 - s1 * s2;
++				else
++					s1 = s1 * s2;
++			}
++		}
+ 	}
+ 
+ 	/* result should be in range, but make sure... */
+@@ -2137,7 +2170,21 @@
+ 	/* look through any binary-compatible relabeling of arrayexpr */
+ 	arrayexpr = strip_array_coercion(arrayexpr);
+ 
+-	if (arrayexpr && IsA(arrayexpr, Const))
++	if (arrayexpr && IsA(arrayexpr, Param) &&
++		((Param *) arrayexpr)->paramkind == PARAM_EXEC &&
++		((Param *) arrayexpr)->native_af_batch_keys &&
++		((Param *) arrayexpr)->native_af_array_length > 0.0)
++		return (int) ceil(Min(((Param *) arrayexpr)->native_af_array_length,
++							 (double) PG_INT32_MAX));
++	else if (arrayexpr && IsA(arrayexpr, Param) &&
++		((Param *) arrayexpr)->paramkind == PARAM_EXEC &&
++		((Param *) arrayexpr)->native_af_array_length > 0.0)
++	{
++		/* The bound is a planner estimate, never an executed key enumeration. */
++		return (int) ceil(Min(((Param *) arrayexpr)->native_af_array_length,
++							 (double) PG_INT32_MAX));
++	}
++	else if (arrayexpr && IsA(arrayexpr, Const))
+ 	{
+ 		Datum		arraydatum = ((Const *) arrayexpr)->constvalue;
+ 		bool		arrayisnull = ((Const *) arrayexpr)->constisnull;
+@@ -6645,6 +6692,10 @@
+ 		indexTotalCost = numIndexPages * spc_random_page_cost;
+ 	}
+ 
++	/* A033: only bounded first-touch index I/O is adjusted; CPU remains. */
++	indexTotalCost *= native_af_cache_io_fraction(root, index->indexoid,
++		index->pages, indexTotalCost / spc_random_page_cost, loop_count);
++
+ 	/*
+ 	 * CPU cost: any complex expressions in the indexquals will need to be
+ 	 * evaluated once at the start of the scan to reduce them to runtime keys
+--- a/src/backend/utils/misc/guc.c
++++ b/src/backend/utils/misc/guc.c
+@@ -35,6 +35,7 @@
+ #include "catalog/pg_parameter_acl.h"
+ #include "guc_internal.h"
+ #include "libpq/pqformat.h"
++#include "optimizer/native_af.h"
+ #include "parser/scansup.h"
+ #include "port/pg_bitutils.h"
+ #include "storage/fd.h"
+@@ -1541,6 +1542,7 @@
+ 	 * environment variables.  Process those settings.
+ 	 */
+ 	InitializeGUCOptionsFromEnvironment();
++	native_af_initialize();
+ }
+ 
+ /*
+--- a/src/include/access/heapam.h
++++ b/src/include/access/heapam.h
+@@ -88,6 +88,9 @@
+ 
+ 	Buffer		xs_cbuf;		/* current heap buffer in scan, if any */
+ 	/* NB: if xs_cbuf is not InvalidBuffer, we hold a pin on that buffer */
++
++	/* Optional scan-owned strategy; retained across parameter rescans. */
++	BufferAccessStrategy xs_strategy;
+ } IndexFetchHeapData;
+ 
+ /* Result codes for HeapTupleSatisfiesVacuum */
+--- a/src/include/access/nbtree.h
++++ b/src/include/access/nbtree.h
+@@ -1034,6 +1034,17 @@
+ 	Datum	   *elem_values;	/* array of num_elems Datums */
+ } BTArrayKeyInfo;
+ 
++/* Optional scan-owned read strategy; no backend-ambient index state. */
++typedef struct BTAFReadContextData
++{
++	IndexScanDesc owner;
++	Relation	relation;
++	BufferAccessStrategy strategy;
++	uint64		read_calls;
++} BTAFReadContextData;
++
++typedef BTAFReadContextData *BTAFReadContext;
++
+ typedef struct BTScanOpaqueData
+ {
+ 	/* all fields (except arraysStarted) are set by _bt_preprocess_keys(): */
+@@ -1073,6 +1084,9 @@
+ 	 */
+ 	int			markItemIndex;	/* itemIndex, or -1 if not valid */
+ 
++	/* Retained unchanged across btrescan; released after scan pins at end. */
++	BTAFReadContextData af_read_context;
++
+ 	/* keep these last in struct for efficiency */
+ 	BTScanPosData currPos;		/* current position data */
+ 	BTScanPosData markPos;		/* marked position, if any */
+@@ -1203,15 +1217,24 @@
+ extern void _bt_set_cleanup_info(Relation rel, BlockNumber num_delpages);
+ extern void _bt_upgrademetapage(Page page);
+ extern Buffer _bt_getroot(Relation rel, Relation heaprel, int access);
++extern Buffer _bt_getroot_with_context(Relation rel, Relation heaprel, int access,
++									  BTAFReadContext context);
+ extern Buffer _bt_gettrueroot(Relation rel);
+ extern int	_bt_getrootheight(Relation rel);
+ extern void _bt_metaversion(Relation rel, bool *heapkeyspace,
+ 							bool *allequalimage);
++extern void _bt_metaversion_with_context(Relation rel, bool *heapkeyspace,
++										bool *allequalimage, BTAFReadContext context);
+ extern void _bt_checkpage(Relation rel, Buffer buf);
+ extern Buffer _bt_getbuf(Relation rel, BlockNumber blkno, int access);
++extern Buffer _bt_getbuf_with_context(Relation rel, BlockNumber blkno, int access,
++									 BTAFReadContext context);
+ extern Buffer _bt_allocbuf(Relation rel, Relation heaprel);
+ extern Buffer _bt_relandgetbuf(Relation rel, Buffer obuf,
+ 							   BlockNumber blkno, int access);
++extern Buffer _bt_relandgetbuf_with_context(Relation rel, Buffer obuf,
++										   BlockNumber blkno, int access,
++										   BTAFReadContext context);
+ extern void _bt_relbuf(Relation rel, Buffer buf);
+ extern void _bt_lockbuf(Relation rel, Buffer buf, int access);
+ extern void _bt_unlockbuf(Relation rel, Buffer buf);
+@@ -1234,9 +1257,16 @@
+  */
+ extern BTStack _bt_search(Relation rel, Relation heaprel, BTScanInsert key,
+ 						  Buffer *bufP, int access, Snapshot snapshot);
++extern BTStack _bt_search_with_context(Relation rel, Relation heaprel,
++									  BTScanInsert key, Buffer *bufP, int access,
++									  Snapshot snapshot, BTAFReadContext context);
+ extern Buffer _bt_moveright(Relation rel, Relation heaprel, BTScanInsert key,
+ 							Buffer buf, bool forupdate, BTStack stack,
+ 							int access, Snapshot snapshot);
++extern Buffer _bt_moveright_with_context(Relation rel, Relation heaprel,
++										 BTScanInsert key, Buffer buf, bool forupdate,
++										 BTStack stack, int access, Snapshot snapshot,
++										 BTAFReadContext context);
+ extern OffsetNumber _bt_binsrch_insert(Relation rel, BTInsertState insertstate);
+ extern int32 _bt_compare(Relation rel, BTScanInsert key, Page page, OffsetNumber offnum);
+ extern bool _bt_first(IndexScanDesc scan, ScanDirection dir);
+--- a/src/include/nodes/execnodes.h
++++ b/src/include/nodes/execnodes.h
+@@ -1573,6 +1573,10 @@
+ 	ExprContext *iss_RuntimeContext;
+ 	Relation	iss_RelationDesc;
+ 	struct IndexScanDescData *iss_ScanDesc;
++	/* Statement-fixed permission; never re-read AF mode from a tuple loop. */
++	bool		iss_AFStreamHeapAllowed;
++	/* First version: forward scalar equality, no mark/backward executor. */
++	bool		iss_AFStreamIndexAllowed;
+ 
+ 	/* These are needed for re-checking ORDER BY expr ordering */
+ 	pairingheap *iss_ReorderQueue;
+--- a/src/include/nodes/pathnodes.h
++++ b/src/include/nodes/pathnodes.h
+@@ -485,6 +485,13 @@
+ 	 */
+ 	Index		qual_security_level;
+ 
++	/* Planner-local, uncosted native AF membership descriptors. */
++	List *native_af_membership pg_node_attr(read_write_ignore);
++	List *native_af_private_indexes pg_node_attr(read_write_ignore);
++
++	/* AF-only source scope; descendants consult their parent_root chain. */
++	bool native_af_serial_acl_source pg_node_attr(read_write_ignore);
++
+ 	/* true if any RTEs are RTE_JOIN kind */
+ 	bool		hasJoinRTEs;
+ 	/* true if any RTEs are marked LATERAL */
+--- a/src/include/nodes/plannodes.h
++++ b/src/include/nodes/plannodes.h
+@@ -455,6 +455,8 @@
+ 	List	   *indexorderbyorig;	/* the same in original form */
+ 	List	   *indexorderbyops;	/* OIDs of sort ops for ORDER BY exprs */
+ 	ScanDirection indexorderdir;	/* forward or backward or don't care */
++	/* AF-validated ordinary-source heap reads use the standard bulkread ring. */
++	bool		af_stream_heap;
+ } IndexScan;
+ 
+ /* ----------------
+--- a/src/include/nodes/primnodes.h
++++ b/src/include/nodes/primnodes.h
+@@ -358,6 +358,16 @@
+ 	int32		paramtypmod pg_node_attr(query_jumble_ignore);
+ 	/* OID of collation, or InvalidOid if none */
+ 	Oid			paramcollid pg_node_attr(query_jumble_ignore);
++	/*
++	 * Cost-only estimate for an admitted AF ARRAY_SUBLINK's distinct keys.
++	 * Zero leaves all upstream unknown-array estimates unchanged.  The hint
++	 * follows copyObject while costing, but is deliberately absent from stored
++	 * node text, equality and query fingerprints.  Runtime still reads the
++	 * real PARAM_EXEC array and never consumes this estimate.
++	 */
++	double		native_af_array_length pg_node_attr(read_write_ignore, read_as(0), equal_ignore, query_jumble_ignore);
++	/* Cost-only provenance of the separately admitted join-batch ARRAY. */
++	bool		native_af_batch_keys pg_node_attr(read_write_ignore, read_as(false), equal_ignore, query_jumble_ignore);
+ 	/* token location, or -1 if unknown */
+ 	int			location;
+ } Param;
+--- a/src/include/nodes/execnodes.h
++++ b/src/include/nodes/execnodes.h
+@@ -667,6 +667,7 @@
+ 	uint64		es_total_processed; /* total # of tuples aggregated across all
+ 									 * ExecutorRun() calls. */
+ 
++	bool		es_native_af_complete_run; /* full forward executor call */
+ 	int			es_top_eflags;	/* eflags passed to ExecutorStart */
+ 	int			es_instrument;	/* OR of InstrumentOption flags */
+ 	bool		es_finished;	/* true when ExecutorFinish is done */
+--- a/src/backend/executor/execMain.c
++++ b/src/backend/executor/execMain.c
+@@ -328,6 +328,11 @@
+ 
+ 	Assert(estate != NULL);
+ 	Assert(!(estate->es_top_eflags & EXEC_FLAG_EXPLAIN_ONLY));
++
++	/* AF key filters only activate in a single full forward execution. */
++	estate->es_native_af_complete_run =
++		count == 0 && ScanDirectionIsForward(direction) &&
++		estate->es_total_processed == 0;
+ 
+ 	/*
+ 	 * Switch into per-query memory context
