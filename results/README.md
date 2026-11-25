@@ -1,5 +1,9 @@
 # A044 measurement snapshot
 
+These measurements use the earlier A043 implementation, not the A047 r05
+source currently in `code/`. The current source was separately checked against
+A044 plans and answers; this snapshot is not an A047 performance run.
+
 The snapshot records 170 conditions: 120 benchmark conditions and 50 synthetic
 application conditions. Each completed condition/method cell contains four
 warmups and 32 timed, unprepared requests across four cycles. Latency covers

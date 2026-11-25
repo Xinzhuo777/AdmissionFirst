@@ -8,6 +8,7 @@
 #include "nodes/execnodes.h"
 
 extern void native_af_initialize(void);
+extern bool native_af_planner_trace_enabled(void);
 extern void native_af_note_planning(void);
 extern bool native_af_stream_execution_allowed(void);
 extern void native_af_note_stream_heap_execution(void);
@@ -19,6 +20,8 @@ extern void native_af_stream_finalize(PlannerInfo *root, Plan *plan);
 extern void native_af_add_join_input_filter(PlannerInfo *root, Plan *plan, Query *original, int cursorOptions);
 extern void *native_af_cost_enter(Query *parse);
 extern void native_af_cost_leave(void *token);
+extern void native_af_begin_join_enumeration(PlannerInfo *root);
+extern void native_af_end_join_enumeration(PlannerInfo *root);
 extern double native_af_cache_io_fraction(PlannerInfo *root, Oid relation_oid,
                                          double pages, double page_events, double scans);
 extern Query *native_af_batch_save(Query *parse);

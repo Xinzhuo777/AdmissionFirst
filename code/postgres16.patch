@@ -710,7 +710,22 @@
  #include "optimizer/pathnode.h"
  #include "optimizer/paths.h"
  #include "optimizer/plancat.h"
-@@ -319,7 +320,8 @@
+@@ -221,12 +222,14 @@
+ 	/*
+ 	 * Generate access paths for each base rel.
+ 	 */
++	native_af_begin_join_enumeration(root);
+ 	set_base_rel_pathlists(root);
+ 
+ 	/*
+ 	 * Generate access paths for the entire join tree.
+ 	 */
+ 	rel = make_rel_from_joinlist(root, joinlist);
++	native_af_end_join_enumeration(root);
+ 
+ 	/*
+ 	 * The result should join all and only the query's base + outer-join rels.
+@@ -319,7 +322,8 @@
  		 * consider_parallel flag, and (b) for some RTE types, set_rel_size()
  		 * goes ahead and makes paths immediately.
  		 */
@@ -720,7 +735,7 @@
  			set_rel_consider_parallel(root, rel, rte);
  
  		set_rel_size(root, rel, rti, rte);
-@@ -582,6 +584,7 @@
+@@ -582,6 +586,7 @@
  
  	/* Mark rel with estimated output rows, width, etc */
  	set_baserel_size_estimates(root, rel);
@@ -728,7 +743,7 @@
  }
  
  /*
-@@ -787,6 +790,8 @@
+@@ -787,6 +792,8 @@
  
  	/* Consider TID scans */
  	create_tidscan_paths(root, rel);
@@ -806,7 +821,7 @@
  										   outer_rel,
 --- a/src/backend/optimizer/plan/Makefile
 +++ b/src/backend/optimizer/plan/Makefile
-@@ -19,6 +19,13 @@
+@@ -19,6 +19,14 @@
  	planagg.o \
  	planmain.o \
  	planner.o \
@@ -817,6 +832,7 @@
 +	native_af_partial.o \
 +	native_af_binding.o \
 +	native_af_guard.o \
++	native_af_admission.o \
  	setrefs.o \
  	subselect.o
  

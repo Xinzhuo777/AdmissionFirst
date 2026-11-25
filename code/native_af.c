@@ -146,6 +146,13 @@ static void native_af_choice_join_paths(PlannerInfo *root, RelOptInfo *joinrel,
                                        JoinType jointype, JoinPathExtraData *extra);
 static bool native_af_authorization_indexes = false;
 static bool native_af_trace = false;
+
+bool
+native_af_planner_trace_enabled(void)
+{
+	return native_af_trace;
+}
+
 static int native_af_max_authorized_keys = 1048576;
 /* A031: experiment controls alter candidate availability, never admission. */
 typedef enum AfExperimentForce
@@ -1468,6 +1475,40 @@ native_af_choice_join_paths(PlannerInfo *root, RelOptInfo *joinrel,
  * The ordinary RelOptInfo owns exact RLS paths. A private shallow copy
  * owns the alternate restriction list for authorization index lowering.
  */
+/* Close the generated key test against the actual occurrence and source.
+ * The source's SQL was validated before generation. These are the bindings
+ * that the physical index test and executor fallback actually consume. */
+static bool
+membership_access_bound(PlannerInfo *root, RelOptInfo *rel,
+						MembershipCandidate *candidate, MembershipAccess *access)
+{
+	RangeTblEntry *rte = planner_rt_fetch(rel->relid, root);
+	SubPlan *source = access->initplan;
+	ScalarArrayOpExpr *test;
+	Param *array;
+
+	if (candidate->rti != rel->relid || candidate->policy == NULL ||
+		!list_member_ptr(rel->baserestrictinfo, candidate->policy) ||
+		list_length(rte->securityQuals) != 1 ||
+		list_length(linitial(rte->securityQuals)) != 1 ||
+		!equal(linitial(linitial(rte->securityQuals)), candidate->policy->clause) ||
+		access->key_filter == NULL ||
+		!IsA(access->key_filter->clause, ScalarArrayOpExpr) ||
+		source->subLinkType != ARRAY_SUBLINK || source->plan_id <= 0 ||
+		source->plan_id > list_length(root->glob->subplans) ||
+		source->parParam != NIL || source->args != NIL ||
+		source->firstColType != INT8OID || list_length(source->setParam) != 1)
+		return false;
+	test = castNode(ScalarArrayOpExpr, access->key_filter->clause);
+	if (!test->useOr || test->opno != candidate->equality || test->opfuncid != F_INT8EQ ||
+		list_length(test->args) != 2 || !equal(linitial(test->args), candidate->key) ||
+		!IsA(lsecond(test->args), Param))
+		return false;
+	array = lsecond_node(Param, test->args);
+	return array->paramkind == PARAM_EXEC && array->paramtype == INT8ARRAYOID &&
+		array->paramid == linitial_int(source->setParam);
+}
+
 static List *
 membership_index_paths(PlannerInfo *root, RelOptInfo *rel,
 					   MembershipCandidate *candidate, MembershipAccess *access,
@@ -1479,6 +1520,9 @@ membership_index_paths(PlannerInfo *root, RelOptInfo *rel,
 
 	if (access->initplan == NULL ||
 		access->acl_rows > native_af_max_authorized_keys)
+		return NIL;
+	if (native_af_mode == AF_ADMISSION_FIRST &&
+		!membership_access_bound(root, rel, candidate, access))
 		return NIL;
 
 	alternate = palloc(sizeof(*alternate));
@@ -2169,21 +2213,15 @@ native_af_add_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte)
             return;
         }
         accepted = published;
-        /* An unavailable exact-SP family must not clear ordinary paths. */
-        if (experiment_all_families_off())
-            sp_paths = NIL;
     }
 	if (accepted == NIL)
 		return;
-	if (native_af_mode == AF_INDEX_PRIORITY ||
-		(sp_paths != NIL && !root->glob->parallelModeOK))
+	if (native_af_mode == AF_INDEX_PRIORITY)
 	{
 		/*
-		 * IP publishes the first applicable path family. The restricted AF
-		 * SP fragment publishes the admitted exact roots surviving its finite
-		 * comparison, plus applicable authorization-key index paths. The SP
-		 * comparison does not cover ordinary parallel paths: when parallel
-		 * planning is enabled, AF retains the full ordinary path lists.
+		 * IP publishes the first applicable path family. AF's finite
+		 * replacement proof applies only to the compared private roots.
+		 * Ordinary paths still take part in normal complete-plan choice.
 		 */
 		rel->pathlist = NIL;
 		rel->partial_pathlist = NIL;
@@ -2725,6 +2763,10 @@ typedef struct AfBatchContext
     Index outer_rti;
     AttrNumber outer_key;
     AttrNumber inner_key;
+    int array_plan_id;
+    List *producer_carriers;
+    Oid principal;
+    Snapshot planning_snapshot;
     bool domain_costed;
     Bitmapset *input_relids;
     bool pair_first;
@@ -2819,6 +2861,13 @@ typedef struct AfCostScope
     AfStreamDomain stream;
     List *stream_marks;
     AfCostShape shape;
+    PlannerInfo *join_root;
+    List *join_rtable;
+    FromExpr *join_tree;
+    Snapshot join_snapshot;
+    Oid join_role;
+    uint64 join_scope_reuses;
+    bool join_scope_ok;
     bool eligible;
     bool membership_ready;
     bool shared;
@@ -3778,7 +3827,7 @@ stream_shape_node_matches(AfCostShapeNode *saved, Node *node)
 }
 
 static bool
-stream_cost_scope_matches(PlannerInfo *root)
+stream_cost_scope_recheck(PlannerInfo *root)
 {
     AfCostScope *scope = af_cost_scope;
     ListCell *cell;
@@ -3800,6 +3849,65 @@ stream_cost_scope_matches(PlannerInfo *root)
             return false;
     }
     return stream_shape_node_matches(scope->shape.tree, (Node *) root->parse->jointree);
+}
+
+/* After base sizing, the supported direct INNER graph and RTE identities
+ * are read-only during base/parameterized path and join search. Hooks that
+ * can extend this interval keep per-use validation. A private replan or
+ * subquery uses its own PlannerInfo and cost scope. */
+void
+native_af_begin_join_enumeration(PlannerInfo *root)
+{
+    AfCostScope *scope = af_cost_scope;
+
+    if (native_af_mode != AF_ADMISSION_FIRST || scope == NULL ||
+        root->parent_root != NULL || scope->query != root->parse ||
+        !scope->owner->eligible || !scope->owner->membership_ready ||
+        set_rel_pathlist_hook != NULL || join_search_hook != NULL || native_af_previous_join_hook != NULL ||
+        set_join_pathlist_hook != native_af_choice_join_paths)
+        return;
+    scope->join_root = root;
+    scope->join_rtable = root->parse->rtable;
+    scope->join_tree = root->parse->jointree;
+    scope->join_role = GetUserId();
+    scope->join_snapshot = ActiveSnapshotSet() ? GetActiveSnapshot() : NULL;
+    scope->join_scope_ok = stream_cost_scope_recheck(root);
+    scope->join_scope_reuses = 0;
+}
+
+void
+native_af_end_join_enumeration(PlannerInfo *root)
+{
+    AfCostScope *scope = af_cost_scope;
+
+    if (scope == NULL || scope->join_root != root)
+        return;
+    if (native_af_trace)
+        ereport(NOTICE, (errmsg("native_af: join scope reuse " UINT64_FORMAT " validated %d",
+                               scope->join_scope_reuses, scope->join_scope_ok)));
+    scope->join_root = NULL;
+}
+
+static bool
+stream_cost_scope_matches(PlannerInfo *root)
+{
+    AfCostScope *scope = af_cost_scope;
+
+    if (root != NULL && scope != NULL && scope->join_root == root)
+    {
+        if (root->parse == scope->query &&
+            root->parse->rtable == scope->join_rtable &&
+            root->parse->jointree == scope->join_tree &&
+            GetUserId() == scope->join_role &&
+            (ActiveSnapshotSet() ? GetActiveSnapshot() : NULL) == scope->join_snapshot)
+        {
+            if (native_af_trace)
+                scope->join_scope_reuses++;
+            return scope->join_scope_ok;
+        }
+        scope->join_root = NULL;
+    }
+    return stream_cost_scope_recheck(root);
 }
 
 static bool
@@ -4432,6 +4540,15 @@ batch_query(Query *query, PlannedStmt *original, AfBatchContext *context)
     producer->jointree = makeFromExpr(list_make1(range),
                                      (Node *) make_ands_explicit(copyObject(moved)));
     ChangeVarNodes((Node *) producer, protected_rti, 1, 0);
+    {
+        RangeTblEntry *original_rte = rt_fetch(protected_rti, query->rtable);
+        List *required_policy = copyObject(original_rte->securityQuals);
+
+        ChangeVarNodes((Node *) required_policy, protected_rti, 1, 0);
+        if (!equal(physical->securityQuals, required_policy) ||
+            !equal(permission, batch_permission(query, original_rte)))
+            return NULL;
+    }
 
     /* Map actual outer expressions before attaching the physical producer. */
     /* Unlike query_tree_walker, query_tree_mutator does not implement
@@ -4516,6 +4633,11 @@ batch_query(Query *query, PlannedStmt *original, AfBatchContext *context)
     context->outer_key = vars.mapping[protected_key];
     context->inner_key = inner_key;
     context->input_relids = bms_copy(seen);
+    att = -1;
+    while ((att = bms_next_member(vars.needed, att)) >= 0)
+        context->producer_carriers = lappend_int(context->producer_carriers, att);
+    context->principal = GetUserId();
+    context->planning_snapshot = ActiveSnapshotSet() ? GetActiveSnapshot() : NULL;
     return result;
 }
 
@@ -4660,7 +4782,7 @@ batch_plan_key(Plan *plan, AfBatchContext *context)
 
 static Bitmapset *
 batch_plan_scope(Plan *plan, AfBatchContext *context, bool repeated,
-                 bool *valid, bool *paired, int *batch_scans)
+                 bool *valid, bool *paired, int *batch_scans, CteScan **producer_use)
 {
     Bitmapset *left;
     Bitmapset *right;
@@ -4678,16 +4800,23 @@ batch_plan_scope(Plan *plan, AfBatchContext *context, bool repeated,
                 *valid = false;
             (*batch_scans)++;
         }
+        if (rti == context->outer_rti)
+        {
+            if (!IsA(plan, CteScan) || *producer_use != NULL)
+                *valid = false;
+            else
+                *producer_use = castNode(CteScan, plan);
+        }
         return bms_make_singleton(rti);
     }
     /* Keep the single-preprocessing contract independent of merge
      * mark/restore and rescan details in this first prototype. */
     left = batch_plan_scope(outerPlan(plan), context,
                            repeated || IsA(plan, MergeJoin),
-                           valid, paired, batch_scans);
+                           valid, paired, batch_scans, producer_use);
     right = batch_plan_scope(innerPlan(plan), context,
                             repeated || IsA(plan, NestLoop) || IsA(plan, MergeJoin),
-                            valid, paired, batch_scans);
+                            valid, paired, batch_scans, producer_use);
     join = IsA(plan, NestLoop) || IsA(plan, MergeJoin) || IsA(plan, HashJoin);
     if (join && bms_num_members(left) == 1 && bms_num_members(right) == 1 &&
         ((bms_is_member(context->outer_rti, left) &&
@@ -4700,10 +4829,150 @@ batch_plan_scope(Plan *plan, AfBatchContext *context, bool repeated,
         else
             *paired = true;
     }
+    if (bms_overlap(left, right))
+        *valid = false;
     all = bms_union(left, right);
     bms_free(left);
     bms_free(right);
     return all;
+}
+
+/* Resolve projection slots back to the actual scan that produces them.
+ * These are planner-only references and never enter the cached plan. */
+static Var *
+batch_producer_column(Plan *producer, AttrNumber column)
+{
+    TargetEntry *entry = get_tle_by_resno(producer->targetlist, column);
+    Var *value;
+    List *carriers = NIL;
+
+    if (entry == NULL || entry->resjunk || !IsA(entry->expr, Var))
+        return NULL;
+    value = castNode(Var, entry->expr);
+    if (value->varno != INDEX_VAR)
+        return value;
+    if (IsA(producer, CustomScan))
+        carriers = castNode(CustomScan, producer)->custom_scan_tlist;
+    else if (IsA(producer, IndexOnlyScan))
+        carriers = castNode(IndexOnlyScan, producer)->indextlist;
+    entry = get_tle_by_resno(carriers, value->varattno);
+    return entry != NULL && IsA(entry->expr, Var) ? castNode(Var, entry->expr) : NULL;
+}
+
+/* Reconstruct the effective root range from the physical main tree, then
+ * separately resolve the materialized producer and key-set read. The same
+ * checked row source must establish the protected occurrence and supply the
+ * complete prefilter key set. Other main-tree occurrences retain their
+ * original permissions and identities. */
+static const char *
+batch_root_check(Query *original, PlannedStmt *statement, const AfBatchContext *context,
+                 Bitmapset *actual, CteScan *consumer)
+{
+    Plan *array;
+    Plan *producer;
+    CteScan *key_scan;
+    RangeTblEntry *rte;
+    const RangeTblEntry *original_rte = rt_fetch(context->outer_rti, original->rtable);
+    Index physical_occurrence;
+    int occurrence = -1;
+    int output = 0;
+    int producer_bindings = 0;
+    int array_bindings = 0;
+    ListCell *cell;
+    Var *key;
+
+    if (!original->hasRowSecurity)
+        return "original_policy_context_missing";
+    if (consumer == NULL || !bms_equal(context->input_relids, actual))
+        return "root_occurrence_mismatch";
+    if (context->principal != GetUserId() ||
+        context->planning_snapshot != (ActiveSnapshotSet() ? GetActiveSnapshot() : NULL))
+        return "root_binding_mismatch";
+    while ((occurrence = bms_next_member(actual, occurrence)) >= 0)
+    {
+        RangeTblEntry *before = rt_fetch(occurrence, original->rtable);
+
+        if (occurrence > list_length(statement->rtable))
+            return "root_occurrence_missing";
+        rte = rt_fetch(occurrence, statement->rtable);
+        if (occurrence == context->outer_rti)
+        {
+            if (rte->rtekind != RTE_CTE)
+                return "root_producer_use_missing";
+        }
+        else if (rte->rtekind != RTE_RELATION || rte->relid != before->relid ||
+                 rte->perminfoindex == 0 ||
+                 !equal(getRTEPermissionInfo(statement->permInfos, rte),
+                        batch_permission(original, before)))
+            return "root_ordinary_occurrence_mismatch";
+    }
+    if (consumer->ctePlanId <= 0 || consumer->ctePlanId > list_length(statement->subplans) ||
+        context->array_plan_id <= 0 || context->array_plan_id > list_length(statement->subplans) ||
+        context->param_id < 0 || context->param_id >= list_length(statement->paramExecTypes) ||
+        list_nth_oid(statement->paramExecTypes, context->param_id) != INT8ARRAYOID)
+        return "root_dependency_missing";
+    foreach(cell, statement->planTree->initPlan)
+    {
+        SubPlan *source = lfirst_node(SubPlan, cell);
+
+        if (list_member_int(source->setParam, context->param_id))
+        {
+            if (source->subLinkType != ARRAY_SUBLINK || source->plan_id != context->array_plan_id ||
+                source->parParam != NIL || source->args != NIL ||
+                list_length(source->setParam) != 1 || source->firstColType != INT8OID)
+                return "root_array_binding_mismatch";
+            array_bindings++;
+        }
+        if (list_member_int(source->setParam, consumer->cteParam))
+        {
+            if (source->subLinkType != CTE_SUBLINK || source->plan_id != consumer->ctePlanId ||
+                list_length(source->setParam) != 1)
+                return "root_producer_binding_mismatch";
+            producer_bindings++;
+        }
+    }
+    if (producer_bindings != 1 || array_bindings != 1)
+        return "root_producer_or_array_binding_missing";
+    array = list_nth(statement->subplans, context->array_plan_id - 1);
+    if (!IsA(array, CteScan))
+        return "key_source_is_not_producer_read";
+    key_scan = castNode(CteScan, array);
+    if (key_scan->ctePlanId != consumer->ctePlanId || key_scan->cteParam != consumer->cteParam ||
+        array->qual != NIL || list_length(array->targetlist) != 1)
+        return "key_source_not_same_complete_producer";
+    key = batch_producer_column(array, 1);
+    if (key == NULL || key->varno != key_scan->scan.scanrelid ||
+        key->varattno != context->outer_key || key->vartype != INT8OID)
+        return "key_source_column_mismatch";
+    producer = list_nth(statement->subplans, consumer->ctePlanId - 1);
+    if (IsA(producer, CustomScan))
+    {
+        CustomScan *scan = castNode(CustomScan, producer);
+
+        if (scan->methods != &completed_hash_scan_methods &&
+            scan->methods != &membership_scan_methods && scan->methods != &partial_scan_methods)
+            return "unknown_producer_exact_rule";
+    }
+    else if (!IsA(producer, SeqScan) && !IsA(producer, IndexScan) &&
+             !IsA(producer, IndexOnlyScan) && !IsA(producer, BitmapHeapScan))
+        return "unknown_producer_leaf";
+    physical_occurrence = ((Scan *) producer)->scanrelid;
+    if (physical_occurrence <= 0 || physical_occurrence > list_length(statement->rtable))
+        return "producer_scan_binding_missing";
+    rte = rt_fetch(physical_occurrence, statement->rtable);
+    if (rte->rtekind != RTE_RELATION || rte->relid != original_rte->relid ||
+        rte->perminfoindex == 0 ||
+        !equal(getRTEPermissionInfo(statement->permInfos, rte),
+               batch_permission(original, (RangeTblEntry *) original_rte)))
+        return "producer_policy_context_mismatch";
+    foreach(cell, context->producer_carriers)
+    {
+        Var *value = batch_producer_column(producer, ++output);
+
+        if (value == NULL || value->varno != physical_occurrence || value->varattno != lfirst_int(cell))
+            return "producer_carrier_mismatch";
+    }
+    return NULL;
 }
 
 static void
@@ -4740,6 +5009,8 @@ batch_choose_variant(Query *saved, PlannedStmt *original,
     bool paired = false;
     int batch_scans = 0;
     Bitmapset *scope;
+    CteScan *producer_use = NULL;
+    const char *root_rejection;
     if (native_af_mode != AF_ADMISSION_FIRST || af_batch_depth != 0 ||
         native_af_experiment_force != AF_EXP_AUTO)
         return original;
@@ -4783,16 +5054,26 @@ batch_choose_variant(Query *saved, PlannedStmt *original,
         return original;
     }
     scope = batch_plan_scope(alternative->planTree, &context, false,
-                             &valid, &paired, &batch_scans);
+                             &valid, &paired, &batch_scans, &producer_use);
+    root_rejection = valid && paired && batch_scans == 1 ?
+        batch_root_check(saved, alternative, &context, scope, producer_use) :
+        "root_join_or_key_scan_outside_rule";
+    if (native_af_trace)
+        ereport(NOTICE, (errmsg("native_af: shared root %s",
+                               root_rejection != NULL ? root_rejection : "admitted")));
     bms_free(scope);
     if (native_af_experiment_publish_shared &&
         context.lowered && !context.rejected && context.domain_costed &&
-        valid && paired && batch_scans == 1 && alternative != NULL &&
+        root_rejection == NULL &&
         isfinite(alternative->planTree->total_cost) &&
         alternative->planTree->total_cost < original->planTree->total_cost)
     {
         batch_summary(&context, true, valid, paired, batch_scans,
                       original, alternative, true);
+        /* This internal rewrite runs after the caller's RLS rewrite. Keep
+         * the chosen plan role-dependent even when standard_planner's
+         * own dependencies do not add the flag. */
+        alternative->dependsOnRole = true;
         return alternative;
     }
     batch_summary(&context, true, valid, paired, batch_scans,
@@ -4867,6 +5148,7 @@ native_af_batch_prepare(PlannerInfo *root)
         source->startup_cost += 2.0 * cpu_operator_cost * rows * log(rows) / log(2.0);
     context->filter->args = list_make2(linitial(context->filter->args), parameter);
     context->param_id = parameter->paramid;
+    context->array_plan_id = source->plan_id;
     context->lowered = true;
 }
 

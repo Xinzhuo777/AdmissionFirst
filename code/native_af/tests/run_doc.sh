@@ -45,3 +45,6 @@ cd "$repo"
 python3 -m native_af.tests.doc_safety \
     --socket-dir "$socket" --port "$port" --database postgres \
     --admin "$(id -un)" --libpq "$libpq" --output "$run/doc-safety.jsonl" "$@"
+python3 -m native_af.tests.admission \
+    --socket-dir "$socket" --port "$port" --database postgres \
+    --admin "$(id -un)" --libpq "$libpq" --output "$run/admission.jsonl"

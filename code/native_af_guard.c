@@ -50,6 +50,7 @@
 #include "optimizer/cost.h"
 #include "optimizer/clauses.h"
 #include "optimizer/native_af.h"
+#include "optimizer/native_af_admission.h"
 #include "optimizer/native_af_binding.h"
 #include "optimizer/native_af_guard.h"
 #include "optimizer/optimizer.h"
@@ -257,22 +258,6 @@ guard_index(IndexOptInfo *index, RelOptInfo *rel, Var *title)
 }
 
 /* First prototype has full ordinary fields and CTID, no whole-row/system recovery. */
-static bool
-guard_missing_input(Node *node, void *context)
-{
-	Index rti = *(Index *) context;
-	if (node == NULL)
-		return false;
-	if (IsA(node, Var))
-	{
-		Var *var = castNode(Var, node);
-		return var->varno != rti || var->varlevelsup != 0 ||
-			!bms_is_empty(var->varnullingrels) || var->varattno == 0 ||
-			(var->varattno < 0 && var->varattno != SelfItemPointerAttributeNumber);
-	}
-	return expression_tree_walker(node, guard_missing_input, context);
-}
-
 /* Validate actual support output, not just the original LIKE's spelling. */
 static bool
 guard_bounds(List *bounds, Var *title)
@@ -406,7 +391,8 @@ guard_find(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 /* Admission runs before any path constructor or candidate cost evaluation. */
 static bool
 guard_admit(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
-			 GuardDescriptor *descriptor)
+			const NativeAfScanRequirement *need, PathTarget *input,
+			GuardDescriptor *descriptor)
 {
 	TimestampTz start = GetCurrentTimestamp();
 	bool valid;
@@ -431,17 +417,23 @@ guard_admit(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 		valid = false;
 		descriptor->rejection = "unproved_original_pg_policy_arm";
 	}
-	else if (guard_missing_input((Node *) descriptor->policy->clause, &rel->relid) ||
-		guard_missing_input((Node *) get_actual_clauses(descriptor->users), &rel->relid))
+	else
 	{
-		valid = false;
-		descriptor->rejection = "unsupported_whole_row_or_system_input";
-	}
-	else if (descriptor->late_policy)
-	{
-		/* The original LIKE is already a protected nonleakproof read. */
-		valid = false;
-		descriptor->rejection = "protected_read_before_exact_policy";
+		NativeAfScanDelivery delivery;
+		NativeAfScanRule rule = {
+			.input = input,
+			.output = rel->reltarget,
+			.target_filter = (Node *) descriptor->like->clause,
+			.before_check = descriptor->late_policy ?
+				lappend(list_copy(descriptor->bounds), descriptor->like->clause) : descriptor->bounds,
+			.after_check = get_actual_clauses(descriptor->users),
+			.exact_check = (Node *) descriptor->policy->clause,
+			.validated_prefix = descriptor->bounds,
+			.identity = SelfItemPointerAttributeNumber
+		};
+
+		descriptor->rejection = native_af_admit_checked_scan(need, &rule, &delivery);
+		valid = descriptor->rejection == NULL;
 	}
 	if (valid)
 		guard_admitted++;
@@ -532,7 +524,7 @@ guard_policy_variants(PlannerInfo *root, GuardDescriptor *base,
 
 /* All ordinary fields and an actual CTID carrier, never a user expression. */
 static PathTarget *
-guard_target(PlannerInfo *root, RelOptInfo *rel, Oid heap)
+guard_target(RelOptInfo *rel, Oid heap)
 {
 	PathTarget *target = create_empty_pathtarget();
 	Relation relation = table_open(heap, AccessShareLock);
@@ -554,7 +546,6 @@ guard_target(PlannerInfo *root, RelOptInfo *rel, Oid heap)
 	add_column_to_pathtarget(target,
 		(Expr *) makeVar(rel->relid, SelfItemPointerAttributeNumber,
 						TIDOID, -1, InvalidOid, 0), 0);
-	set_pathtarget_cost_width(root, target);
 	table_close(relation, AccessShareLock);
 	return target;
 }
@@ -570,11 +561,12 @@ guard_restrictions(PlannerInfo *root, List *bounds)
 }
 
 static RelOptInfo *
-guard_relation(PlannerInfo *root, RelOptInfo *rel, Oid heap, List *bounds)
+guard_relation(PlannerInfo *root, RelOptInfo *rel, PathTarget *target, List *bounds)
 {
 	RelOptInfo *raw = palloc(sizeof(*raw));
 	memcpy(raw, rel, sizeof(*raw));
-	raw->reltarget = guard_target(root, rel, heap);
+	raw->reltarget = target;
+	set_pathtarget_cost_width(root, raw->reltarget);
 	raw->baserestrictinfo = guard_restrictions(root, bounds);
 	raw->baserestrict_min_security = 0;
 	raw->pathlist = NIL;
@@ -1035,7 +1027,8 @@ guard_sp_scope(PlannerInfo *root, List *paths, RestrictInfo *closed_policy, Node
  * nonmonotone parent inputs, instead of hiding a useful order property.
  */
 static List *
-guard_sp_paths(PlannerInfo *root, List *paths, RestrictInfo *closed_policy, Node *original_policy)
+guard_sp_paths(PlannerInfo *root, List *paths, RestrictInfo *closed_policy,
+			   Node *original_policy, const NativeAfScanRequirement *need, Node *target_filter)
 {
 	List *survivors = list_copy(paths);
 	List *evidence = NIL;
@@ -1073,6 +1066,28 @@ guard_sp_paths(PlannerInfo *root, List *paths, RestrictInfo *closed_policy, Node
 			const char *decision = "retain";
 			bool root_ok;
 			bool projection_ok;
+			NativeAfScanRule indexed_rule = {
+				.input = index_child->pathtarget,
+				.output = indexed->path.pathtarget,
+				.target_filter = target_filter,
+				.before_check = get_actual_clauses(index_child->parent->baserestrictinfo),
+				.after_check = lsecond(indexed->custom_private),
+				.exact_check = linitial(indexed->custom_private),
+				.validated_prefix = lthird(indexed->custom_private),
+				.identity = SelfItemPointerAttributeNumber
+			};
+			NativeAfScanRule seq_rule = {
+				.input = seq_child->pathtarget,
+				.output = seq->path.pathtarget,
+				.target_filter = target_filter,
+				.before_check = get_actual_clauses(seq_child->parent->baserestrictinfo),
+				.after_check = lsecond(seq->custom_private),
+				.exact_check = linitial(seq->custom_private),
+				.validated_prefix = lthird(seq->custom_private),
+				.identity = SelfItemPointerAttributeNumber
+			};
+			NativeAfScanDelivery indexed_delivery;
+			NativeAfScanDelivery seq_delivery;
 			QualCost policy;
 			Cost index_root_cost;
 			Cost seq_root_cost;
@@ -1108,6 +1123,12 @@ guard_sp_paths(PlannerInfo *root, List *paths, RestrictInfo *closed_policy, Node
 				equal(list_nth(indexed->custom_private, 7), list_nth(seq->custom_private, 7));
 			projection_ok = equal(index_child->pathtarget->exprs, seq_child->pathtarget->exprs) &&
 				index_child->pathtarget->width == seq_child->pathtarget->width;
+			root_ok = root_ok &&
+				native_af_admit_checked_scan(need, &indexed_rule, &indexed_delivery) == NULL &&
+				native_af_admit_checked_scan(need, &seq_rule, &seq_delivery) == NULL &&
+				native_af_scan_preserves(&indexed_delivery, &seq_delivery, false) == NULL;
+			projection_ok = projection_ok && (!root_ok ||
+				native_af_scan_preserves(&indexed_delivery, &seq_delivery, true) == NULL);
 			if (!root_ok)
 				reason = "completion_or_guard_binding_mismatch";
 			else if (!projection_ok)
@@ -1189,6 +1210,8 @@ native_af_guard_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 					  RestrictInfo *closed_policy, RestrictInfo *completed_hash_policy)
 {
 	GuardDescriptor base = {0};
+	NativeAfScanRequirement need;
+	PathTarget *input = NULL;
 	List *accepted = NIL;
 	List *uncosted = NIL;
 	List *cost_evidence;
@@ -1196,7 +1219,8 @@ native_af_guard_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 	ListCell *cell;
 	bool seq_created = false;
 
-	if (!guard_scope(root, rel, rte) || !guard_find(root, rel, rte, &base))
+	if (!guard_scope(root, rel, rte) || !guard_find(root, rel, rte, &base) ||
+		!native_af_scan_requirement(root, rel, rte, &need))
 		return NIL;
 	variants = guard_policy_variants(root, &base, closed_policy, completed_hash_policy);
 	foreach(cell, rel->indexlist)
@@ -1223,6 +1247,8 @@ native_af_guard_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 			PointerGetDatum(&request)));
 		if (safe.bounds == NIL)
 			continue;
+		if (input == NULL)
+			input = guard_target(rel, rte->relid);
 		safe.index = index;
 		for (indexed = 1; indexed >= 0; indexed--)
 		{
@@ -1242,8 +1268,8 @@ native_af_guard_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 				unsafe = admitted;
 				unsafe.late_policy = true;
 				/* Every actual provider/completion/order is admitted before cost. */
-				safe_ok = guard_admit(root, rel, rte, &admitted);
-				unsafe_ok = guard_admit(root, rel, rte, &unsafe);
+				safe_ok = guard_admit(root, rel, rte, &need, input, &admitted);
+				unsafe_ok = guard_admit(root, rel, rte, &need, input, &unsafe);
 #ifndef NATIVE_AF_GUARD_DIAGNOSTIC_UNSAFE
 				if (!unsafe_ok)
 				{
@@ -1260,7 +1286,7 @@ native_af_guard_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 				if (!safe_ok)
 					continue;
 				if (raw == NULL)
-					raw = guard_relation(root, rel, rte->relid, safe.bounds);
+					raw = guard_relation(root, rel, input, safe.bounds);
 				if (child == NULL)
 					child = guard_child(root, raw, &admitted, indexed);
 				path = guard_wrap(root, rel, rte, &admitted, child, indexed);
@@ -1280,7 +1306,8 @@ native_af_guard_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 		}
 	}
 	cost_evidence = guard_cost_evidence(accepted, uncosted);
-	accepted = guard_sp_paths(root, accepted, closed_policy, (Node *) base.original_policy->clause);
+	accepted = guard_sp_paths(root, accepted, closed_policy, (Node *) base.original_policy->clause,
+							  &need, (Node *) base.like->clause);
 	foreach(cell, accepted)
 	{
 		CustomPath *path = lfirst_node(CustomPath, cell);

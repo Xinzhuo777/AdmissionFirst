@@ -28,6 +28,7 @@ shasum -a 256 "$kernel_dir"/native_af.c "$kernel_dir"/native_af.h \
     "$kernel_dir"/native_af_partial.c "$kernel_dir"/native_af_partial.h \
     "$kernel_dir"/native_af_binding.c "$kernel_dir"/native_af_binding.h \
     "$kernel_dir"/native_af_guard.c "$kernel_dir"/native_af_guard.h \
+    "$kernel_dir"/native_af_admission.c "$kernel_dir"/native_af_admission.h \
     "$kernel_dir"/native_af_os_cache.c "$kernel_dir"/native_af_os_cache.h \
     "$kernel_dir"/postgres16.patch > implementation.sha256
 tar -xjf "$archive"
@@ -41,10 +42,12 @@ fi
 patch -p1 < "$kernel_dir/postgres16.patch"
 cp "$kernel_dir/native_af.c" "$kernel_dir/native_af_sp.c" \
    "$kernel_dir/native_af_keyed.c" "$kernel_dir/native_af_partial.c" \
-   "$kernel_dir/native_af_binding.c" "$kernel_dir/native_af_guard.c" "$kernel_dir/native_af_os_cache.c" src/backend/optimizer/plan/
+   "$kernel_dir/native_af_binding.c" "$kernel_dir/native_af_guard.c" \
+   "$kernel_dir/native_af_admission.c" "$kernel_dir/native_af_os_cache.c" src/backend/optimizer/plan/
 cp "$kernel_dir/native_af.h" "$kernel_dir/native_af_sp.h" \
    "$kernel_dir/native_af_keyed.h" "$kernel_dir/native_af_partial.h" \
-   "$kernel_dir/native_af_binding.h" "$kernel_dir/native_af_guard.h" "$kernel_dir/native_af_os_cache.h" src/include/optimizer/
+   "$kernel_dir/native_af_binding.h" "$kernel_dir/native_af_guard.h" \
+   "$kernel_dir/native_af_admission.h" "$kernel_dir/native_af_os_cache.h" src/include/optimizer/
 ./configure --prefix="$build_dir/install" --without-icu --without-readline \
     --without-zlib --with-openssl --enable-depend > "$build_dir/configure.log" 2>&1
 make -j "${NATIVE_AF_BUILD_JOBS:-6}" > "$build_dir/build.log" 2>&1

@@ -25,6 +25,7 @@
 #include "optimizer/paths.h"
 #include "optimizer/tlist.h"
 #include "optimizer/native_af.h"
+#include "optimizer/native_af_admission.h"
 #include "optimizer/native_af_sp.h"
 #include "parser/parsetree.h"
 #include "parser/parse_relation.h"
@@ -40,6 +41,7 @@ typedef struct ExactRoot
 	PathTarget *target;
 	RestrictInfo *policy;
 	RestrictInfo *selection;
+	NativeAfScanDelivery delivery;
 } ExactRoot;
 
 static bool
@@ -121,9 +123,18 @@ sp_selection(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 static bool
 admit_exact_root(PlannerInfo *root, RelOptInfo *input, RangeTblEntry *rte,
 				 RestrictInfo *policy, RestrictInfo *selection, Var *key,
-				 IndexOptInfo *index, ExactRoot *result)
+				 IndexOptInfo *index, const NativeAfScanRequirement *need,
+				 ExactRoot *result)
 {
 	RTEPermissionInfo *permissions;
+	NativeAfScanRule rule = {
+		.input = input->reltarget,
+		.output = need->target,
+		.target_filter = (Node *) selection->clause,
+		.before_check = list_make1(selection->clause),
+		.exact_check = (Node *) policy->clause,
+		.identity = key->varattno
+	};
 
 	if (planner_rt_fetch(input->relid, root) != rte ||
 		rte->perminfoindex == 0 || list_length(rte->securityQuals) != 1 ||
@@ -132,8 +143,7 @@ admit_exact_root(PlannerInfo *root, RelOptInfo *input, RangeTblEntry *rte,
 		!equal(policy->clause, linitial(linitial(rte->securityQuals))) ||
 		!list_member_ptr(input->baserestrictinfo, policy) ||
 		!list_member_ptr(input->baserestrictinfo, selection) ||
-		!plain_column(key, input->relid) || key->vartype != INT8OID ||
-		!list_member(input->reltarget->exprs, key))
+		!plain_column(key, input->relid) || key->vartype != INT8OID)
 		return false;
 
 	permissions = getRTEPermissionInfo(root->parse->rteperminfos, rte);
@@ -162,7 +172,7 @@ admit_exact_root(PlannerInfo *root, RelOptInfo *input, RangeTblEntry *rte,
 	result->target = input->reltarget;
 	result->policy = policy;
 	result->selection = selection;
-	return true;
+	return native_af_admit_checked_scan(need, &rule, &result->delivery) == NULL;
 }
 
 static Cost
@@ -183,6 +193,11 @@ compare_requirement(const ExactRoot *better, const ExactRoot *worse,
 					Path *index, Path *scan, bool need_identity,
 					bool index_sort, bool scan_sort, Cost index_cost, Cost scan_cost)
 {
+	const char *preservation = native_af_scan_preserves(&better->delivery, &worse->delivery,
+														need_identity);
+
+	if (preservation != NULL)
+		return preservation;
 	if (better->occurrence != worse->occurrence ||
 		better->relation != worse->relation || better->principal != worse->principal ||
 		index->parent->relid != better->occurrence ||
@@ -224,6 +239,7 @@ native_af_sp_exact_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 						 RestrictInfo *checked_policy, Var *key, List **evidence)
 {
 	RestrictInfo *selection = sp_selection(root, rel, rte, checked_policy);
+	NativeAfScanRequirement need;
 	RelOptInfo *input;
 	ExactRoot	scan_root;
 	Path	   *scan;
@@ -237,7 +253,8 @@ native_af_sp_exact_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 	*evidence = NIL;
 	if (selection == NULL || !enable_seqscan ||
 		(order == NIL && !enable_bitmapscan) ||
-		(order != NIL && (!enable_indexscan || !enable_sort)))
+		(order != NIL && (!enable_indexscan || !enable_sort)) ||
+		!native_af_scan_requirement(root, rel, rte, &need))
 		return NIL;
 
 	/*
@@ -250,7 +267,7 @@ native_af_sp_exact_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 		ExactRoot	projected;
 
 		if (!admit_exact_root(root, rel, rte, checked_policy, selection,
-							  key, NULL, &projected))
+							  key, NULL, &need, &projected))
 			rejected_carrier++;
 	}
 
@@ -261,7 +278,7 @@ native_af_sp_exact_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 	if (!list_member(input->reltarget->exprs, key))
 		add_column_to_pathtarget(input->reltarget, (Expr *) key, 0);
 	if (!admit_exact_root(root, input, rte, checked_policy, selection,
-						  key, NULL, &scan_root))
+						  key, NULL, &need, &scan_root))
 		return NIL;
 	set_pathtarget_cost_width(root, input->reltarget);
 	scan = create_seqscan_path(root, input, NULL, 0);
@@ -287,7 +304,7 @@ native_af_sp_exact_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 		if ((order == NIL && !index->amhasgetbitmap) ||
 			(order != NIL && !index->amhasgettuple) ||
 			!admit_exact_root(root, input, rte, checked_policy, selection,
-							  key, index, &index_root))
+							  key, index, &need, &index_root))
 			continue;
 
 		if (order != NIL)
@@ -323,6 +340,9 @@ native_af_sp_exact_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 									  false, index_sort, scan_sort, index_cost, scan_cost);
 		at_projection = compare_requirement(&index_root, &scan_root, candidate, scan,
 											true, index_sort, scan_sort, index_cost, scan_cost);
+		if (native_af_planner_trace_enabled())
+			ereport(NOTICE, (errmsg("native_af: SP replacement root %s projection %s",
+								   at_root, at_projection)));
 		if (strcmp(at_root, "pass") == 0 && strcmp(at_projection, "pass") == 0)
 			drop_scan = true;
 
@@ -337,6 +357,11 @@ native_af_sp_exact_paths(PlannerInfo *root, RelOptInfo *rel, RangeTblEntry *rte,
 		return NIL;
 	if (drop_scan)
 		survivors = list_delete_ptr(survivors, scan);
+	if (native_af_planner_trace_enabled())
+		ereport(NOTICE,
+				(errmsg("native_af: SP occurrence %u admitted %d rejected missing carrier %d pruned %d survivors %d",
+						rel->relid, 1 + list_length(comparisons), rejected_carrier,
+						drop_scan, list_length(survivors))));
 	*evidence = list_make5(makeInteger(rel->relid), makeInteger(key->varattno),
 						   makeInteger(rejected_carrier), makeInteger(drop_scan),
 						   comparisons);

@@ -5,10 +5,14 @@ PostgreSQL's planner and executor. It tests a candidate before comparing its
 cost with ordinary PostgreSQL plans. The implementation includes policy-aware
 access paths, join planning, and execution-time filtering for supported cases.
 
-`code/` contains the PostgreSQL 16.11 patch and C implementation used in the
-A044 experiments. This is a PostgreSQL source modification, not an extension
-that can be loaded into an existing stock server. `results/` contains a compact
-snapshot of those measurements.
+`code/` contains the A047 r05 PostgreSQL 16.11 patch and C implementation. This
+is a PostgreSQL source modification, not an extension that can be loaded into
+an existing stock server. The compact A044 measurements in `results/` were
+collected with the earlier A043 implementation, available in
+[the previous release commit](https://github.com/Xinzhuo777/AdmissionFirst/tree/d66bd85b656a3d2769c6124cab44273d7520ebc4).
+A047 was checked against A044 across 170 conditions: their executable plans
+matched after excluding cost estimates, and their complete typed answers
+matched. The snapshot is not a new performance measurement of A047.
 
 ## Build
 
@@ -47,9 +51,10 @@ sh code/native_af/tests/run_doc.sh \
   --require-af-membership --require-sp
 ```
 
-The test compares native, AF, and IndexPriority modes; checks full results and
-non-leakproof observations; and exercises authorization changes and generic
-prepared statements. This focused test is not the complete A044 benchmark.
+The tests compare native, AF, and IndexPriority modes; check full results and
+non-leakproof observations; exercise authorization changes and generic
+prepared statements; and check admission and replacement of scan candidates.
+These focused tests are not the complete A044 benchmark.
 
 ## Check the experiment snapshot
 
@@ -68,7 +73,7 @@ packaged here. The snapshot verification command does not rerun the benchmark.
 
 ## Source and notices
 
-The AF source files and build script correspond to the measured A044 normal
+The AF source files and build script correspond to the verified A047 r05 normal
 build; `code/SOURCE.sha256` records their digests. PostgreSQL source is obtained
 separately. The patch includes material from PostgreSQL, whose copyright and
 license notice is reproduced in [POSTGRESQL-COPYRIGHT](POSTGRESQL-COPYRIGHT).
