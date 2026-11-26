@@ -1,0 +1,51 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Aggregate",
+   "Strategy": "Plain",
+   "Partial Mode": "Simple",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 8,
+   "Output": [
+    "count(*)"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Index Scan",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Scan Direction": "Forward",
+     "Index Name": "ticket_pkey",
+     "Relation Name": "ticket",
+     "Schema": "public",
+     "Alias": "t",
+     "Plan Rows": 19,
+     "Plan Width": 0,
+     "Output": [
+      "ticket_id",
+      "tenant_id",
+      "owner_id",
+      "status",
+      "priority",
+      "secret",
+      "payload"
+     ],
+     "Index Cond": "((t.ticket_id >= 1) AND (t.ticket_id <= 20000))",
+     "Filter": "((t.priority >= 4) AND (t.status = 'open'::text) AND ((t.tenant_id = 90) OR (t.owner_id = 90)))"
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

@@ -1,0 +1,27 @@
+{
+ "case": "original/job-13a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "release_date",
+    25
+   ],
+   [
+    "rating",
+    25
+   ],
+   [
+    "german_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "9369373606ead270f11a3f0ca9ff28a1bb8e5dde8e548313db495b5f14f2b96b",
+  "row_count": 1,
+  "sha256": "9369373606ead270f11a3f0ca9ff28a1bb8e5dde8e548313db495b5f14f2b96b"
+ },
+ "audit": null
+}

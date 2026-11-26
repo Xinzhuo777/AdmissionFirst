@@ -1,0 +1,23 @@
+{
+ "case": "original/job-8a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "actress_pseudonym",
+    25
+   ],
+   [
+    "japanese_movie_dubbed",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "3624d5fee4f1223844bc8d5c1aa9299ca30677335748b3eb718977cf5ce349ac",
+  "row_count": 1,
+  "sha256": "3624d5fee4f1223844bc8d5c1aa9299ca30677335748b3eb718977cf5ce349ac"
+ },
+ "audit": null
+}

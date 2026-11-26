@@ -1,0 +1,31 @@
+{
+ "case": "original/job-26a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "character_name",
+    25
+   ],
+   [
+    "rating",
+    25
+   ],
+   [
+    "playing_actor",
+    25
+   ],
+   [
+    "complete_hero_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "97c2ca7ea4c58341254c5d40869add34a07c282c280e1eeae835546d747eb2de",
+  "row_count": 1,
+  "sha256": "97c2ca7ea4c58341254c5d40869add34a07c282c280e1eeae835546d747eb2de"
+ },
+ "audit": null
+}

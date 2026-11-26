@@ -1,0 +1,23 @@
+{
+ "case": "original/tpch-q13-key-predicate",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "c_count",
+    20
+   ],
+   [
+    "custdist",
+    20
+   ]
+  ],
+  "command": "SELECT 37",
+  "multiset_sha256": "31b53b3ed7afde85df1f650fa896e0e02b745e047cf23b2042264cd649f730f4",
+  "row_count": 37,
+  "sha256": "cf91d1143f02fe80162e72d87e75e7c3ab87025144a029c6766ec2e59b4e70b6"
+ },
+ "audit": null
+}

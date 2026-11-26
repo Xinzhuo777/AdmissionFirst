@@ -1,0 +1,23 @@
+{
+ "case": "original/job-17a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "member_in_charnamed_american_movie",
+    25
+   ],
+   [
+    "a1",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "a2912ab7f22d75233f6052d9b0c04b5de9d20528b3a4b3a8652d35ff9f30c302",
+  "row_count": 1,
+  "sha256": "a2912ab7f22d75233f6052d9b0c04b5de9d20528b3a4b3a8652d35ff9f30c302"
+ },
+ "audit": null
+}

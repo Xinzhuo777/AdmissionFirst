@@ -1,0 +1,19 @@
+{
+ "search_path": "pg_catalog,public",
+ "row_security": "on",
+ "DateStyle": "ISO,YMD",
+ "TimeZone": "UTC",
+ "plan_cache_mode": "force_generic_plan",
+ "statement_timeout": "120000",
+ "standard_conforming_strings": "on",
+ "client_min_messages": "notice",
+ "work_mem": "16MB",
+ "effective_cache_size": "8GB",
+ "random_page_cost": "4.0",
+ "seq_page_cost": "1.0",
+ "cpu_tuple_cost": "0.01",
+ "cpu_index_tuple_cost": "0.005",
+ "cpu_operator_cost": "0.0025",
+ "jit": "off",
+ "max_parallel_workers_per_gather": "0"
+}

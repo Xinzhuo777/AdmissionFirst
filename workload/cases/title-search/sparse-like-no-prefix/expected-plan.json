@@ -1,0 +1,244 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Sort",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 79,
+   "Output": [
+    "d.title",
+    "d.secret",
+    "d.title",
+    "((d.secret)::text)"
+   ],
+   "Sort Key": [
+    "d.title COLLATE \"C\"",
+    "d.secret COLLATE \"C\" NULLS FIRST"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Limit",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "InitPlan 3 (returns $4)",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 524,
+     "Plan Width": 8,
+     "Output": [
+      "s_1.rid"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Plan Rows": 524,
+       "Plan Width": 8,
+       "Output": [
+        "s_1.rid"
+       ],
+       "Inner Unique": false,
+       "Plans": [
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "group_membership_pkey",
+         "Relation Name": "group_membership",
+         "Schema": "public",
+         "Alias": "m_1",
+         "Plan Rows": 1,
+         "Plan Width": 8,
+         "Output": [
+          "m_1.user_id",
+          "m_1.group_id"
+         ],
+         "Index Cond": "(m_1.user_id = 'af_prefix_sparse'::text)"
+        },
+        {
+         "Node Type": "Bitmap Heap Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "share_acl",
+         "Schema": "public",
+         "Alias": "s_1",
+         "Plan Rows": 524,
+         "Plan Width": 16,
+         "Output": [
+          "s_1.relname",
+          "s_1.rid",
+          "s_1.group_id",
+          "s_1.permission"
+         ],
+         "Recheck Cond": "((s_1.group_id = m_1.group_id) AND (s_1.relname = 'public.prefix_doc'::text) AND (s_1.permission = 'read'::text))",
+         "Plans": [
+          {
+           "Node Type": "Bitmap Index Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Index Name": "prefix_acl_group",
+           "Plan Rows": 524,
+           "Plan Width": 0,
+           "Index Cond": "((s_1.group_id = m_1.group_id) AND (s_1.relname = 'public.prefix_doc'::text) AND (s_1.permission = 'read'::text))"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "Node Type": "Result",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 1,
+     "Plan Width": 79,
+     "Output": [
+      "d.title",
+      "d.secret",
+      "d.title",
+      "d.secret"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Custom Scan",
+       "Parent Relationship": "Outer",
+       "Custom Plan Provider": "AF Membership Keys",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "prefix_doc",
+       "Schema": "public",
+       "Alias": "d",
+       "Plan Rows": 1,
+       "Plan Width": 30,
+       "Output": [
+        "d.title",
+        "d.secret"
+       ],
+       "AF Actual Branch": "not_executed",
+       "AF Path": "enumerate_authorized_keys",
+       "AF Authorization": "fresh_exact_membership",
+       "AF Algorithm": "af",
+       "AF Key Parameter": 4,
+       "AF Key Attribute": 1,
+       "AF ACL Estimated Rows": 524,
+       "AF Original Relation Rows": 28,
+       "AF Estimated Distinct Keys": 524,
+       "AF Source Plan Cost": 1573.52,
+       "AF Array Build Cost": 10.48,
+       "AF Array Sort Unique Cost": 24.98,
+       "Plans": [
+        {
+         "Node Type": "Index Scan",
+         "Parent Relationship": "children",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "prefix_doc_pkey",
+         "Relation Name": "prefix_doc",
+         "Schema": "public",
+         "Alias": "d",
+         "Plan Rows": 1,
+         "Plan Width": 30,
+         "Output": [
+          "d.title",
+          "d.secret"
+         ],
+         "Index Cond": "(d.id = ANY ($4))",
+         "Filter": "((d.title ~~ '%urgent%'::text) AND prefix_audit_secret(d.id, d.secret))"
+        },
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "children",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "prefix_doc",
+         "Schema": "public",
+         "Alias": "d",
+         "Plan Rows": 1,
+         "Plan Width": 30,
+         "Output": [
+          "d.title",
+          "d.secret"
+         ],
+         "Filter": "((SubPlan 1) AND (d.title ~~ '%urgent%'::text) AND prefix_audit_secret(d.id, d.secret))",
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "SubPlan",
+           "Subplan Name": "SubPlan 1",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 1,
+           "Plan Width": 0,
+           "Inner Unique": true,
+           "Join Filter": "(s.group_id = m.group_id)",
+           "Plans": [
+            {
+             "Node Type": "Index Only Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "share_acl_pkey",
+             "Relation Name": "share_acl",
+             "Schema": "public",
+             "Alias": "s",
+             "Plan Rows": 1,
+             "Plan Width": 8,
+             "Output": [
+              "s.relname",
+              "s.rid",
+              "s.group_id",
+              "s.permission"
+             ],
+             "Index Cond": "((s.relname = 'public.prefix_doc'::text) AND (s.rid = d.id) AND (s.permission = 'read'::text))"
+            },
+            {
+             "Node Type": "Index Only Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "group_membership_pkey",
+             "Relation Name": "group_membership",
+             "Schema": "public",
+             "Alias": "m",
+             "Plan Rows": 1,
+             "Plan Width": 8,
+             "Output": [
+              "m.user_id",
+              "m.group_id"
+             ],
+             "Index Cond": "(m.user_id = 'af_prefix_sparse'::text)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

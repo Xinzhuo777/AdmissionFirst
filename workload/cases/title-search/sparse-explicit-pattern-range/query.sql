@@ -1,0 +1,1 @@
+SELECT d.title, d.secret FROM public.prefix_doc d WHERE d.title ~>=~ 'report' AND d.title ~<~ 'reporu' AND d.title LIKE 'report%urgent%' AND public.prefix_audit_secret(d.id,d.secret) ORDER BY d.title COLLATE "C", d.secret COLLATE "C" NULLS FIRST

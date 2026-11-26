@@ -1,0 +1,27 @@
+{
+ "case": "title-search/sparse-like-no-prefix",
+ "database": "title_search",
+ "role": "af_prefix_sparse",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ],
+   [
+    "secret",
+    25
+   ]
+  ],
+  "command": "SELECT 140",
+  "multiset_sha256": "eab595cbe37dad5d7ef51602980ac6eff79f423e1add3a88b10a6f237d7c5c51",
+  "row_count": 140,
+  "sha256": "eab595cbe37dad5d7ef51602980ac6eff79f423e1add3a88b10a6f237d7c5c51"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 140,
+  "unauthorized": 0
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "case": "original/job-25a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "movie_budget",
+    25
+   ],
+   [
+    "movie_votes",
+    25
+   ],
+   [
+    "male_writer",
+    25
+   ],
+   [
+    "violent_movie_title",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "38b5ee332e8d203ca7ac3292ecfffaa3d1b4f09712bccaabb589f60a168c7dfc",
+  "row_count": 1,
+  "sha256": "38b5ee332e8d203ca7ac3292ecfffaa3d1b4f09712bccaabb589f60a168c7dfc"
+ },
+ "audit": null
+}

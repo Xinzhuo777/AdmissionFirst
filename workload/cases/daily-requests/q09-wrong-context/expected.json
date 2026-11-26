@@ -1,0 +1,20 @@
+{
+ "case": "daily-requests/q09-wrong-context",
+ "database": "application",
+ "role": "caprls_e10_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "count",
+    20
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "88350163572f0f4e5fea2e658be597e1c584ac0e16ef903fa6576ae03d5a166a",
+  "row_count": 1,
+  "sha256": "88350163572f0f4e5fea2e658be597e1c584ac0e16ef903fa6576ae03d5a166a"
+ },
+ "audit": null,
+ "state": "alternate_context"
+}

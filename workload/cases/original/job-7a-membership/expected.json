@@ -1,0 +1,23 @@
+{
+ "case": "original/job-7a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "of_person",
+    25
+   ],
+   [
+    "biography_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "e7699005837ab529336c13c3efe8f546711682d33eec2249e44333646051b738",
+  "row_count": 1,
+  "sha256": "e7699005837ab529336c13c3efe8f546711682d33eec2249e44333646051b738"
+ },
+ "audit": null
+}

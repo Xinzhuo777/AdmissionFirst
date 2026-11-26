@@ -1,0 +1,27 @@
+{
+ "case": "original/tpch-q22-key-predicate",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "cntrycode",
+    25
+   ],
+   [
+    "numcust",
+    20
+   ],
+   [
+    "totacctbal",
+    1700
+   ]
+  ],
+  "command": "SELECT 7",
+  "multiset_sha256": "59b00b7cece407bfeddc46b87964c39aad9b79ac8fc85e05d6849cbfe6f94988",
+  "row_count": 7,
+  "sha256": "59b00b7cece407bfeddc46b87964c39aad9b79ac8fc85e05d6849cbfe6f94988"
+ },
+ "audit": null
+}

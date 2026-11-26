@@ -1,0 +1,313 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Aggregate",
+   "Strategy": "Sorted",
+   "Partial Mode": "Simple",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 74,
+   "Plan Width": 72,
+   "Output": [
+    "(SUBSTRING(customer.c_phone FROM 1 FOR 2))",
+    "count(*)",
+    "sum(customer.c_acctbal)"
+   ],
+   "Group Key": [
+    "(SUBSTRING(customer.c_phone FROM 1 FOR 2))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Plain",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "InitPlan 4 (returns $3)",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 1,
+     "Plan Width": 32,
+     "Output": [
+      "avg(customer_1.c_acctbal)"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Custom Scan",
+       "Parent Relationship": "Outer",
+       "Custom Plan Provider": "AF Completed Hash Policy",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "customer",
+       "Schema": "public",
+       "Alias": "customer_1",
+       "Plan Rows": 263,
+       "Plan Width": 6,
+       "Output": [
+        "customer_1.c_acctbal"
+       ],
+       "AF Path": "completed_hash_policy",
+       "AF Authorization": "native_exact_policy_hash",
+       "AF Hash Source": "original_rls_alternative",
+       "AF Hash SubPlan": 2,
+       "AF Hash Evaluations Upper Estimate": 150000,
+       "AF Original Policy Alternatives": [
+        {
+         "SubPlan": 1,
+         "Hash": false,
+         "Per Call Cost": 5.47
+        },
+        {
+         "SubPlan": 2,
+         "Hash": true,
+         "Per Call Cost": 0.0025
+        }
+       ],
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "child",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "customer",
+         "Schema": "public",
+         "Alias": "customer_1",
+         "Plan Rows": 263,
+         "Plan Width": 6,
+         "Output": [
+          "customer_1.c_acctbal"
+         ],
+         "Filter": "((hashed SubPlan 2) AND (customer_1.c_acctbal > 0.00) AND (SUBSTRING(customer_1.c_phone FROM 1 FOR 2) = ANY ('{29,10,24,23,25,11,20}'::text[])))",
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "SubPlan",
+           "Subplan Name": "SubPlan 2",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 15061,
+           "Plan Width": 8,
+           "Output": [
+            "a.rid"
+           ],
+           "Inner Unique": false,
+           "Join Filter": "(a.group_id = m.group_id)",
+           "Plans": [
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "group_membership",
+             "Schema": "public",
+             "Alias": "m",
+             "Plan Rows": 1,
+             "Plan Width": 8,
+             "Output": [
+              "m.user_id",
+              "m.group_id",
+              "m.membership_version"
+             ],
+             "Filter": "(m.user_id = 'e3_user'::text)"
+            },
+            {
+             "Node Type": "Index Only Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "share_acl_lookup_idx",
+             "Relation Name": "share_acl",
+             "Schema": "public",
+             "Alias": "a",
+             "Plan Rows": 15061,
+             "Plan Width": 16,
+             "Output": [
+              "a.relname",
+              "a.rid",
+              "a.permission",
+              "a.group_id"
+             ],
+             "Index Cond": "((a.relname = 'public.customer'::text) AND (a.permission = 'read'::text))"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 74,
+     "Plan Width": 38,
+     "Output": [
+      "(SUBSTRING(customer.c_phone FROM 1 FOR 2))",
+      "customer.c_acctbal"
+     ],
+     "Sort Key": [
+      "(SUBSTRING(customer.c_phone FROM 1 FOR 2))"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Anti",
+       "Plan Rows": 74,
+       "Plan Width": 38,
+       "Output": [
+        "SUBSTRING(customer.c_phone FROM 1 FOR 2)",
+        "customer.c_acctbal"
+       ],
+       "Inner Unique": false,
+       "Plans": [
+        {
+         "Node Type": "Custom Scan",
+         "Parent Relationship": "Outer",
+         "Custom Plan Provider": "AF Completed Hash Policy",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "customer",
+         "Schema": "public",
+         "Alias": "customer",
+         "Plan Rows": 175,
+         "Plan Width": 30,
+         "Output": [
+          "customer.c_phone",
+          "customer.c_acctbal",
+          "customer.c_custkey"
+         ],
+         "AF Path": "completed_hash_policy",
+         "AF Authorization": "native_exact_policy_hash",
+         "AF Hash Source": "original_rls_alternative",
+         "AF Hash SubPlan": 6,
+         "AF Hash Evaluations Upper Estimate": 150000,
+         "AF Original Policy Alternatives": [
+          {
+           "SubPlan": 5,
+           "Hash": false,
+           "Per Call Cost": 5.47
+          },
+          {
+           "SubPlan": 6,
+           "Hash": true,
+           "Per Call Cost": 0.0025
+          }
+         ],
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "child",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "customer",
+           "Schema": "public",
+           "Alias": "customer",
+           "Plan Rows": 175,
+           "Plan Width": 30,
+           "Output": [
+            "customer.c_phone",
+            "customer.c_acctbal",
+            "customer.c_custkey"
+           ],
+           "Filter": "((hashed SubPlan 6) AND (customer.c_acctbal > $3) AND (SUBSTRING(customer.c_phone FROM 1 FOR 2) = ANY ('{29,10,24,23,25,11,20}'::text[])))",
+           "Plans": [
+            {
+             "Node Type": "Nested Loop",
+             "Parent Relationship": "SubPlan",
+             "Subplan Name": "SubPlan 6",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Plan Rows": 15061,
+             "Plan Width": 8,
+             "Output": [
+              "a_1.rid"
+             ],
+             "Inner Unique": false,
+             "Join Filter": "(a_1.group_id = m_1.group_id)",
+             "Plans": [
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "group_membership",
+               "Schema": "public",
+               "Alias": "m_1",
+               "Plan Rows": 1,
+               "Plan Width": 8,
+               "Output": [
+                "m_1.user_id",
+                "m_1.group_id",
+                "m_1.membership_version"
+               ],
+               "Filter": "(m_1.user_id = 'e3_user'::text)"
+              },
+              {
+               "Node Type": "Index Only Scan",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Scan Direction": "Forward",
+               "Index Name": "share_acl_lookup_idx",
+               "Relation Name": "share_acl",
+               "Schema": "public",
+               "Alias": "a_1",
+               "Plan Rows": 15061,
+               "Plan Width": 16,
+               "Output": [
+                "a_1.relname",
+                "a_1.rid",
+                "a_1.permission",
+                "a_1.group_id"
+               ],
+               "Index Cond": "((a_1.relname = 'public.customer'::text) AND (a_1.permission = 'read'::text))"
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "orders_customer_date_idx",
+         "Relation Name": "orders",
+         "Schema": "public",
+         "Alias": "orders",
+         "Plan Rows": 17,
+         "Plan Width": 8,
+         "Output": [
+          "orders.o_custkey",
+          "orders.o_orderdate"
+         ],
+         "Index Cond": "(orders.o_custkey = customer.c_custkey)"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

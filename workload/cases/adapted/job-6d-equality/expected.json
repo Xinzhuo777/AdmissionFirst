@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-6d-equality",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "studio_id",
+    20
+   ],
+   [
+    "cast_edges",
+    20
+   ]
+  ],
+  "command": "SELECT 10",
+  "multiset_sha256": "9d66f9c525ebc737bf61a58e6c48b144b8dc6b5bbb7ea52ee4bf3244e4650ad3",
+  "row_count": 10,
+  "sha256": "be77b6b7c534daf3fc084ec4351ca5d5ad752a4e454e81a6293073efcd07093a"
+ },
+ "audit": null
+}

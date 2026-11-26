@@ -1,0 +1,27 @@
+{
+ "case": "original/tpch-q22-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "cntrycode",
+    25
+   ],
+   [
+    "numcust",
+    20
+   ],
+   [
+    "totacctbal",
+    1700
+   ]
+  ],
+  "command": "SELECT 7",
+  "multiset_sha256": "e99bb068a1831264f4eefc55b9ea516f55ad69c58ec39327ee8e420c176c0da5",
+  "row_count": 7,
+  "sha256": "e99bb068a1831264f4eefc55b9ea516f55ad69c58ec39327ee8e420c176c0da5"
+ },
+ "audit": null
+}

@@ -1,0 +1,162 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Sort",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 20,
+   "Output": [
+    "o.o_shippriority",
+    "(count(*) FILTER (WHERE (l.l_shipdate < '1995-01-01'::date)))",
+    "(count(*) FILTER (WHERE (l.l_shipdate >= '1995-01-01'::date)))"
+   ],
+   "Sort Key": [
+    "o.o_shippriority"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Hashed",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 1,
+     "Plan Width": 20,
+     "Output": [
+      "o.o_shippriority",
+      "count(*) FILTER (WHERE (l.l_shipdate < '1995-01-01'::date))",
+      "count(*) FILTER (WHERE (l.l_shipdate >= '1995-01-01'::date))"
+     ],
+     "Group Key": [
+      "o.o_shippriority"
+     ],
+     "Planned Partitions": 0,
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Plan Rows": 18132,
+       "Plan Width": 8,
+       "Output": [
+        "o.o_shippriority",
+        "l.l_shipdate"
+       ],
+       "Inner Unique": false,
+       "Plans": [
+        {
+         "Node Type": "Hash Join",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Plan Rows": 4532,
+         "Plan Width": 12,
+         "Output": [
+          "o.o_shippriority",
+          "o.o_orderkey"
+         ],
+         "Inner Unique": true,
+         "Hash Cond": "(o.o_custkey = c.c_custkey)",
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "tpch_orders",
+           "Schema": "public",
+           "Alias": "o",
+           "Plan Rows": 226504,
+           "Plan Width": 20,
+           "Output": [
+            "o.o_orderkey",
+            "o.o_custkey",
+            "o.o_orderdate",
+            "o.o_shippriority",
+            "o.tenant_id"
+           ],
+           "Filter": "((o.o_orderdate >= '1994-01-01'::date) AND (o.o_orderdate < '1995-01-01'::date))"
+          },
+          {
+           "Node Type": "Hash",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Plan Rows": 3001,
+           "Plan Width": 8,
+           "Output": [
+            "c.c_custkey"
+           ],
+           "Plans": [
+            {
+             "Node Type": "Bitmap Heap Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "tpch_customer",
+             "Schema": "public",
+             "Alias": "c",
+             "Plan Rows": 3001,
+             "Plan Width": 8,
+             "Output": [
+              "c.c_custkey"
+             ],
+             "Recheck Cond": "(c.tenant_id = 1)",
+             "Filter": "(c.c_mktsegment = 'BUILDING'::text)",
+             "Plans": [
+              {
+               "Node Type": "Bitmap Index Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Index Name": "tpch_customer_tenant_idx",
+               "Plan Rows": 15035,
+               "Plan Width": 0,
+               "Index Cond": "(c.tenant_id = 1)"
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "tpch_lineitem_order_ship_idx",
+         "Relation Name": "tpch_lineitem",
+         "Schema": "public",
+         "Alias": "l",
+         "Plan Rows": 7,
+         "Plan Width": 12,
+         "Output": [
+          "l.l_orderkey",
+          "l.l_shipdate"
+         ],
+         "Index Cond": "(l.l_orderkey = o.o_orderkey)"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

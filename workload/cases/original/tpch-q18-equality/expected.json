@@ -1,0 +1,39 @@
+{
+ "case": "original/tpch-q18-equality",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "c_name",
+    1043
+   ],
+   [
+    "c_custkey",
+    20
+   ],
+   [
+    "o_orderkey",
+    20
+   ],
+   [
+    "o_orderdate",
+    1082
+   ],
+   [
+    "o_totalprice",
+    1700
+   ],
+   [
+    "sum",
+    1700
+   ]
+  ],
+  "command": "SELECT 2",
+  "multiset_sha256": "23a65dfd38200a1c9aefb1f3aabea0c33a8d977f60de0c85529d30178f9c380f",
+  "row_count": 2,
+  "sha256": "4cd3c6ae8ea5fb336a18efd8f43a260a905d1dfb5f03ad53f90e575fd0cd96e6"
+ },
+ "audit": null
+}

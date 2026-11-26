@@ -1,0 +1,27 @@
+{
+ "case": "title-search/sparse-escaped-percent",
+ "database": "title_search",
+ "role": "af_prefix_sparse",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ],
+   [
+    "secret",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "37d417efb68f9dea260c967ce46698cabda7ca17c7e2bd960b7c83b616fc596f",
+  "row_count": 1,
+  "sha256": "37d417efb68f9dea260c967ce46698cabda7ca17c7e2bd960b7c83b616fc596f"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 1,
+  "unauthorized": 0
+ }
+}

@@ -1,0 +1,230 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Aggregate",
+   "Strategy": "Plain",
+   "Partial Mode": "Simple",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 8,
+   "Output": [
+    "count(DISTINCT branch_tagged.branch_rid)"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Seq Scan",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "CTE auth",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "document",
+     "Schema": "public",
+     "Alias": "d",
+     "Plan Rows": 53024,
+     "Plan Width": 24,
+     "Output": [
+      "d.doc_id",
+      "d.owner_id",
+      "d.doc_id"
+     ],
+     "Filter": "((d.tenant_id = 90) OR (d.owner_id = 90) OR d.public OR (hashed SubPlan 2))",
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "SubPlan",
+       "Subplan Name": "SubPlan 2",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Plan Rows": 1000,
+       "Plan Width": 8,
+       "Output": [
+        "a.rid"
+       ],
+       "Inner Unique": false,
+       "Plans": [
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "group_membership_pkey",
+         "Relation Name": "group_membership",
+         "Schema": "public",
+         "Alias": "gm",
+         "Plan Rows": 5,
+         "Plan Width": 8,
+         "Output": [
+          "gm.user_id",
+          "gm.group_id"
+         ],
+         "Index Cond": "(gm.user_id = 90)"
+        },
+        {
+         "Node Type": "Bitmap Heap Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "share_acl",
+         "Schema": "public",
+         "Alias": "a",
+         "Plan Rows": 200,
+         "Plan Width": 16,
+         "Output": [
+          "a.group_id",
+          "a.rid",
+          "a.relname",
+          "a.permission",
+          "a.valid_from",
+          "a.valid_to"
+         ],
+         "Recheck Cond": "((a.group_id = gm.group_id) AND (a.relname = 'document'::text))",
+         "Filter": "((a.permission = ANY ('{read,owner}'::text[])) AND ('2026-06-01 00:00:00+00'::timestamp with time zone >= a.valid_from) AND ('2026-06-01 00:00:00+00'::timestamp with time zone <= a.valid_to))",
+         "Plans": [
+          {
+           "Node Type": "Bitmap Index Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Index Name": "share_acl_pkey",
+           "Plan Rows": 200,
+           "Plan Width": 0,
+           "Index Cond": "((a.group_id = gm.group_id) AND (a.relname = 'document'::text))"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "Node Type": "Append",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "CTE branch_tagged",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 105244,
+     "Plan Width": 40,
+     "Subplans Removed": 0,
+     "Plans": [
+      {
+       "Node Type": "CTE Scan",
+       "Parent Relationship": "Member",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "CTE Name": "auth",
+       "Alias": "d_1",
+       "Plan Rows": 265,
+       "Plan Width": 40,
+       "Output": [
+        "d_1.doc_id",
+        "'own'::text"
+       ],
+       "Filter": "(d_1.owner_id = '90'::bigint)"
+      },
+      {
+       "Node Type": "Hash Join",
+       "Parent Relationship": "Member",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Plan Rows": 104979,
+       "Plan Width": 40,
+       "Output": [
+        "d_2.doc_id",
+        "'shared'::text"
+       ],
+       "Inner Unique": false,
+       "Hash Cond": "(d_2.doc_id = a_1.rid)",
+       "Plans": [
+        {
+         "Node Type": "CTE Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "CTE Name": "auth",
+         "Alias": "d_2",
+         "Plan Rows": 53024,
+         "Plan Width": 8,
+         "Output": [
+          "d_2.doc_id",
+          "d_2.owner_id",
+          "d_2.__rid"
+         ]
+        },
+        {
+         "Node Type": "Hash",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Plan Rows": 200000,
+         "Plan Width": 8,
+         "Output": [
+          "a_1.rid"
+         ],
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "share_acl",
+           "Schema": "public",
+           "Alias": "a_1",
+           "Plan Rows": 200000,
+           "Plan Width": 8,
+           "Output": [
+            "a_1.rid"
+           ],
+           "Filter": "((a_1.permission = ANY ('{read,owner}'::text[])) AND (a_1.relname = 'document'::text))"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 105244,
+     "Plan Width": 8,
+     "Output": [
+      "branch_tagged.branch_rid"
+     ],
+     "Sort Key": [
+      "branch_tagged.branch_rid"
+     ],
+     "Plans": [
+      {
+       "Node Type": "CTE Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "CTE Name": "branch_tagged",
+       "Alias": "branch_tagged",
+       "Plan Rows": 105244,
+       "Plan Width": 8,
+       "Output": [
+        "branch_tagged.branch_rid"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

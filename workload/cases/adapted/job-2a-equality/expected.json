@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-2a-equality",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "production_year",
+    23
+   ],
+   [
+    "production_edges",
+    20
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "56e020a54c926f522226ada894713b996112a8e9ad3f3124d72ce8453179bb33",
+  "row_count": 20,
+  "sha256": "7eb18f2664a86bf7e171e2f4b038e839deaa925356d6700869e2bb7301b6e0de"
+ },
+ "audit": null
+}

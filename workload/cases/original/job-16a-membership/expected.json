@@ -1,0 +1,23 @@
+{
+ "case": "original/job-16a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "cool_actor_pseudonym",
+    25
+   ],
+   [
+    "series_named_after_char",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "442e389f0540905b4c7f820c0d332566dd23aacfe7f24586e472b750c58284f4",
+  "row_count": 1,
+  "sha256": "442e389f0540905b4c7f820c0d332566dd23aacfe7f24586e472b750c58284f4"
+ },
+ "audit": null
+}

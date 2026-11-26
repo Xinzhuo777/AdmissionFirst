@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-10a-key-predicate",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "production_year",
+    23
+   ],
+   [
+    "company_edges",
+    20
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "0c08c8019ddf7ff9b5e141c11714f7e30f2116fcada3e4ca719d0901d46b3163",
+  "row_count": 20,
+  "sha256": "f143f75fcef03b01b9fc970069f0a77f34c530970c7234fd88301f044b4614b9"
+ },
+ "audit": null
+}

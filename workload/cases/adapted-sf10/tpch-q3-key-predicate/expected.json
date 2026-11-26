@@ -1,0 +1,31 @@
+{
+ "case": "adapted-sf10/tpch-q3-key-predicate",
+ "database": "tpch_sf10",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "l_orderkey",
+    20
+   ],
+   [
+    "revenue",
+    1700
+   ],
+   [
+    "o_orderdate",
+    1082
+   ],
+   [
+    "o_shippriority",
+    23
+   ]
+  ],
+  "command": "SELECT 10",
+  "multiset_sha256": "2db0f17ec4d2dca380aee4d227c312b01f2fc7ab196f3a047ff89da0a16d48a0",
+  "row_count": 10,
+  "sha256": "42d2b50d943d1516f6b6f5d90b6331aa9f9b54ea7d48e9f2e9e51daa5abc71a2"
+ },
+ "audit": null
+}

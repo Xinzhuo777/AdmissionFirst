@@ -1,0 +1,31 @@
+{
+ "case": "original/tpch-q7-membership-3-tables",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "supp_nation",
+    1042
+   ],
+   [
+    "cust_nation",
+    1042
+   ],
+   [
+    "l_year",
+    1700
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 4",
+  "multiset_sha256": "a02b1f472e0d40cc1e893a0980d6f6b4a85cd06230cae1c73fb57e28da28dc2b",
+  "row_count": 4,
+  "sha256": "a02b1f472e0d40cc1e893a0980d6f6b4a85cd06230cae1c73fb57e28da28dc2b"
+ },
+ "audit": null
+}

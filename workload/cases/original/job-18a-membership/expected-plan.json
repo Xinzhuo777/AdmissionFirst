@@ -1,0 +1,457 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Aggregate",
+   "Strategy": "Plain",
+   "Partial Mode": "Simple",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 96,
+   "Output": [
+    "min(mi.info)",
+    "min(mi_idx.info)",
+    "min(t.title)"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Limit",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "InitPlan 3 (returns $2)",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 252770,
+     "Plan Width": 8,
+     "Output": [
+      "a_1.rid"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Plan Rows": 252770,
+       "Plan Width": 8,
+       "Output": [
+        "a_1.rid"
+       ],
+       "Inner Unique": false,
+       "Join Filter": "(a_1.group_id = m_1.group_id)",
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "group_membership",
+         "Schema": "public",
+         "Alias": "m_1",
+         "Plan Rows": 1,
+         "Plan Width": 8,
+         "Output": [
+          "m_1.user_id",
+          "m_1.group_id",
+          "m_1.membership_version"
+         ],
+         "Filter": "(m_1.user_id = 'e3_user'::text)"
+        },
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "share_acl",
+         "Schema": "public",
+         "Alias": "a_1",
+         "Plan Rows": 252770,
+         "Plan Width": 16,
+         "Output": [
+          "a_1.relname",
+          "a_1.rid",
+          "a_1.group_id",
+          "a_1.permission",
+          "a_1.acl_version"
+         ],
+         "Filter": "((a_1.relname = 'public.title'::text) AND (a_1.permission = 'read'::text))"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Plan Rows": 3,
+     "Plan Width": 66,
+     "Output": [
+      "mi.info",
+      "mi_idx.info",
+      "t.title"
+     ],
+     "Inner Unique": true,
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Plan Rows": 36,
+       "Plan Width": 73,
+       "Output": [
+        "ci.movie_id",
+        "mi.info",
+        "mi.movie_id",
+        "mi_idx.info",
+        "mi_idx.movie_id"
+       ],
+       "Inner Unique": true,
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Plan Rows": 8389,
+         "Plan Width": 81,
+         "Output": [
+          "ci.movie_id",
+          "ci.person_id",
+          "mi.info",
+          "mi.movie_id",
+          "mi_idx.info",
+          "mi_idx.movie_id"
+         ],
+         "Inner Unique": false,
+         "Plans": [
+          {
+           "Node Type": "Hash Join",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 3419,
+           "Plan Width": 65,
+           "Output": [
+            "mi.info",
+            "mi.movie_id",
+            "mi_idx.info",
+            "mi_idx.movie_id"
+           ],
+           "Inner Unique": true,
+           "Hash Cond": "(mi.info_type_id = it1.id)",
+           "Plans": [
+            {
+             "Node Type": "Nested Loop",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Plan Rows": 386389,
+             "Plan Width": 73,
+             "Output": [
+              "mi_idx.info",
+              "mi_idx.movie_id",
+              "mi.info",
+              "mi.movie_id",
+              "mi.info_type_id"
+             ],
+             "Inner Unique": false,
+             "Plans": [
+              {
+               "Node Type": "Nested Loop",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Join Type": "Inner",
+               "Plan Rows": 12213,
+               "Plan Width": 13,
+               "Output": [
+                "mi_idx.info",
+                "mi_idx.movie_id"
+               ],
+               "Inner Unique": false,
+               "Plans": [
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "info_type",
+                 "Schema": "public",
+                 "Alias": "it2",
+                 "Plan Rows": 1,
+                 "Plan Width": 8,
+                 "Output": [
+                  "it2.id",
+                  "it2.info"
+                 ],
+                 "Filter": "((it2.info)::text = 'votes'::text)"
+                },
+                {
+                 "Node Type": "Custom Scan",
+                 "Parent Relationship": "Inner",
+                 "Custom Plan Provider": "AF Join Input Authorization Filter",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "movie_info_idx",
+                 "Schema": "public",
+                 "Alias": "mi_idx",
+                 "Plan Rows": 345009,
+                 "Plan Width": 21,
+                 "Output": [
+                  "mi_idx.id",
+                  "mi_idx.movie_id",
+                  "mi_idx.info_type_id",
+                  "mi_idx.info",
+                  "mi_idx.note"
+                 ],
+                 "AF Prefilter Trigger": 1024,
+                 "AF Prefilter Shared Access Budget": 252770,
+                 "Plans": [
+                  {
+                   "Node Type": "Bitmap Heap Scan",
+                   "Parent Relationship": "child",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Relation Name": "movie_info_idx",
+                   "Schema": "public",
+                   "Alias": "mi_idx",
+                   "Plan Rows": 345009,
+                   "Plan Width": 21,
+                   "Output": [
+                    "mi_idx.id",
+                    "mi_idx.movie_id",
+                    "mi_idx.info_type_id",
+                    "mi_idx.info",
+                    "mi_idx.note"
+                   ],
+                   "Recheck Cond": "(it2.id = mi_idx.info_type_id)",
+                   "Plans": [
+                    {
+                     "Node Type": "Bitmap Index Scan",
+                     "Parent Relationship": "Outer",
+                     "Parallel Aware": false,
+                     "Async Capable": false,
+                     "Index Name": "info_type_id_movie_info_idx",
+                     "Plan Rows": 345009,
+                     "Plan Width": 0,
+                     "Index Cond": "(mi_idx.info_type_id = it2.id)"
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              },
+              {
+               "Node Type": "Index Scan",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Scan Direction": "Forward",
+               "Index Name": "movie_id_movie_info",
+               "Relation Name": "movie_info",
+               "Schema": "public",
+               "Alias": "mi",
+               "Plan Rows": 43,
+               "Plan Width": 60,
+               "Output": [
+                "mi.id",
+                "mi.movie_id",
+                "mi.info_type_id",
+                "mi.info",
+                "mi.note"
+               ],
+               "Index Cond": "(mi.movie_id = mi_idx.movie_id)"
+              }
+             ]
+            },
+            {
+             "Node Type": "Hash",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Plan Rows": 1,
+             "Plan Width": 8,
+             "Output": [
+              "it1.id"
+             ],
+             "Plans": [
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "info_type",
+               "Schema": "public",
+               "Alias": "it1",
+               "Plan Rows": 1,
+               "Plan Width": 8,
+               "Output": [
+                "it1.id"
+               ],
+               "Filter": "((it1.info)::text = 'budget'::text)"
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "Node Type": "Index Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Scan Direction": "Forward",
+           "Index Name": "movie_id_cast_info",
+           "Relation Name": "cast_info",
+           "Schema": "public",
+           "Alias": "ci",
+           "Plan Rows": 2,
+           "Plan Width": 16,
+           "Output": [
+            "ci.id",
+            "ci.person_id",
+            "ci.movie_id",
+            "ci.person_role_id",
+            "ci.note",
+            "ci.nr_order",
+            "ci.role_id"
+           ],
+           "Index Cond": "(ci.movie_id = mi.movie_id)",
+           "Filter": "(ci.note = ANY ('{(producer),\"(executive producer)\"}'::text[]))"
+          }
+         ]
+        },
+        {
+         "Node Type": "Index Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "name_pkey",
+         "Relation Name": "name",
+         "Schema": "public",
+         "Alias": "n",
+         "Plan Rows": 1,
+         "Plan Width": 8,
+         "Output": [
+          "n.id",
+          "n.name",
+          "n.imdb_index",
+          "n.imdb_id",
+          "n.gender",
+          "n.name_pcode_cf",
+          "n.name_pcode_nf",
+          "n.surname_pcode",
+          "n.md5sum"
+         ],
+         "Index Cond": "(n.id = ci.person_id)",
+         "Filter": "(((n.gender)::text = 'm'::text) AND (n.name ~~ '%Tim%'::text))"
+        }
+       ]
+      },
+      {
+       "Node Type": "Index Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Scan Direction": "Forward",
+       "Index Name": "title_pkey",
+       "Relation Name": "title",
+       "Schema": "public",
+       "Alias": "t",
+       "Plan Rows": 1,
+       "Plan Width": 25,
+       "Output": [
+        "t.id",
+        "t.title",
+        "t.imdb_index",
+        "t.kind_id",
+        "t.production_year",
+        "t.imdb_id",
+        "t.phonetic_code",
+        "t.episode_of_id",
+        "t.season_nr",
+        "t.episode_nr",
+        "t.series_years",
+        "t.md5sum",
+        "t.tenant_id"
+       ],
+       "Index Cond": "(t.id = mi.movie_id)",
+       "Filter": "(SubPlan 1)",
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "SubPlan",
+         "Subplan Name": "SubPlan 1",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Plan Rows": 1,
+         "Plan Width": 0,
+         "Inner Unique": true,
+         "Join Filter": "(a.group_id = m.group_id)",
+         "Plans": [
+          {
+           "Node Type": "Index Only Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Scan Direction": "Forward",
+           "Index Name": "share_acl_lookup_idx",
+           "Relation Name": "share_acl",
+           "Schema": "public",
+           "Alias": "a",
+           "Plan Rows": 1,
+           "Plan Width": 8,
+           "Output": [
+            "a.relname",
+            "a.rid",
+            "a.permission",
+            "a.group_id"
+           ],
+           "Index Cond": "((a.relname = 'public.title'::text) AND (a.rid = t.id) AND (a.permission = 'read'::text))"
+          },
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "group_membership",
+           "Schema": "public",
+           "Alias": "m",
+           "Plan Rows": 1,
+           "Plan Width": 8,
+           "Output": [
+            "m.user_id",
+            "m.group_id",
+            "m.membership_version"
+           ],
+           "Filter": "(m.user_id = 'e3_user'::text)"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

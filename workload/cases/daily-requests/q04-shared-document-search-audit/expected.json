@@ -1,0 +1,25 @@
+{
+ "case": "daily-requests/q04-shared-document-search-audit",
+ "database": "application",
+ "role": "caprls_e10_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "count",
+    20
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "90ceb69abef2a9cc3166f8a234dc9ce09cb53b5d34d86aba08202490473facf2",
+  "row_count": 1,
+  "sha256": "90ceb69abef2a9cc3166f8a234dc9ce09cb53b5d34d86aba08202490473facf2"
+ },
+ "audit": {
+  "kind": "application",
+  "observations": 1400,
+  "unauthorized": 0,
+  "run_id": "e10",
+  "query_id": "E10_Q4_shared_document_search_audit"
+ }
+}

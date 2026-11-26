@@ -1,0 +1,31 @@
+{
+ "case": "original/tpch-q7-key-predicate",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "supp_nation",
+    1042
+   ],
+   [
+    "cust_nation",
+    1042
+   ],
+   [
+    "l_year",
+    1700
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 4",
+  "multiset_sha256": "7d575968951841697560ef1261e60d0870d61ad37b1e6585f241dbb12e4841ba",
+  "row_count": 4,
+  "sha256": "7d575968951841697560ef1261e60d0870d61ad37b1e6585f241dbb12e4841ba"
+ },
+ "audit": null
+}

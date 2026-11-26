@@ -1,0 +1,673 @@
+{
+ "constraints": {
+  "group_membership.group_membership_pkey": "PRIMARY KEY (user_id, group_id)",
+  "prefix_audit.prefix_audit_pkey": "PRIMARY KEY (seq)",
+  "prefix_doc.prefix_doc_pkey": "PRIMARY KEY (id)",
+  "share_acl.share_acl_pkey": "PRIMARY KEY (relname, rid, group_id, permission)"
+ },
+ "database": {
+  "acl": null,
+  "collate": "C",
+  "connlimit": -1,
+  "ctype": "C",
+  "encoding": "UTF8",
+  "locale_provider": "c",
+  "settings": null
+ },
+ "default_acl": null,
+ "extensions": [
+  "plpgsql 1.0"
+ ],
+ "functions": {
+  "prefix_audit_secret(bigint,text)": {
+   "acl": "{postgres=X/postgres,af_prefix_sparse=X/postgres,af_prefix_medium=X/postgres,af_prefix_dense=X/postgres}",
+   "config": null,
+   "cost": 100,
+   "definition": "CREATE OR REPLACE FUNCTION public.prefix_audit_secret(row_id bigint, value text)\n RETURNS boolean\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n    INSERT INTO public.prefix_audit(rid,secret) VALUES (row_id,value);\n    RETURN true;\nEND\n$function$\n",
+   "leakproof": false,
+   "owner": "postgres",
+   "secdef": false,
+   "volatile": "v"
+  }
+ },
+ "policies": [
+  {
+   "cmd": "SELECT",
+   "name": "prefix_dense",
+   "permissive": "PERMISSIVE",
+   "qual": "(EXISTS ( SELECT 1\n   FROM (share_acl s\n     JOIN group_membership m ON ((m.group_id = s.group_id)))\n  WHERE ((m.user_id = 'af_prefix_dense'::text) AND (s.relname = 'public.prefix_doc'::text) AND (s.rid = prefix_doc.id) AND (s.permission = 'read'::text))))",
+   "roles": [
+    "af_prefix_dense"
+   ],
+   "table": "prefix_doc",
+   "with_check": null
+  },
+  {
+   "cmd": "SELECT",
+   "name": "prefix_medium",
+   "permissive": "PERMISSIVE",
+   "qual": "(EXISTS ( SELECT 1\n   FROM (share_acl s\n     JOIN group_membership m ON ((m.group_id = s.group_id)))\n  WHERE ((m.user_id = 'af_prefix_medium'::text) AND (s.relname = 'public.prefix_doc'::text) AND (s.rid = prefix_doc.id) AND (s.permission = 'read'::text))))",
+   "roles": [
+    "af_prefix_medium"
+   ],
+   "table": "prefix_doc",
+   "with_check": null
+  },
+  {
+   "cmd": "SELECT",
+   "name": "prefix_sparse",
+   "permissive": "PERMISSIVE",
+   "qual": "(EXISTS ( SELECT 1\n   FROM (share_acl s\n     JOIN group_membership m ON ((m.group_id = s.group_id)))\n  WHERE ((m.user_id = 'af_prefix_sparse'::text) AND (s.relname = 'public.prefix_doc'::text) AND (s.rid = prefix_doc.id) AND (s.permission = 'read'::text))))",
+   "roles": [
+    "af_prefix_sparse"
+   ],
+   "table": "prefix_doc",
+   "with_check": null
+  }
+ ],
+ "relations": {
+  "group_membership": {
+   "acl": "{postgres=arwdDxt/postgres,af_prefix_sparse=r/postgres,af_prefix_medium=r/postgres,af_prefix_dense=r/postgres}",
+   "columns": [
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "user_id",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "text"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "group_id",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": null,
+   "kind": "r",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 6,
+   "reltuples": 851,
+   "rowsecurity": false
+  },
+  "group_membership_pkey": {
+   "acl": null,
+   "columns": [
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "user_id",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "group_id",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "bigint"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": "CREATE UNIQUE INDEX group_membership_pkey ON public.group_membership USING btree (user_id, group_id)",
+   "kind": "i",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 10,
+   "reltuples": 851,
+   "rowsecurity": false
+  },
+  "prefix_acl_group": {
+   "acl": null,
+   "columns": [
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "group_id",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "relname",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    },
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "permission",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "rid",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "bigint"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": "CREATE INDEX prefix_acl_group ON public.share_acl USING btree (group_id, relname, permission, rid)",
+   "kind": "i",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 6234,
+   "reltuples": 524290,
+   "rowsecurity": false
+  },
+  "prefix_audit": {
+   "acl": "{postgres=arwdDxt/postgres,af_prefix_sparse=a/postgres,af_prefix_medium=a/postgres,af_prefix_dense=a/postgres}",
+   "columns": [
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "a",
+     "name": "seq",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": "C",
+     "default": "CURRENT_USER",
+     "identity": "",
+     "name": "principal",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "name"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "rid",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "secret",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": null,
+   "kind": "r",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 0,
+   "reltuples": -1,
+   "rowsecurity": false
+  },
+  "prefix_audit_pkey": {
+   "acl": null,
+   "columns": [
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "seq",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "bigint"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": "CREATE UNIQUE INDEX prefix_audit_pkey ON public.prefix_audit USING btree (seq)",
+   "kind": "i",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 0,
+   "reltuples": -1,
+   "rowsecurity": false
+  },
+  "prefix_audit_seq_seq": {
+   "acl": "{postgres=rwU/postgres,af_prefix_sparse=U/postgres,af_prefix_medium=U/postgres,af_prefix_dense=U/postgres}",
+   "columns": [
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "last_value",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "log_cnt",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "is_called",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "boolean"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": null,
+   "kind": "S",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 1,
+   "reltuples": 1,
+   "rowsecurity": false
+  },
+  "prefix_doc": {
+   "acl": "{postgres=arwdDxt/postgres,af_prefix_sparse=r/postgres,af_prefix_medium=r/postgres,af_prefix_dense=r/postgres}",
+   "columns": [
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "id",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": "C",
+     "default": null,
+     "identity": "",
+     "name": "title",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    },
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "secret",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    }
+   ],
+   "forcerowsecurity": true,
+   "indexdef": null,
+   "kind": "r",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 4436,
+   "reltuples": 524288,
+   "rowsecurity": true
+  },
+  "prefix_doc_pkey": {
+   "acl": null,
+   "columns": [
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "id",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "bigint"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": "CREATE UNIQUE INDEX prefix_doc_pkey ON public.prefix_doc USING btree (id)",
+   "kind": "i",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 1440,
+   "reltuples": 524288,
+   "rowsecurity": false
+  },
+  "prefix_doc_title_pattern": {
+   "acl": null,
+   "columns": [
+    {
+     "acl": null,
+     "collation": "C",
+     "default": null,
+     "identity": "",
+     "name": "title",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": "CREATE INDEX prefix_doc_title_pattern ON public.prefix_doc USING btree (title text_pattern_ops)",
+   "kind": "i",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 470,
+   "reltuples": 524288,
+   "rowsecurity": false
+  },
+  "prefix_formal_meta": {
+   "acl": null,
+   "columns": [
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "rows",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "version",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "text"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": null,
+   "kind": "r",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 0,
+   "reltuples": -1,
+   "rowsecurity": false
+  },
+  "share_acl": {
+   "acl": "{postgres=arwdDxt/postgres,af_prefix_sparse=r/postgres,af_prefix_medium=r/postgres,af_prefix_dense=r/postgres}",
+   "columns": [
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "relname",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "text"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "rid",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "group_id",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "permission",
+     "notnull": true,
+     "stattarget": -1,
+     "type": "text"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": null,
+   "kind": "r",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 4900,
+   "reltuples": 524290,
+   "rowsecurity": false
+  },
+  "share_acl_pkey": {
+   "acl": null,
+   "columns": [
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "relname",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "rid",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": null,
+     "default": null,
+     "identity": "",
+     "name": "group_id",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "bigint"
+    },
+    {
+     "acl": null,
+     "collation": "default",
+     "default": null,
+     "identity": "",
+     "name": "permission",
+     "notnull": false,
+     "stattarget": -1,
+     "type": "text"
+    }
+   ],
+   "forcerowsecurity": false,
+   "indexdef": "CREATE UNIQUE INDEX share_acl_pkey ON public.share_acl USING btree (relname, rid, group_id, permission)",
+   "kind": "i",
+   "options": null,
+   "owner": "postgres",
+   "persistence": "p",
+   "relallvisible": 0,
+   "relpages": 4368,
+   "reltuples": 524290,
+   "rowsecurity": false
+  }
+ },
+ "roles": {
+  "af_prefix_dense": {
+   "bypassrls": false,
+   "config": null,
+   "connlimit": -1,
+   "createdb": false,
+   "createrole": false,
+   "inherit": true,
+   "login": true,
+   "member_of": null,
+   "replication": false,
+   "super": false,
+   "validuntil": null
+  },
+  "af_prefix_medium": {
+   "bypassrls": false,
+   "config": null,
+   "connlimit": -1,
+   "createdb": false,
+   "createrole": false,
+   "inherit": true,
+   "login": true,
+   "member_of": null,
+   "replication": false,
+   "super": false,
+   "validuntil": null
+  },
+  "af_prefix_sparse": {
+   "bypassrls": false,
+   "config": null,
+   "connlimit": -1,
+   "createdb": false,
+   "createrole": false,
+   "inherit": true,
+   "login": true,
+   "member_of": null,
+   "replication": false,
+   "super": false,
+   "validuntil": null
+  },
+  "postgres": {
+   "bypassrls": true,
+   "config": null,
+   "connlimit": -1,
+   "createdb": true,
+   "createrole": true,
+   "inherit": true,
+   "login": true,
+   "member_of": null,
+   "replication": true,
+   "super": true,
+   "validuntil": null
+  }
+ },
+ "schemas": {
+  "public": {
+   "acl": "{pg_database_owner=UC/pg_database_owner,=U/pg_database_owner,af_prefix_sparse=U/pg_database_owner,af_prefix_medium=U/pg_database_owner,af_prefix_dense=U/pg_database_owner}",
+   "owner": "pg_database_owner"
+  }
+ },
+ "sequences": {
+  "public.prefix_audit_seq_seq": {
+   "cache": 1,
+   "cycle": false,
+   "increment": 1,
+   "last_value": 28431616,
+   "max": 9223372036854775807,
+   "min": 1,
+   "start": 1,
+   "type": "bigint"
+  }
+ },
+ "statistics": {
+  "group_membership": {
+   "columns": 2,
+   "md5": "9154d17f65c5784e0c051a75e9eb8424"
+  },
+  "prefix_doc": {
+   "columns": 3,
+   "md5": "581359dffbdc572f2c565dc8a2540ad1"
+  },
+  "share_acl": {
+   "columns": 4,
+   "md5": "5c91b943c115728a8bf318e00d2c37e7"
+  }
+ },
+ "tables": {
+  "group_membership": {
+   "content_md5": "1b2b12df47bcff47813682f362771674",
+   "physical_md5": "4547ab9d045689216ec0e8c5ec2ef8ab",
+   "rows": 851
+  },
+  "prefix_audit": {
+   "content_md5": null,
+   "physical_md5": null,
+   "rows": 0
+  },
+  "prefix_doc": {
+   "content_md5": "50e0bb6dfa19435528a659fd486fdeee",
+   "physical_md5": "4488fa7a14f6d2097ef40dfec9d54a73",
+   "rows": 524288
+  },
+  "prefix_formal_meta": {
+   "content_md5": "db806edb1217b897ce856b5be6f49afd",
+   "physical_md5": "8effe9f2f0f1feafc514629706da4fbd",
+   "rows": 1
+  },
+  "share_acl": {
+   "content_md5": "b66b8e5e93ae10f315dd5aff66f04174",
+   "physical_md5": "fe0002891f9fcc5de30511fba513a4ac",
+   "rows": 524290
+  }
+ }
+}

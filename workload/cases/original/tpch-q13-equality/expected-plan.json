@@ -1,0 +1,139 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Sort",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 200,
+   "Plan Width": 16,
+   "Output": [
+    "(count(orders.o_orderkey))",
+    "(count(*))"
+   ],
+   "Sort Key": [
+    "(count(*)) DESC",
+    "(count(orders.o_orderkey)) DESC"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Hashed",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 200,
+     "Plan Width": 16,
+     "Output": [
+      "(count(orders.o_orderkey))",
+      "count(*)"
+     ],
+     "Group Key": [
+      "count(orders.o_orderkey)"
+     ],
+     "Planned Partitions": 0,
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Hashed",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 14835,
+       "Plan Width": 16,
+       "Output": [
+        "customer.c_custkey",
+        "count(orders.o_orderkey)"
+       ],
+       "Group Key": [
+        "customer.c_custkey"
+       ],
+       "Planned Partitions": 0,
+       "Plans": [
+        {
+         "Node Type": "Hash Join",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Right",
+         "Plan Rows": 148335,
+         "Plan Width": 16,
+         "Output": [
+          "customer.c_custkey",
+          "orders.o_orderkey"
+         ],
+         "Inner Unique": true,
+         "Hash Cond": "(orders.o_custkey = customer.c_custkey)",
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "orders",
+           "Schema": "public",
+           "Alias": "orders",
+           "Plan Rows": 1499850,
+           "Plan Width": 16,
+           "Output": [
+            "orders.o_orderkey",
+            "orders.o_custkey",
+            "orders.o_orderstatus",
+            "orders.o_totalprice",
+            "orders.o_orderdate",
+            "orders.o_orderpriority",
+            "orders.o_clerk",
+            "orders.o_shippriority",
+            "orders.o_comment",
+            "orders.tenant_id"
+           ],
+           "Filter": "((orders.o_comment)::text !~~ '%pending%deposits%'::text)"
+          },
+          {
+           "Node Type": "Hash",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Plan Rows": 14835,
+           "Plan Width": 8,
+           "Output": [
+            "customer.c_custkey"
+           ],
+           "Plans": [
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "customer",
+             "Schema": "public",
+             "Alias": "customer",
+             "Plan Rows": 14835,
+             "Plan Width": 8,
+             "Output": [
+              "customer.c_custkey"
+             ],
+             "Filter": "(customer.tenant_id = 1)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

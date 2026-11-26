@@ -1,0 +1,23 @@
+{
+ "case": "title-search/medium-projection-title-bag",
+ "database": "title_search",
+ "role": "af_prefix_medium",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ]
+  ],
+  "command": "SELECT 799",
+  "multiset_sha256": "ff491ad782fc403d4155bc77aee5e46aecc982646df005ddeb6a03d53af60d6c",
+  "row_count": 799,
+  "sha256": "c9280b54fc50dbe2b8bc49d2aefadaa843207e10ea346f001ed25daf034cd4ab"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 799,
+  "unauthorized": 0
+ }
+}

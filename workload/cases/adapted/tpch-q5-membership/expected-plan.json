@@ -1,0 +1,271 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 5,
+   "Plan Width": 40,
+   "Output": [
+    "c.region_id",
+    "(sum((l.l_extendedprice * ('1'::numeric - l.l_discount))))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 5,
+     "Plan Width": 40,
+     "Output": [
+      "c.region_id",
+      "(sum((l.l_extendedprice * ('1'::numeric - l.l_discount))))"
+     ],
+     "Sort Key": [
+      "(sum((l.l_extendedprice * ('1'::numeric - l.l_discount)))) DESC"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Sorted",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 5,
+       "Plan Width": 40,
+       "Output": [
+        "c.region_id",
+        "sum((l.l_extendedprice * ('1'::numeric - l.l_discount)))"
+       ],
+       "Group Key": [
+        "c.region_id"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Sort",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Plan Rows": 2056,
+         "Plan Width": 20,
+         "Output": [
+          "c.region_id",
+          "l.l_extendedprice",
+          "l.l_discount"
+         ],
+         "Sort Key": [
+          "c.region_id"
+         ],
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 2056,
+           "Plan Width": 20,
+           "Output": [
+            "c.region_id",
+            "l.l_extendedprice",
+            "l.l_discount"
+           ],
+           "Inner Unique": false,
+           "Plans": [
+            {
+             "Node Type": "Nested Loop",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Plan Rows": 925,
+             "Plan Width": 16,
+             "Output": [
+              "c.region_id",
+              "o.o_orderkey"
+             ],
+             "Inner Unique": false,
+             "Plans": [
+              {
+               "Node Type": "Custom Scan",
+               "Parent Relationship": "Outer",
+               "Custom Plan Provider": "AF Completed Hash Policy",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "tpch_customer",
+               "Schema": "public",
+               "Alias": "c",
+               "Plan Rows": 2970,
+               "Plan Width": 16,
+               "Output": [
+                "c.region_id",
+                "c.c_custkey"
+               ],
+               "AF Path": "completed_hash_policy",
+               "AF Authorization": "native_exact_policy_hash",
+               "AF Hash Source": "original_rls_alternative",
+               "AF Hash SubPlan": 2,
+               "AF Hash Evaluations Upper Estimate": 150000,
+               "AF Original Policy Alternatives": [
+                {
+                 "SubPlan": 1,
+                 "Hash": false,
+                 "Per Call Cost": 9.47
+                },
+                {
+                 "SubPlan": 2,
+                 "Hash": true,
+                 "Per Call Cost": 0.0025
+                }
+               ],
+               "Plans": [
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "child",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "tpch_customer",
+                 "Schema": "public",
+                 "Alias": "c",
+                 "Plan Rows": 2970,
+                 "Plan Width": 16,
+                 "Output": [
+                  "c.region_id",
+                  "c.c_custkey"
+                 ],
+                 "Filter": "((c.c_mktsegment = 'BUILDING'::text) AND (hashed SubPlan 2))",
+                 "Plans": [
+                  {
+                   "Node Type": "Nested Loop",
+                   "Parent Relationship": "SubPlan",
+                   "Subplan Name": "SubPlan 2",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Join Type": "Inner",
+                   "Plan Rows": 14929,
+                   "Plan Width": 8,
+                   "Output": [
+                    "s.rid"
+                   ],
+                   "Inner Unique": false,
+                   "Plans": [
+                    {
+                     "Node Type": "Seq Scan",
+                     "Parent Relationship": "Outer",
+                     "Parallel Aware": false,
+                     "Async Capable": false,
+                     "Relation Name": "group_membership",
+                     "Schema": "public",
+                     "Alias": "m",
+                     "Plan Rows": 1,
+                     "Plan Width": 8,
+                     "Output": [
+                      "m.user_id",
+                      "m.group_id",
+                      "m.membership_version"
+                     ],
+                     "Filter": "(m.user_id = 'e3_user'::text)"
+                    },
+                    {
+                     "Node Type": "Bitmap Heap Scan",
+                     "Parent Relationship": "Inner",
+                     "Parallel Aware": false,
+                     "Async Capable": false,
+                     "Relation Name": "share_acl",
+                     "Schema": "public",
+                     "Alias": "s",
+                     "Plan Rows": 14929,
+                     "Plan Width": 16,
+                     "Output": [
+                      "s.relname",
+                      "s.rid",
+                      "s.group_id",
+                      "s.permission",
+                      "s.acl_version"
+                     ],
+                     "Recheck Cond": "((s.group_id = m.group_id) AND (s.relname = 'public.tpch_customer'::text) AND (s.permission = 'read'::text))",
+                     "Plans": [
+                      {
+                       "Node Type": "Bitmap Index Scan",
+                       "Parent Relationship": "Outer",
+                       "Parallel Aware": false,
+                       "Async Capable": false,
+                       "Index Name": "share_acl_group_idx",
+                       "Plan Rows": 14929,
+                       "Plan Width": 0,
+                       "Index Cond": "((s.group_id = m.group_id) AND (s.relname = 'public.tpch_customer'::text) AND (s.permission = 'read'::text))"
+                      }
+                     ]
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              },
+              {
+               "Node Type": "Index Scan",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Scan Direction": "Forward",
+               "Index Name": "tpch_orders_cust_date_idx",
+               "Relation Name": "tpch_orders",
+               "Schema": "public",
+               "Alias": "o",
+               "Plan Rows": 1,
+               "Plan Width": 16,
+               "Output": [
+                "o.o_orderkey",
+                "o.o_custkey",
+                "o.o_orderdate",
+                "o.o_shippriority",
+                "o.tenant_id"
+               ],
+               "Index Cond": "((o.o_custkey = c.c_custkey) AND (o.o_orderdate >= '1995-01-15'::date) AND (o.o_orderdate < '1995-04-01'::date))"
+              }
+             ]
+            },
+            {
+             "Node Type": "Index Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "tpch_lineitem_order_ship_idx",
+             "Relation Name": "tpch_lineitem",
+             "Schema": "public",
+             "Alias": "l",
+             "Plan Rows": 4,
+             "Plan Width": 20,
+             "Output": [
+              "l.l_orderkey",
+              "l.l_extendedprice",
+              "l.l_discount",
+              "l.l_shipdate"
+             ],
+             "Index Cond": "((l.l_orderkey = o.o_orderkey) AND (l.l_shipdate > '1995-02-01'::date))"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

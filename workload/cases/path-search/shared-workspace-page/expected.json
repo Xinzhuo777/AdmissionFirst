@@ -1,0 +1,31 @@
+{
+ "case": "path-search/shared-workspace-page",
+ "database": "path_search",
+ "role": "a027_ind_dense",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "id",
+    20
+   ],
+   [
+    "tenant_id",
+    20
+   ],
+   [
+    "path",
+    25
+   ],
+   [
+    "title",
+    25
+   ]
+  ],
+  "command": "SELECT 100",
+  "multiset_sha256": "170ca749fda7b8d0a03b723e88705d1870b76b8f8f7db4d8c99f23bf604c38c6",
+  "row_count": 100,
+  "sha256": "bbb6360e45f2e405d9b4c584728aa3660f9b8bab85ddf749291c3878601a2f9b"
+ },
+ "audit": null
+}

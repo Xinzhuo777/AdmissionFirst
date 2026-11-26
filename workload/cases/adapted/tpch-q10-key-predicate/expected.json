@@ -1,0 +1,27 @@
+{
+ "case": "adapted/tpch-q10-key-predicate",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "c_custkey",
+    20
+   ],
+   [
+    "region_id",
+    20
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "735a35aa47aa7b2123f0d6171465d0e499404ce3d522ba9654fc8571e9a57b99",
+  "row_count": 20,
+  "sha256": "b31402bf00aebbaad8d95f7977c4919e7e7c642bcd59ddf68160ffb2ed5b9280"
+ },
+ "audit": null
+}

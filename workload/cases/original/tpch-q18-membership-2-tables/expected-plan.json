@@ -1,0 +1,404 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 100,
+   "Plan Width": 79,
+   "Output": [
+    "customer.c_name",
+    "customer.c_custkey",
+    "orders.o_orderkey",
+    "orders.o_orderdate",
+    "orders.o_totalprice",
+    "(sum(lineitem.l_quantity))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 4559,
+     "Plan Width": 79,
+     "Output": [
+      "customer.c_name",
+      "customer.c_custkey",
+      "orders.o_orderkey",
+      "orders.o_orderdate",
+      "orders.o_totalprice",
+      "(sum(lineitem.l_quantity))"
+     ],
+     "Sort Key": [
+      "orders.o_totalprice DESC",
+      "orders.o_orderdate"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Sorted",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 4559,
+       "Plan Width": 79,
+       "Output": [
+        "customer.c_name",
+        "customer.c_custkey",
+        "orders.o_orderkey",
+        "orders.o_orderdate",
+        "orders.o_totalprice",
+        "sum(lineitem.l_quantity)"
+       ],
+       "Group Key": [
+        "customer.c_custkey",
+        "orders.o_orderkey"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Sort",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Plan Rows": 4559,
+         "Plan Width": 52,
+         "Output": [
+          "customer.c_custkey",
+          "orders.o_orderkey",
+          "customer.c_name",
+          "orders.o_orderdate",
+          "orders.o_totalprice",
+          "lineitem.l_quantity"
+         ],
+         "Sort Key": [
+          "customer.c_custkey",
+          "orders.o_orderkey"
+         ],
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 4559,
+           "Plan Width": 52,
+           "Output": [
+            "customer.c_custkey",
+            "orders.o_orderkey",
+            "customer.c_name",
+            "orders.o_orderdate",
+            "orders.o_totalprice",
+            "lineitem.l_quantity"
+           ],
+           "Inner Unique": false,
+           "Plans": [
+            {
+             "Node Type": "Hash Join",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Plan Rows": 1140,
+             "Plan Width": 55,
+             "Output": [
+              "customer.c_name",
+              "customer.c_custkey",
+              "orders.o_orderkey",
+              "orders.o_orderdate",
+              "orders.o_totalprice",
+              "lineitem_1.l_orderkey"
+             ],
+             "Inner Unique": false,
+             "Hash Cond": "(lineitem_1.l_orderkey = orders.o_orderkey)",
+             "Plans": [
+              {
+               "Node Type": "Aggregate",
+               "Strategy": "Hashed",
+               "Partial Mode": "Simple",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Plan Rows": 114104,
+               "Plan Width": 8,
+               "Output": [
+                "lineitem_1.l_orderkey"
+               ],
+               "Group Key": [
+                "lineitem_1.l_orderkey"
+               ],
+               "Filter": "(sum(lineitem_1.l_quantity) > '315'::numeric)",
+               "Planned Partitions": 4,
+               "Plans": [
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "lineitem",
+                 "Schema": "public",
+                 "Alias": "lineitem_1",
+                 "Plan Rows": 6000912,
+                 "Plan Width": 13,
+                 "Output": [
+                  "lineitem_1.l_orderkey",
+                  "lineitem_1.l_partkey",
+                  "lineitem_1.l_suppkey",
+                  "lineitem_1.l_linenumber",
+                  "lineitem_1.l_quantity",
+                  "lineitem_1.l_extendedprice",
+                  "lineitem_1.l_discount",
+                  "lineitem_1.l_tax",
+                  "lineitem_1.l_returnflag",
+                  "lineitem_1.l_linestatus",
+                  "lineitem_1.l_shipdate",
+                  "lineitem_1.l_commitdate",
+                  "lineitem_1.l_receiptdate",
+                  "lineitem_1.l_shipinstruct",
+                  "lineitem_1.l_shipmode",
+                  "lineitem_1.l_comment",
+                  "lineitem_1.tenant_id"
+                 ]
+                }
+               ]
+              },
+              {
+               "Node Type": "Hash",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Plan Rows": 14981,
+               "Plan Width": 47,
+               "Output": [
+                "customer.c_name",
+                "customer.c_custkey",
+                "orders.o_orderkey",
+                "orders.o_orderdate",
+                "orders.o_totalprice"
+               ],
+               "Plans": [
+                {
+                 "Node Type": "Hash Join",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Join Type": "Inner",
+                 "Plan Rows": 14981,
+                 "Plan Width": 47,
+                 "Output": [
+                  "customer.c_name",
+                  "customer.c_custkey",
+                  "orders.o_orderkey",
+                  "orders.o_orderdate",
+                  "orders.o_totalprice"
+                 ],
+                 "Inner Unique": true,
+                 "Hash Cond": "(orders.o_custkey = customer.c_custkey)",
+                 "Plans": [
+                  {
+                   "Node Type": "Seq Scan",
+                   "Parent Relationship": "Outer",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Relation Name": "orders",
+                   "Schema": "public",
+                   "Alias": "orders",
+                   "Plan Rows": 149700,
+                   "Plan Width": 28,
+                   "Output": [
+                    "orders.o_orderkey",
+                    "orders.o_custkey",
+                    "orders.o_orderstatus",
+                    "orders.o_totalprice",
+                    "orders.o_orderdate",
+                    "orders.o_orderpriority",
+                    "orders.o_clerk",
+                    "orders.o_shippriority",
+                    "orders.o_comment",
+                    "orders.tenant_id"
+                   ],
+                   "Filter": "(orders.tenant_id = 1)"
+                  },
+                  {
+                   "Node Type": "Hash",
+                   "Parent Relationship": "Inner",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Plan Rows": 15011,
+                   "Plan Width": 27,
+                   "Output": [
+                    "customer.c_name",
+                    "customer.c_custkey"
+                   ],
+                   "Plans": [
+                    {
+                     "Node Type": "Custom Scan",
+                     "Parent Relationship": "Outer",
+                     "Custom Plan Provider": "AF Completed Hash Policy",
+                     "Parallel Aware": false,
+                     "Async Capable": false,
+                     "Relation Name": "customer",
+                     "Schema": "public",
+                     "Alias": "customer",
+                     "Plan Rows": 15011,
+                     "Plan Width": 27,
+                     "Output": [
+                      "customer.c_name",
+                      "customer.c_custkey"
+                     ],
+                     "AF Path": "completed_hash_policy",
+                     "AF Authorization": "native_exact_policy_hash",
+                     "AF Hash Source": "original_rls_alternative",
+                     "AF Hash SubPlan": 2,
+                     "AF Hash Evaluations Upper Estimate": 150000,
+                     "AF Original Policy Alternatives": [
+                      {
+                       "SubPlan": 1,
+                       "Hash": false,
+                       "Per Call Cost": 5.47
+                      },
+                      {
+                       "SubPlan": 2,
+                       "Hash": true,
+                       "Per Call Cost": 0.0025
+                      }
+                     ],
+                     "Plans": [
+                      {
+                       "Node Type": "Seq Scan",
+                       "Parent Relationship": "child",
+                       "Parallel Aware": false,
+                       "Async Capable": false,
+                       "Relation Name": "customer",
+                       "Schema": "public",
+                       "Alias": "customer",
+                       "Plan Rows": 15011,
+                       "Plan Width": 27,
+                       "Output": [
+                        "customer.c_name",
+                        "customer.c_custkey"
+                       ],
+                       "Filter": "(hashed SubPlan 2)",
+                       "Plans": [
+                        {
+                         "Node Type": "Nested Loop",
+                         "Parent Relationship": "SubPlan",
+                         "Subplan Name": "SubPlan 2",
+                         "Parallel Aware": false,
+                         "Async Capable": false,
+                         "Join Type": "Inner",
+                         "Plan Rows": 15061,
+                         "Plan Width": 8,
+                         "Output": [
+                          "a.rid"
+                         ],
+                         "Inner Unique": false,
+                         "Join Filter": "(a.group_id = m.group_id)",
+                         "Plans": [
+                          {
+                           "Node Type": "Seq Scan",
+                           "Parent Relationship": "Outer",
+                           "Parallel Aware": false,
+                           "Async Capable": false,
+                           "Relation Name": "group_membership",
+                           "Schema": "public",
+                           "Alias": "m",
+                           "Plan Rows": 1,
+                           "Plan Width": 8,
+                           "Output": [
+                            "m.user_id",
+                            "m.group_id",
+                            "m.membership_version"
+                           ],
+                           "Filter": "(m.user_id = 'e3_user'::text)"
+                          },
+                          {
+                           "Node Type": "Index Only Scan",
+                           "Parent Relationship": "Inner",
+                           "Parallel Aware": false,
+                           "Async Capable": false,
+                           "Scan Direction": "Forward",
+                           "Index Name": "share_acl_lookup_idx",
+                           "Relation Name": "share_acl",
+                           "Schema": "public",
+                           "Alias": "a",
+                           "Plan Rows": 15061,
+                           "Plan Width": 16,
+                           "Output": [
+                            "a.relname",
+                            "a.rid",
+                            "a.permission",
+                            "a.group_id"
+                           ],
+                           "Index Cond": "((a.relname = 'public.customer'::text) AND (a.permission = 'read'::text))"
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     ]
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            },
+            {
+             "Node Type": "Index Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "lineitem_pkey",
+             "Relation Name": "lineitem",
+             "Schema": "public",
+             "Alias": "lineitem",
+             "Plan Rows": 18,
+             "Plan Width": 13,
+             "Output": [
+              "lineitem.l_orderkey",
+              "lineitem.l_partkey",
+              "lineitem.l_suppkey",
+              "lineitem.l_linenumber",
+              "lineitem.l_quantity",
+              "lineitem.l_extendedprice",
+              "lineitem.l_discount",
+              "lineitem.l_tax",
+              "lineitem.l_returnflag",
+              "lineitem.l_linestatus",
+              "lineitem.l_shipdate",
+              "lineitem.l_commitdate",
+              "lineitem.l_receiptdate",
+              "lineitem.l_shipinstruct",
+              "lineitem.l_shipmode",
+              "lineitem.l_comment",
+              "lineitem.tenant_id"
+             ],
+             "Index Cond": "(lineitem.l_orderkey = orders.o_orderkey)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

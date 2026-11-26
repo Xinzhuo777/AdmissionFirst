@@ -1,0 +1,134 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 20,
+   "Plan Width": 16,
+   "Output": [
+    "t.studio_id",
+    "(count(*))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 50,
+     "Plan Width": 16,
+     "Output": [
+      "t.studio_id",
+      "(count(*))"
+     ],
+     "Sort Key": [
+      "(count(*)) DESC",
+      "t.studio_id"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Sorted",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 50,
+       "Plan Width": 16,
+       "Output": [
+        "t.studio_id",
+        "count(*)"
+       ],
+       "Group Key": [
+        "t.studio_id"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Sort",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Plan Rows": 4192,
+         "Plan Width": 8,
+         "Output": [
+          "t.studio_id"
+         ],
+         "Sort Key": [
+          "t.studio_id"
+         ],
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 4192,
+           "Plan Width": 8,
+           "Output": [
+            "t.studio_id"
+           ],
+           "Inner Unique": false,
+           "Plans": [
+            {
+             "Node Type": "Index Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "native_af_auth_job_title_kind_key",
+             "Relation Name": "job_title",
+             "Schema": "public",
+             "Alias": "t",
+             "Plan Rows": 437,
+             "Plan Width": 16,
+             "Output": [
+              "t.t_id",
+              "t.kind",
+              "t.production_year",
+              "t.region_id",
+              "t.studio_id"
+             ],
+             "Index Cond": "(t.kind = 'movie'::text)",
+             "Filter": "(t.production_year >= 1995)"
+            },
+            {
+             "Node Type": "Index Only Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "job_cast_info_movie_role_idx",
+             "Relation Name": "job_cast_info",
+             "Schema": "public",
+             "Alias": "ci",
+             "Plan Rows": 26,
+             "Plan Width": 8,
+             "Output": [
+              "ci.movie_id",
+              "ci.role_id"
+             ],
+             "Index Cond": "((ci.movie_id = t.t_id) AND (ci.role_id <= 3))"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

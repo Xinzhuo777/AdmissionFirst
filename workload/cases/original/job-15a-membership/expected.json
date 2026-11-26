@@ -1,0 +1,23 @@
+{
+ "case": "original/job-15a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "release_date",
+    25
+   ],
+   [
+    "internet_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "0aa8d9083165b6b8596e8cf8330cdf0eb059de1d913c29f1f8652312c53f199d",
+  "row_count": 1,
+  "sha256": "0aa8d9083165b6b8596e8cf8330cdf0eb059de1d913c29f1f8652312c53f199d"
+ },
+ "audit": null
+}

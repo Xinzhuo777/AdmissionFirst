@@ -1,0 +1,144 @@
+{
+ "af_requests_correct": {
+  "total": 6120,
+  "warmups": 680,
+  "measured": 5440
+ },
+ "search_dense_native_ms_range": [
+  2221.06475,
+  2293.671292
+ ],
+ "search_dense_prefix_0.1pct_ms": {
+  "af": 8.219625,
+  "native": 2221.06475,
+  "index_priority": 699.226896
+ },
+ "search_dense_prefix_20pct_af_ms": 604.068896,
+ "search_sparse_af_ms": {
+  "prefix-0.1pct": 3.670396,
+  "prefix-1pct": 14.748771
+ },
+ "search_af_access_methods": {
+  "path-search/independent-sparse-prefix-0.1pct": [
+   "AF Prefix Guard"
+  ],
+  "path-search/independent-sparse-prefix-1pct": [
+   "AF Membership Keys"
+  ],
+  "path-search/independent-sparse-prefix-20pct": [
+   "AF Membership Keys"
+  ],
+  "path-search/independent-sparse-no-prefix": [
+   "AF Membership Keys"
+  ],
+  "path-search/independent-dense-prefix-0.1pct": [
+   "AF Prefix Guard"
+  ],
+  "path-search/independent-dense-prefix-1pct": [
+   "AF Prefix Guard"
+  ],
+  "path-search/independent-dense-prefix-20pct": [
+   "AF Completed Hash Policy"
+  ],
+  "path-search/independent-dense-no-prefix": [
+   "AF Completed Hash Policy"
+  ],
+  "path-search/concentrated-sparse-prefix-0.1pct": [
+   "AF Prefix Guard"
+  ],
+  "path-search/concentrated-sparse-prefix-1pct": [
+   "AF Membership Keys"
+  ],
+  "path-search/concentrated-sparse-no-prefix": [
+   "AF Membership Keys"
+  ],
+  "path-search/shared-workspace-page": [
+   "AF Prefix Guard"
+  ]
+ },
+ "benchmark_af_within_5_percent_of_fastest": 101,
+ "benchmark_native_over_af_gm": {
+  "all": 1.557277225971409,
+  "adapted": 1.5843163004069312,
+  "original": 1.5392592196407813,
+  "without_largest_gain": 1.5104626525096376,
+  "largest_gain_case": "original/job-31a-membership",
+  "membership": 2.028185878209254,
+  "membership_cases": 71,
+  "equality_and_key_predicate": 1.0535221086291586,
+  "equality_and_key_predicate_cases": 48
+ },
+ "adapted_membership_cases_using_hash_check": {
+  "cases": 16,
+  "with_hash_check": 16
+ },
+ "original_tpch_q10_membership_ms": {
+  "in_rewrite": 656.557,
+  "af": 67.08729199999999
+ },
+ "original_job_31a_membership_ms": {
+  "af": 468.215625,
+  "native": 26730.8562085
+ },
+ "original_job_1a_membership_ms": {
+  "af": 3.510125,
+  "native": 3.242875,
+  "index_priority": 272.658521,
+  "in_rewrite": 408.46552099999997
+ },
+ "benchmark_latency_relative_to_native": {
+  "af": {
+   "more_than_halves": 27,
+   "more_than_doubles": 1
+  },
+  "index_priority": {
+   "more_than_halves": 16,
+   "more_than_doubles": 14
+  },
+  "in_rewrite": {
+   "more_than_halves": 14,
+   "more_than_doubles": 16
+  }
+ },
+ "original_job_26a_membership_ms": {
+  "in_rewrite": 146.63179150000002,
+  "af": 1045.2773335000002
+ },
+ "original_tpch_q8_membership_3_tables_ms": {
+  "native": 54.769229,
+  "af": 119.38706250000001
+ },
+ "benchmark_losses_against_native": {
+  "losses": 17,
+  "within_5_percent": 11
+ },
+ "sf10_native_over_af_gm": {
+  "adapted": 1.6028595602528126,
+  "membership": 3.7900164622736576
+ },
+ "original_tpch_membership_native_over_af_gm": {
+  "customer": 2.7459015171063976,
+  "customer_and_orders": 1.4606974353515547,
+  "customer_orders_and_lineitem": 1.7490773458631201
+ },
+ "application_af_at_most_half_of": {
+  "native": 34,
+  "index_priority": 9
+ },
+ "application_searches": {
+  "cases": 39,
+  "native_over_af_gm": 23.008405833097353,
+  "af_faster": 37,
+  "af_slower": {
+   "title-search/dense-explicit-starts-with": 0.9200351109812174,
+   "title-search/dense-explicit-pattern-range": 0.9164915806158411
+  }
+ },
+ "daily_requests": {
+  "cases": 11,
+  "af_wins": 1,
+  "unclear": 10,
+  "af_losses": 0,
+  "af_over_native_gm": 1.0027495078375972
+ }
+}

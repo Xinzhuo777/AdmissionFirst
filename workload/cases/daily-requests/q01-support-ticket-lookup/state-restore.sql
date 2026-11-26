@@ -1,0 +1,1 @@
+DROP INDEX public.native_af_auth_e10_ticket_enum;

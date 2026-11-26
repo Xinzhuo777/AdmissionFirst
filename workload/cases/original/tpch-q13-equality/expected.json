@@ -1,0 +1,23 @@
+{
+ "case": "original/tpch-q13-equality",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "c_count",
+    20
+   ],
+   [
+    "custdist",
+    20
+   ]
+  ],
+  "command": "SELECT 40",
+  "multiset_sha256": "04560b0d5810fa77242cc5c4d90867a889d61f0e0ca8ee6a20164bfe4b3a2708",
+  "row_count": 40,
+  "sha256": "538e038dd22f901d8d845131596b7702f5d3aebe08eb50d43839f412eaf2908f"
+ },
+ "audit": null
+}

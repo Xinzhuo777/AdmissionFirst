@@ -1,0 +1,19 @@
+{
+ "case": "original/job-20a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "complete_downey_ironman_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "03bc0342644b95dc9ac08c2ae7baaf4b40b638e861b10587cff9c8115e9ae25e",
+  "row_count": 1,
+  "sha256": "03bc0342644b95dc9ac08c2ae7baaf4b40b638e861b10587cff9c8115e9ae25e"
+ },
+ "audit": null
+}

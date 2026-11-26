@@ -1,0 +1,27 @@
+{
+ "case": "adapted/tpch-q10-membership",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "c_custkey",
+    20
+   ],
+   [
+    "region_id",
+    20
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "c6c67328e0a2e5cee6e1a266c94cd62dacfc6ad96edd1f8d3acea5c0c6da0ce8",
+  "row_count": 20,
+  "sha256": "7e060d5c93d74758085539b5df82348cf026a7ecb65ca59180679f1aff585fc5"
+ },
+ "audit": null
+}

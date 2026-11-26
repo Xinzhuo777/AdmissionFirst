@@ -1,0 +1,31 @@
+{
+ "case": "path-search/concentrated-sparse-prefix-1pct",
+ "database": "path_search",
+ "role": "a027_corr_sparse",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "id",
+    20
+   ],
+   [
+    "tenant_id",
+    20
+   ],
+   [
+    "path",
+    25
+   ],
+   [
+    "title",
+    25
+   ]
+  ],
+  "command": "SELECT 1000",
+  "multiset_sha256": "4c7f8db3909d90e6b90813dc4fad00b9661197183363f2f17dd46cdda8c5f137",
+  "row_count": 1000,
+  "sha256": "f933f0bb5615e2be691be7fbf502d004095701417da96b617f736927da16c539"
+ },
+ "audit": null
+}

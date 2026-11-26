@@ -1,0 +1,180 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 20,
+   "Plan Width": 16,
+   "Output": [
+    "t.studio_id",
+    "(count(*))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Bitmap Heap Scan",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "CTE __native_af_authorized_batch",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "job_title",
+     "Schema": "public",
+     "Alias": "t_1",
+     "Plan Rows": 87318,
+     "Plan Width": 27,
+     "Output": [
+      "t_1.t_id",
+      "t_1.kind",
+      "t_1.production_year",
+      "t_1.studio_id"
+     ],
+     "Recheck Cond": "(t_1.region_id = 1)",
+     "Filter": "((t_1.production_year >= 1995) AND (t_1.kind = 'movie'::text))",
+     "Plans": [
+      {
+       "Node Type": "Bitmap Index Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Index Name": "job_title_region_idx",
+       "Plan Rows": 507685,
+       "Plan Width": 0,
+       "Index Cond": "(t_1.region_id = 1)"
+      }
+     ]
+    },
+    {
+     "Node Type": "CTE Scan",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "InitPlan 2 (returns $1)",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "CTE Name": "__native_af_authorized_batch",
+     "Alias": "t_2",
+     "Plan Rows": 87318,
+     "Plan Width": 8,
+     "Output": [
+      "t_2.t_id"
+     ]
+    },
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 200,
+     "Plan Width": 16,
+     "Output": [
+      "t.studio_id",
+      "(count(*))"
+     ],
+     "Sort Key": [
+      "(count(*)) DESC",
+      "t.studio_id"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Hashed",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 200,
+       "Plan Width": 16,
+       "Output": [
+        "t.studio_id",
+        "count(*)"
+       ],
+       "Group Key": [
+        "t.studio_id"
+       ],
+       "Planned Partitions": 0,
+       "Plans": [
+        {
+         "Node Type": "Hash Join",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Plan Rows": 2234534,
+         "Plan Width": 8,
+         "Output": [
+          "t.studio_id"
+         ],
+         "Inner Unique": false,
+         "Hash Cond": "(t.t_id = ci.movie_id)",
+         "Plans": [
+          {
+           "Node Type": "CTE Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "CTE Name": "__native_af_authorized_batch",
+           "Alias": "t",
+           "Plan Rows": 87318,
+           "Plan Width": 16,
+           "Output": [
+            "t.studio_id",
+            "t.t_id"
+           ]
+          },
+          {
+           "Node Type": "Hash",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Plan Rows": 2234534,
+           "Plan Width": 8,
+           "Output": [
+            "ci.movie_id"
+           ],
+           "Plans": [
+            {
+             "Node Type": "Bitmap Heap Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "job_cast_info",
+             "Schema": "public",
+             "Alias": "ci",
+             "Plan Rows": 2234534,
+             "Plan Width": 8,
+             "Output": [
+              "ci.movie_id"
+             ],
+             "Recheck Cond": "((ci.movie_id = ANY ($1)) AND (ci.role_id <= 3))",
+             "Plans": [
+              {
+               "Node Type": "Bitmap Index Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Index Name": "job_cast_info_movie_role_idx",
+               "Plan Rows": 2234534,
+               "Plan Width": 0,
+               "Index Cond": "((ci.movie_id = ANY ($1)) AND (ci.role_id <= 3))"
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

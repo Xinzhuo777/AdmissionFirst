@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-16b-membership",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "studio_id",
+    20
+   ],
+   [
+    "title_company_edges",
+    20
+   ]
+  ],
+  "command": "SELECT 5",
+  "multiset_sha256": "e2b174be8762e5c8ed655badf81b0dd407a5948d4da9d31c424d762b3aaa9198",
+  "row_count": 5,
+  "sha256": "79edeabf3a3d5cf46e1ec9f4370d7f17876481d526b1dd4d814d9dd4ec4d13ce"
+ },
+ "audit": null
+}

@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-3c-membership",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "region_id",
+    20
+   ],
+   [
+    "regional_cast_edges",
+    20
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "d80ea62f82ae81b7bddefc166c8ff1f52b85db3acea255464f2dc2deeeef6c43",
+  "row_count": 1,
+  "sha256": "d80ea62f82ae81b7bddefc166c8ff1f52b85db3acea255464f2dc2deeeef6c43"
+ },
+ "audit": null
+}

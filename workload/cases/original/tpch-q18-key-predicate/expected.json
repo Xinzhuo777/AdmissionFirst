@@ -1,0 +1,39 @@
+{
+ "case": "original/tpch-q18-key-predicate",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "c_name",
+    1043
+   ],
+   [
+    "c_custkey",
+    20
+   ],
+   [
+    "o_orderkey",
+    20
+   ],
+   [
+    "o_orderdate",
+    1082
+   ],
+   [
+    "o_totalprice",
+    1700
+   ],
+   [
+    "sum",
+    1700
+   ]
+  ],
+  "command": "SELECT 0",
+  "multiset_sha256": "cf0282796a09ae06f6937851a71bd6615da9219ae1e4b705cc8ea1c0c5861c3a",
+  "row_count": 0,
+  "sha256": "cf0282796a09ae06f6937851a71bd6615da9219ae1e4b705cc8ea1c0c5861c3a"
+ },
+ "audit": null
+}

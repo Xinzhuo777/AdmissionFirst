@@ -1,0 +1,27 @@
+{
+ "case": "title-search/dense-explicit-starts-with",
+ "database": "title_search",
+ "role": "af_prefix_dense",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ],
+   [
+    "secret",
+    25
+   ]
+  ],
+  "command": "SELECT 12478",
+  "multiset_sha256": "a6e1294a278ef994a8dc2703ec36d6641b382b28da901e05347b2743bc4bef10",
+  "row_count": 12478,
+  "sha256": "a6e1294a278ef994a8dc2703ec36d6641b382b28da901e05347b2743bc4bef10"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 12478,
+  "unauthorized": 0
+ }
+}

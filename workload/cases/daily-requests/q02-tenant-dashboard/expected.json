@@ -1,0 +1,19 @@
+{
+ "case": "daily-requests/q02-tenant-dashboard",
+ "database": "application",
+ "role": "caprls_e10_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "count",
+    20
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "f5def0c913ef810593eb0f331c7861eb778cd5238ebe69411ffc9754b5a6f8ac",
+  "row_count": 1,
+  "sha256": "f5def0c913ef810593eb0f331c7861eb778cd5238ebe69411ffc9754b5a6f8ac"
+ },
+ "audit": null
+}

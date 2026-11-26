@@ -1,0 +1,187 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 80,
+   "Plan Width": 109,
+   "Output": [
+    "d.id",
+    "d.tenant_id",
+    "d.path",
+    "d.title",
+    "d.path"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 80,
+     "Plan Width": 109,
+     "Output": [
+      "d.id",
+      "d.tenant_id",
+      "d.path",
+      "d.title",
+      "d.path"
+     ],
+     "Sort Key": [
+      "d.path COLLATE \"C\"",
+      "d.id"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Result",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 80,
+       "Plan Width": 109,
+       "Output": [
+        "d.id",
+        "d.tenant_id",
+        "d.path",
+        "d.title",
+        "d.path"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Custom Scan",
+         "Parent Relationship": "Outer",
+         "Custom Plan Provider": "AF Completed Hash Policy",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "a027_document",
+         "Schema": "public",
+         "Alias": "d",
+         "Plan Rows": 80,
+         "Plan Width": 81,
+         "Output": [
+          "d.id",
+          "d.tenant_id",
+          "d.path",
+          "d.title"
+         ],
+         "AF Path": "completed_hash_policy",
+         "AF Authorization": "native_exact_policy_hash",
+         "AF Hash Source": "original_rls_alternative",
+         "AF Hash SubPlan": 2,
+         "AF Hash Evaluations Upper Estimate": 1000000,
+         "AF Original Policy Alternatives": [
+          {
+           "SubPlan": 1,
+           "Hash": false,
+           "Per Call Cost": 13.208128076
+          },
+          {
+           "SubPlan": 2,
+           "Hash": true,
+           "Per Call Cost": 0.0025
+          }
+         ],
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "child",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "a027_document",
+           "Schema": "public",
+           "Alias": "d",
+           "Plan Rows": 80,
+           "Plan Width": 81,
+           "Output": [
+            "d.id",
+            "d.tenant_id",
+            "d.path",
+            "d.title"
+           ],
+           "Filter": "((hashed SubPlan 2) AND (d.path ~~ '%rotation-%'::text))",
+           "Plans": [
+            {
+             "Node Type": "Hash Join",
+             "Parent Relationship": "SubPlan",
+             "Subplan Name": "SubPlan 2",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Plan Rows": 799871,
+             "Plan Width": 8,
+             "Output": [
+              "s.rid"
+             ],
+             "Inner Unique": true,
+             "Hash Cond": "(s.group_id = m.group_id)",
+             "Plans": [
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "a027_share_acl",
+               "Schema": "public",
+               "Alias": "s",
+               "Plan Rows": 2000004,
+               "Plan Width": 16,
+               "Output": [
+                "s.relname",
+                "s.rid",
+                "s.group_id",
+                "s.permission"
+               ],
+               "Filter": "((s.relname = 'public.a027_document'::text) AND (s.permission = 'read'::text))"
+              },
+              {
+               "Node Type": "Hash",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Plan Rows": 12800,
+               "Plan Width": 8,
+               "Output": [
+                "m.group_id"
+               ],
+               "Plans": [
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "a027_group_membership",
+                 "Schema": "public",
+                 "Alias": "m",
+                 "Plan Rows": 12800,
+                 "Plan Width": 8,
+                 "Output": [
+                  "m.group_id"
+                 ],
+                 "Filter": "(m.user_id = 'a027_ind_dense'::text)"
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

@@ -1,0 +1,27 @@
+{
+ "case": "original/job-1a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "production_note",
+    25
+   ],
+   [
+    "movie_title",
+    25
+   ],
+   [
+    "movie_year",
+    23
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "270dcd8c71b6d18e373c4981546fc31ad7f9d3b0f1b791441b62fa80bfa4a116",
+  "row_count": 1,
+  "sha256": "270dcd8c71b6d18e373c4981546fc31ad7f9d3b0f1b791441b62fa80bfa4a116"
+ },
+ "audit": null
+}

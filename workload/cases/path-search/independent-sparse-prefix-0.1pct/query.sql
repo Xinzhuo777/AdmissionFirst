@@ -1,0 +1,1 @@
+SELECT d.id, d.tenant_id, d.path, d.title FROM public.a027_document d WHERE d.path LIKE 'docs/security/auth/%rotation-%' ORDER BY d.path COLLATE "C", d.id LIMIT 1000

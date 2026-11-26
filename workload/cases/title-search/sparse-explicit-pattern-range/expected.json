@@ -1,0 +1,27 @@
+{
+ "case": "title-search/sparse-explicit-pattern-range",
+ "database": "title_search",
+ "role": "af_prefix_sparse",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ],
+   [
+    "secret",
+    25
+   ]
+  ],
+  "command": "SELECT 26",
+  "multiset_sha256": "7431a649833f0607e7c0a2d5a4546341cf2c074143d8ecb3a4d48797f9d0c3dd",
+  "row_count": 26,
+  "sha256": "7431a649833f0607e7c0a2d5a4546341cf2c074143d8ecb3a4d48797f9d0c3dd"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 26,
+  "unauthorized": 0
+ }
+}

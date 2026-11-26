@@ -1,0 +1,27 @@
+{
+ "case": "title-search/dense-like-no-prefix",
+ "database": "title_search",
+ "role": "af_prefix_dense",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ],
+   [
+    "secret",
+    25
+   ]
+  ],
+  "command": "SELECT 103717",
+  "multiset_sha256": "16aa0a6180081700339888dbbdde94cf02de7fb77dda3d0cc6850fcdf883ea28",
+  "row_count": 103717,
+  "sha256": "16aa0a6180081700339888dbbdde94cf02de7fb77dda3d0cc6850fcdf883ea28"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 103717,
+  "unauthorized": 0
+ }
+}

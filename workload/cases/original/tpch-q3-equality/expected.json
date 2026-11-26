@@ -1,0 +1,31 @@
+{
+ "case": "original/tpch-q3-equality",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "l_orderkey",
+    20
+   ],
+   [
+    "revenue",
+    1700
+   ],
+   [
+    "o_orderdate",
+    1082
+   ],
+   [
+    "o_shippriority",
+    23
+   ]
+  ],
+  "command": "SELECT 10",
+  "multiset_sha256": "f15f83792911a8edd6560460e18c9ebba51fe1957e28a4c3e11d6ada28100220",
+  "row_count": 10,
+  "sha256": "041a9d10d78b0c88962ff67f40e0052dfa7c2260ff32a1d3ab8aceca8eb08c7c"
+ },
+ "audit": null
+}

@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-16b-equality",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "studio_id",
+    20
+   ],
+   [
+    "title_company_edges",
+    20
+   ]
+  ],
+  "command": "SELECT 10",
+  "multiset_sha256": "2e9fd11efa7beff8d4f29ccaed380ae13d222f02c3406f3dddb3c9cdbd70c99d",
+  "row_count": 10,
+  "sha256": "f03749e55548bf5be11aeb80803cb1fe39b1e3e2adedbfde6dd1f0cdbe19e949"
+ },
+ "audit": null
+}

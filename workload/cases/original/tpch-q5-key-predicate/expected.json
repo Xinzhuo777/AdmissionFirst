@@ -1,0 +1,23 @@
+{
+ "case": "original/tpch-q5-key-predicate",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "n_name",
+    1042
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 5",
+  "multiset_sha256": "53a26a8521f966f9987fe485c967716bafd8898ba850b2ac391d28b53f014bd3",
+  "row_count": 5,
+  "sha256": "ac01520bc7f33004679b89f1b494c184ea03a5781b849edac2366ce6da102ace"
+ },
+ "audit": null
+}

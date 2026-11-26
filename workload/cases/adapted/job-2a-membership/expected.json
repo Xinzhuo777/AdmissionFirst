@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-2a-membership",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "production_year",
+    23
+   ],
+   [
+    "production_edges",
+    20
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "61358a4cad8a49c00b1314be6929ba4ee67678c280f98c0c0b9d5a39fde5eef8",
+  "row_count": 20,
+  "sha256": "5ece60cfb8c8b270a6083e6493a6739c32663b6106aeb2e6462dceed4326a875"
+ },
+ "audit": null
+}

@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-1a-membership",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "t_id",
+    20
+   ],
+   [
+    "matches",
+    20
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "314bb304259c8862865dbf002d11bba28d0fa2bfc71c8a17fe6f5e2698c64d78",
+  "row_count": 20,
+  "sha256": "12b223248bf5ca0b0672aeed4d7e078f143bd703abc2a1517624fc2b65308faf"
+ },
+ "audit": null
+}

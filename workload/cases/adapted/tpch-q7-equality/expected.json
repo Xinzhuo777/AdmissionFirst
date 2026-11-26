@@ -1,0 +1,27 @@
+{
+ "case": "adapted/tpch-q7-equality",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "region_id",
+    20
+   ],
+   [
+    "order_year",
+    23
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 15",
+  "multiset_sha256": "32d025ae2e1df01f2e2358d97fb1879c6dc8a64eb0097cd054f173f3d079067a",
+  "row_count": 15,
+  "sha256": "229f0d3eaa2d31ac9e821ae1933bc738c340bb29852af7ede3d36d44df2d8eca"
+ },
+ "audit": null
+}

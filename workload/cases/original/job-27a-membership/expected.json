@@ -1,0 +1,27 @@
+{
+ "case": "original/job-27a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "producing_company",
+    25
+   ],
+   [
+    "link_type",
+    25
+   ],
+   [
+    "complete_western_sequel",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "d4260c314aa9a3948f84b012d1e9efda631dac6bc7cc04416d0d02e67f813ec6",
+  "row_count": 1,
+  "sha256": "d4260c314aa9a3948f84b012d1e9efda631dac6bc7cc04416d0d02e67f813ec6"
+ },
+ "audit": null
+}

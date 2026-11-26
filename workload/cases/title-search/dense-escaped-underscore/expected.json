@@ -1,0 +1,27 @@
+{
+ "case": "title-search/dense-escaped-underscore",
+ "database": "title_search",
+ "role": "af_prefix_dense",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ],
+   [
+    "secret",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "59858146e17aed7fc8065f9c19ec7db5647403f1481136d270da565fdd39acee",
+  "row_count": 1,
+  "sha256": "59858146e17aed7fc8065f9c19ec7db5647403f1481136d270da565fdd39acee"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 1,
+  "unauthorized": 0
+ }
+}

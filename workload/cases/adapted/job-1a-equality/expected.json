@@ -1,0 +1,23 @@
+{
+ "case": "adapted/job-1a-equality",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "t_id",
+    20
+   ],
+   [
+    "matches",
+    20
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "1b82af6cf1ea63b223cd21a84d1e35ef90ea151c1e940dbced73698d70d2548a",
+  "row_count": 20,
+  "sha256": "5d738c485464aa0c0a040cd9ec156d12edf0037877b230369715b606bb652266"
+ },
+ "audit": null
+}

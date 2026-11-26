@@ -1,0 +1,31 @@
+{
+ "case": "path-search/independent-dense-prefix-0.1pct",
+ "database": "path_search",
+ "role": "a027_ind_dense",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "id",
+    20
+   ],
+   [
+    "tenant_id",
+    20
+   ],
+   [
+    "path",
+    25
+   ],
+   [
+    "title",
+    25
+   ]
+  ],
+  "command": "SELECT 409",
+  "multiset_sha256": "48991777b3860b581852defdf347d5bedef0830d82dfd9f6e41389ef61ad6a67",
+  "row_count": 409,
+  "sha256": "16408396b727e9fcd7918f33a9e5b494b9574d741b488fe3d1dec644a5d1744f"
+ },
+ "audit": null
+}

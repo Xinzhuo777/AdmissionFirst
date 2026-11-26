@@ -1,0 +1,169 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Aggregate",
+   "Strategy": "Sorted",
+   "Partial Mode": "Simple",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 72,
+   "Output": [
+    "(SUBSTRING(customer.c_phone FROM 1 FOR 2))",
+    "count(*)",
+    "sum(customer.c_acctbal)"
+   ],
+   "Group Key": [
+    "(SUBSTRING(customer.c_phone FROM 1 FOR 2))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Plain",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "InitPlan 1 (returns $0)",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 1,
+     "Plan Width": 32,
+     "Output": [
+      "avg(customer_1.c_acctbal)"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Bitmap Heap Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "customer",
+       "Schema": "public",
+       "Alias": "customer_1",
+       "Plan Rows": 1,
+       "Plan Width": 6,
+       "Output": [
+        "customer_1.c_custkey",
+        "customer_1.c_name",
+        "customer_1.c_address",
+        "customer_1.c_nationkey",
+        "customer_1.c_phone",
+        "customer_1.c_acctbal",
+        "customer_1.c_mktsegment",
+        "customer_1.c_comment",
+        "customer_1.tenant_id"
+       ],
+       "Recheck Cond": "((customer_1.tenant_id = 1) AND ((customer_1.c_custkey % '50'::bigint) = 0))",
+       "Filter": "((customer_1.c_acctbal > 0.00) AND (SUBSTRING(customer_1.c_phone FROM 1 FOR 2) = ANY ('{29,10,24,23,25,11,20}'::text[])))",
+       "Plans": [
+        {
+         "Node Type": "Bitmap Index Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Index Name": "native_af_auth_customer_segment_key",
+         "Plan Rows": 74,
+         "Plan Width": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 1,
+     "Plan Width": 38,
+     "Output": [
+      "(SUBSTRING(customer.c_phone FROM 1 FOR 2))",
+      "customer.c_acctbal"
+     ],
+     "Sort Key": [
+      "(SUBSTRING(customer.c_phone FROM 1 FOR 2))"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Anti",
+       "Plan Rows": 1,
+       "Plan Width": 38,
+       "Output": [
+        "SUBSTRING(customer.c_phone FROM 1 FOR 2)",
+        "customer.c_acctbal"
+       ],
+       "Inner Unique": false,
+       "Plans": [
+        {
+         "Node Type": "Bitmap Heap Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "customer",
+         "Schema": "public",
+         "Alias": "customer",
+         "Plan Rows": 1,
+         "Plan Width": 30,
+         "Output": [
+          "customer.c_custkey",
+          "customer.c_name",
+          "customer.c_address",
+          "customer.c_nationkey",
+          "customer.c_phone",
+          "customer.c_acctbal",
+          "customer.c_mktsegment",
+          "customer.c_comment",
+          "customer.tenant_id"
+         ],
+         "Recheck Cond": "((customer.tenant_id = 1) AND ((customer.c_custkey % '50'::bigint) = 0))",
+         "Filter": "((customer.c_acctbal > $0) AND (SUBSTRING(customer.c_phone FROM 1 FOR 2) = ANY ('{29,10,24,23,25,11,20}'::text[])))",
+         "Plans": [
+          {
+           "Node Type": "Bitmap Index Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Index Name": "native_af_auth_customer_segment_key",
+           "Plan Rows": 74,
+           "Plan Width": 0
+          }
+         ]
+        },
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "orders_customer_date_idx",
+         "Relation Name": "orders",
+         "Schema": "public",
+         "Alias": "orders",
+         "Plan Rows": 17,
+         "Plan Width": 8,
+         "Output": [
+          "orders.o_custkey",
+          "orders.o_orderdate"
+         ],
+         "Index Cond": "(orders.o_custkey = customer.c_custkey)"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

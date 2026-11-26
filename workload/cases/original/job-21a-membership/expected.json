@@ -1,0 +1,27 @@
+{
+ "case": "original/job-21a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "company_name",
+    25
+   ],
+   [
+    "link_type",
+    25
+   ],
+   [
+    "western_follow_up",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "8b9a7bb17481600072d1ab5661ca43581304e4c9a66f2a3954a8bc1d59c06d29",
+  "row_count": 1,
+  "sha256": "8b9a7bb17481600072d1ab5661ca43581304e4c9a66f2a3954a8bc1d59c06d29"
+ },
+ "audit": null
+}

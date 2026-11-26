@@ -1,0 +1,305 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Sort",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 3,
+   "Plan Width": 79,
+   "Output": [
+    "d.title",
+    "d.secret",
+    "d.title",
+    "((d.secret)::text)"
+   ],
+   "Sort Key": [
+    "d.title COLLATE \"C\"",
+    "d.secret COLLATE \"C\" NULLS FIRST"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Result",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 3,
+     "Plan Width": 79,
+     "Output": [
+      "d.title",
+      "d.secret",
+      "d.title",
+      "d.secret"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Custom Scan",
+       "Parent Relationship": "Outer",
+       "Custom Plan Provider": "AF Prefix Guard",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "prefix_doc",
+       "Schema": "public",
+       "Alias": "d",
+       "Plan Rows": 3,
+       "Plan Width": 30,
+       "Output": [
+        "d.title",
+        "d.secret"
+       ],
+       "Filter": "((hashed SubPlan 2) AND (d.title ~~ 're%urgent%'::text) AND prefix_audit_secret(d.id, d.secret))",
+       "AF Path": "prefix_pending_seq",
+       "AF Authorization": "pending_original_exact_policy",
+       "AF Execution Order": "guard,policy,user,projection",
+       "AF Actual Branch": "not_executed",
+       "AF Diagnostic Unsafe": false,
+       "AF Guard Attribute": 2,
+       "AF Carrier": "full_policy_inputs_and_ctid",
+       "AF Policy Implementation": "native_pg_hash_arm",
+       "AF Policy Source Plan": 2,
+       "AF Guard Candidate Rows": 260012.0,
+       "AF Policy Estimated Calls": 260012.0,
+       "AF User Estimated Calls": 130006.0,
+       "AF Policy Per Tuple Cost": 0.0025,
+       "AF User Per Tuple Cost": 0.2525,
+       "AF Completion Cost": 17819.74,
+       "AF Guard Child Cost": 12300.32,
+       "AF Repeated Policy Cost": {
+        "Source": "pg_selected_exists_path_and_cost_index",
+        "Status": "not_bound_correlated_exists",
+        "SubPlan": 0,
+        "Estimated Calls": 260012.0,
+        "Original Per Call": 0.0025,
+        "Repeated Per Call": 0.0025,
+        "Source IO Reduction": 0.0,
+        "Source Startup": -1.0,
+        "Source Total": -1.0,
+        "Indexes": []
+       },
+       "AF User Cost Stages": [
+        {
+         "Ordinal": 1,
+         "Estimated Calls": 130006.0,
+         "Per Tuple Cost": 0.0025,
+         "Conditional Selectivity": 0.000637
+        },
+        {
+         "Ordinal": 2,
+         "Estimated Calls": 82.835267,
+         "Per Tuple Cost": 0.25,
+         "Conditional Selectivity": 0.333333
+        }
+       ],
+       "AF SP Pending Comparisons": [
+        {
+         "AF SP Pending Decision": "retain",
+         "AF SP Pending Reason": "outside_frozen_sp_volatile_user",
+         "AF SP Root Requirement": false,
+         "AF SP Projection Requirement": false,
+         "AF SP Uncertified Candidate Cost One": 30120.05706667,
+         "AF SP Uncertified Candidate Cost Two": 30120.05706667,
+         "AF SP Cost Scope": "full_candidate_no_sp_certificate",
+         "AF SP Includes Order Enforcer": false,
+         "Diagnostic Late Policy": false,
+         "Index OID": 0,
+         "AF SP Fragment Scope": "outside_frozen_sp_volatile_user",
+         "AF SP Certificate Issued": false,
+         "AF SP Covers Outer Sort Operator": false
+        }
+       ],
+       "AF Guard Costed Candidates": [
+        {
+         "Index OID": "prefix_doc_title_pattern",
+         "Late Policy": true,
+         "Admission Status": "rejected_uncosted",
+         "Admission Reason": "protected_read_before_exact_policy",
+         "Cost Available": false,
+         "Policy Implementation": "native_pg_correlated_arm",
+         "Policy Source Plan": 1
+        },
+        {
+         "Index OID": "prefix_doc_title_pattern",
+         "Late Policy": true,
+         "Admission Status": "rejected_uncosted",
+         "Admission Reason": "protected_read_before_exact_policy",
+         "Cost Available": false,
+         "Policy Implementation": "native_pg_hash_arm",
+         "Policy Source Plan": 2
+        },
+        {
+         "Index OID": 0,
+         "Late Policy": true,
+         "Admission Status": "rejected_uncosted",
+         "Admission Reason": "protected_read_before_exact_policy",
+         "Cost Available": false,
+         "Policy Implementation": "native_pg_correlated_arm",
+         "Policy Source Plan": 1
+        },
+        {
+         "Index OID": 0,
+         "Late Policy": true,
+         "Admission Status": "rejected_uncosted",
+         "Admission Reason": "protected_read_before_exact_policy",
+         "Cost Available": false,
+         "Policy Implementation": "native_pg_hash_arm",
+         "Policy Source Plan": 2
+        },
+        {
+         "Index OID": "prefix_doc_title_pattern",
+         "Late Policy": false,
+         "Admission Status": "admitted_costed",
+         "Admission Reason": "pass",
+         "Cost Available": true,
+         "Child Cost": 24530.6925,
+         "Exact Policy Calls": 260012.0,
+         "Completion Cost": 4437973.07695392,
+         "Policy Implementation": "native_pg_correlated_arm",
+         "Policy Source Plan": 1
+        },
+        {
+         "Index OID": "prefix_doc_title_pattern",
+         "Late Policy": false,
+         "Admission Status": "admitted_costed",
+         "Admission Reason": "pass",
+         "Cost Available": true,
+         "Child Cost": 24530.6925,
+         "Exact Policy Calls": 260012.0,
+         "Completion Cost": 17819.73706667,
+         "Policy Implementation": "native_pg_hash_arm",
+         "Policy Source Plan": 2
+        },
+        {
+         "Index OID": 0,
+         "Late Policy": false,
+         "Admission Status": "admitted_costed",
+         "Admission Reason": "pass",
+         "Cost Available": true,
+         "Child Cost": 12300.32,
+         "Exact Policy Calls": 260012.0,
+         "Completion Cost": 4437973.07695392,
+         "Policy Implementation": "native_pg_correlated_arm",
+         "Policy Source Plan": 1
+        },
+        {
+         "Index OID": 0,
+         "Late Policy": false,
+         "Admission Status": "admitted_costed",
+         "Admission Reason": "pass",
+         "Cost Available": true,
+         "Child Cost": 12300.32,
+         "Exact Policy Calls": 260012.0,
+         "Completion Cost": 17819.73706667,
+         "Policy Implementation": "native_pg_hash_arm",
+         "Policy Source Plan": 2
+        }
+       ],
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "child",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "prefix_doc",
+         "Schema": "public",
+         "Alias": "d",
+         "Plan Rows": 260012,
+         "Plan Width": 44,
+         "Output": [
+          "d.id",
+          "d.title",
+          "d.secret",
+          "d.ctid"
+         ],
+         "Filter": "((d.title ~>=~ 're'::text) AND (d.title ~<~ 'rf'::text))"
+        },
+        {
+         "Node Type": "Hash Join",
+         "Parent Relationship": "SubPlan",
+         "Subplan Name": "SubPlan 2",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Plan Rows": 26204,
+         "Plan Width": 8,
+         "Output": [
+          "s.rid"
+         ],
+         "Inner Unique": true,
+         "Hash Cond": "(s.group_id = m.group_id)",
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "share_acl",
+           "Schema": "public",
+           "Alias": "s",
+           "Plan Rows": 524290,
+           "Plan Width": 16,
+           "Output": [
+            "s.relname",
+            "s.rid",
+            "s.group_id",
+            "s.permission"
+           ],
+           "Filter": "((s.relname = 'public.prefix_doc'::text) AND (s.permission = 'read'::text))"
+          },
+          {
+           "Node Type": "Hash",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Plan Rows": 50,
+           "Plan Width": 8,
+           "Output": [
+            "m.group_id"
+           ],
+           "Plans": [
+            {
+             "Node Type": "Bitmap Heap Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "group_membership",
+             "Schema": "public",
+             "Alias": "m",
+             "Plan Rows": 50,
+             "Plan Width": 8,
+             "Output": [
+              "m.group_id"
+             ],
+             "Recheck Cond": "(m.user_id = 'af_prefix_medium'::text)",
+             "Plans": [
+              {
+               "Node Type": "Bitmap Index Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Index Name": "group_membership_pkey",
+               "Plan Rows": 50,
+               "Plan Width": 0,
+               "Index Cond": "(m.user_id = 'af_prefix_medium'::text)"
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

@@ -1,0 +1,27 @@
+{
+ "case": "adapted-sf10/tpch-q10-equality",
+ "database": "tpch_sf10",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "c_custkey",
+    20
+   ],
+   [
+    "region_id",
+    20
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 20",
+  "multiset_sha256": "f8d9f4c810f0039bf01e1e1cf455293499bce002cb108bcad308a716a09f1fbb",
+  "row_count": 20,
+  "sha256": "d60eca53fc38d1515f74b14c96480603fa1fe05758ddcce208463c84c2581de0"
+ },
+ "audit": null
+}

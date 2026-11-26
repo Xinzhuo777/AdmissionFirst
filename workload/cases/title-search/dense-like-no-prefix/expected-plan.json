@@ -1,0 +1,164 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Sort",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 44,
+   "Plan Width": 79,
+   "Output": [
+    "d.title",
+    "d.secret",
+    "d.title",
+    "((d.secret)::text)"
+   ],
+   "Sort Key": [
+    "d.title COLLATE \"C\"",
+    "d.secret COLLATE \"C\" NULLS FIRST"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Result",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 44,
+     "Plan Width": 79,
+     "Output": [
+      "d.title",
+      "d.secret",
+      "d.title",
+      "d.secret"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Custom Scan",
+       "Parent Relationship": "Outer",
+       "Custom Plan Provider": "AF Completed Hash Policy",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "prefix_doc",
+       "Schema": "public",
+       "Alias": "d",
+       "Plan Rows": 44,
+       "Plan Width": 30,
+       "Output": [
+        "d.title",
+        "d.secret"
+       ],
+       "AF Path": "completed_hash_policy",
+       "AF Authorization": "native_exact_policy_hash",
+       "AF Hash Source": "original_rls_alternative",
+       "AF Hash SubPlan": 2,
+       "AF Hash Evaluations Upper Estimate": 524288,
+       "AF Original Policy Alternatives": [
+        {
+         "SubPlan": 1,
+         "Hash": false,
+         "Per Call Cost": 16.762524969
+        },
+        {
+         "SubPlan": 2,
+         "Hash": true,
+         "Per Call Cost": 0.0025
+        }
+       ],
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "child",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "prefix_doc",
+         "Schema": "public",
+         "Alias": "d",
+         "Plan Rows": 44,
+         "Plan Width": 30,
+         "Output": [
+          "d.title",
+          "d.secret"
+         ],
+         "Filter": "((hashed SubPlan 2) AND (d.title ~~ '%urgent%'::text) AND prefix_audit_secret(d.id, d.secret))",
+         "Plans": [
+          {
+           "Node Type": "Hash Join",
+           "Parent Relationship": "SubPlan",
+           "Subplan Name": "SubPlan 2",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 419263,
+           "Plan Width": 8,
+           "Output": [
+            "s.rid"
+           ],
+           "Inner Unique": true,
+           "Hash Cond": "(s.group_id = m.group_id)",
+           "Plans": [
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "share_acl",
+             "Schema": "public",
+             "Alias": "s",
+             "Plan Rows": 524290,
+             "Plan Width": 16,
+             "Output": [
+              "s.relname",
+              "s.rid",
+              "s.group_id",
+              "s.permission"
+             ],
+             "Filter": "((s.relname = 'public.prefix_doc'::text) AND (s.permission = 'read'::text))"
+            },
+            {
+             "Node Type": "Hash",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Plan Rows": 800,
+             "Plan Width": 8,
+             "Output": [
+              "m.group_id"
+             ],
+             "Plans": [
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "group_membership",
+               "Schema": "public",
+               "Alias": "m",
+               "Plan Rows": 800,
+               "Plan Width": 8,
+               "Output": [
+                "m.group_id"
+               ],
+               "Filter": "(m.user_id = 'af_prefix_dense'::text)"
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

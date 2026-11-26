@@ -1,0 +1,258 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 109,
+   "Output": [
+    "d.id",
+    "d.tenant_id",
+    "d.path",
+    "d.title",
+    "d.path"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Limit",
+     "Parent Relationship": "InitPlan",
+     "Subplan Name": "InitPlan 3 (returns $5)",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 9998,
+     "Plan Width": 8,
+     "Output": [
+      "s_1.rid"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Plan Rows": 9998,
+       "Plan Width": 8,
+       "Output": [
+        "s_1.rid"
+       ],
+       "Inner Unique": false,
+       "Plans": [
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "a027_group_membership_pkey",
+         "Relation Name": "a027_group_membership",
+         "Schema": "public",
+         "Alias": "m_1",
+         "Plan Rows": 160,
+         "Plan Width": 8,
+         "Output": [
+          "m_1.user_id",
+          "m_1.group_id"
+         ],
+         "Index Cond": "(m_1.user_id = 'a027_corr_sparse'::text)"
+        },
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "a027_acl_group",
+         "Relation Name": "a027_share_acl",
+         "Schema": "public",
+         "Alias": "s_1",
+         "Plan Rows": 62,
+         "Plan Width": 16,
+         "Output": [
+          "s_1.group_id",
+          "s_1.relname",
+          "s_1.permission",
+          "s_1.rid"
+         ],
+         "Index Cond": "((s_1.group_id = m_1.group_id) AND (s_1.relname = 'public.a027_document'::text) AND (s_1.permission = 'read'::text))"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 1,
+     "Plan Width": 109,
+     "Output": [
+      "d.id",
+      "d.tenant_id",
+      "d.path",
+      "d.title",
+      "d.path"
+     ],
+     "Sort Key": [
+      "d.path COLLATE \"C\"",
+      "d.id"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Result",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 1,
+       "Plan Width": 109,
+       "Output": [
+        "d.id",
+        "d.tenant_id",
+        "d.path",
+        "d.title",
+        "d.path"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Custom Scan",
+         "Parent Relationship": "Outer",
+         "Custom Plan Provider": "AF Membership Keys",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "a027_document",
+         "Schema": "public",
+         "Alias": "d",
+         "Plan Rows": 1,
+         "Plan Width": 81,
+         "Output": [
+          "d.id",
+          "d.tenant_id",
+          "d.path",
+          "d.title"
+         ],
+         "AF Actual Branch": "not_executed",
+         "AF Path": "enumerate_authorized_keys",
+         "AF Authorization": "fresh_exact_membership",
+         "AF Algorithm": "af",
+         "AF Key Parameter": 5,
+         "AF Key Attribute": 1,
+         "AF ACL Estimated Rows": 9998,
+         "AF Original Relation Rows": 50,
+         "AF Estimated Distinct Keys": 9998,
+         "AF Source Plan Cost": 1061.88,
+         "AF Array Build Cost": 199.96,
+         "AF Array Sort Unique Cost": 689.23,
+         "Plans": [
+          {
+           "Node Type": "Index Scan",
+           "Parent Relationship": "children",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Scan Direction": "Forward",
+           "Index Name": "a027_document_pkey",
+           "Relation Name": "a027_document",
+           "Schema": "public",
+           "Alias": "d",
+           "Plan Rows": 1,
+           "Plan Width": 81,
+           "Output": [
+            "d.id",
+            "d.tenant_id",
+            "d.path",
+            "d.title"
+           ],
+           "Index Cond": "(d.id = ANY ($5))",
+           "Filter": "(d.path ~~ '%rotation-%'::text)"
+          },
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "children",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "a027_document",
+           "Schema": "public",
+           "Alias": "d",
+           "Plan Rows": 1,
+           "Plan Width": 81,
+           "Output": [
+            "d.id",
+            "d.tenant_id",
+            "d.path",
+            "d.title"
+           ],
+           "Filter": "((SubPlan 1) AND (d.path ~~ '%rotation-%'::text))",
+           "Plans": [
+            {
+             "Node Type": "Nested Loop",
+             "Parent Relationship": "SubPlan",
+             "Subplan Name": "SubPlan 1",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Plan Rows": 1,
+             "Plan Width": 0,
+             "Inner Unique": true,
+             "Plans": [
+              {
+               "Node Type": "Index Only Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Scan Direction": "Forward",
+               "Index Name": "a027_share_acl_pkey",
+               "Relation Name": "a027_share_acl",
+               "Schema": "public",
+               "Alias": "s",
+               "Plan Rows": 2,
+               "Plan Width": 8,
+               "Output": [
+                "s.relname",
+                "s.rid",
+                "s.group_id",
+                "s.permission"
+               ],
+               "Index Cond": "((s.relname = 'public.a027_document'::text) AND (s.rid = d.id) AND (s.permission = 'read'::text))"
+              },
+              {
+               "Node Type": "Index Only Scan",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Scan Direction": "Forward",
+               "Index Name": "a027_group_membership_pkey",
+               "Relation Name": "a027_group_membership",
+               "Schema": "public",
+               "Alias": "m",
+               "Plan Rows": 1,
+               "Plan Width": 8,
+               "Output": [
+                "m.user_id",
+                "m.group_id"
+               ],
+               "Index Cond": "((m.user_id = 'a027_corr_sparse'::text) AND (m.group_id = s.group_id))"
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

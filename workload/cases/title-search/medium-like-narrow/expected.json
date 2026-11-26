@@ -1,0 +1,27 @@
+{
+ "case": "title-search/medium-like-narrow",
+ "database": "title_search",
+ "role": "af_prefix_medium",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "title",
+    25
+   ],
+   [
+    "secret",
+    25
+   ]
+  ],
+  "command": "SELECT 188",
+  "multiset_sha256": "a767d2f4b8960a194d4f8a620601f4392c751da678b5a1e4557f33c77956587b",
+  "row_count": 188,
+  "sha256": "a767d2f4b8960a194d4f8a620601f4392c751da678b5a1e4557f33c77956587b"
+ },
+ "audit": {
+  "kind": "title",
+  "observations": 188,
+  "unauthorized": 0
+ }
+}

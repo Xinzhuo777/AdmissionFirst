@@ -1,0 +1,27 @@
+{
+ "case": "original/job-6a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "movie_keyword",
+    25
+   ],
+   [
+    "actor_name",
+    25
+   ],
+   [
+    "marvel_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "46949977cbf57721c92ed35d93ad1cddbe0571cba476450c138ac843a7e56877",
+  "row_count": 1,
+  "sha256": "46949977cbf57721c92ed35d93ad1cddbe0571cba476450c138ac843a7e56877"
+ },
+ "audit": null
+}

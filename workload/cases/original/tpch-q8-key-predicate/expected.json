@@ -1,0 +1,23 @@
+{
+ "case": "original/tpch-q8-key-predicate",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "o_year",
+    1700
+   ],
+   [
+    "mkt_share",
+    1700
+   ]
+  ],
+  "command": "SELECT 2",
+  "multiset_sha256": "52072cfad07c8ee1f42774acf97ebce291f47669f23b7aac38fa7ffe54280fde",
+  "row_count": 2,
+  "sha256": "52072cfad07c8ee1f42774acf97ebce291f47669f23b7aac38fa7ffe54280fde"
+ },
+ "audit": null
+}

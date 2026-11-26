@@ -1,0 +1,1 @@
+SELECT d.title FROM public.prefix_doc d WHERE d.title LIKE 'report%urgent%' AND public.prefix_audit_secret(d.id,d.secret)

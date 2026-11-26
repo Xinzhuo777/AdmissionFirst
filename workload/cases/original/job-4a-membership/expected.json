@@ -1,0 +1,23 @@
+{
+ "case": "original/job-4a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "rating",
+    25
+   ],
+   [
+    "movie_title",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "8b4eaccfd831e6079e4c7c127dd6b03993cca9fc7e75a105575c9fa9db77ec32",
+  "row_count": 1,
+  "sha256": "8b4eaccfd831e6079e4c7c127dd6b03993cca9fc7e75a105575c9fa9db77ec32"
+ },
+ "audit": null
+}

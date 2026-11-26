@@ -1,0 +1,27 @@
+{
+ "case": "original/job-11a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "from_company",
+    25
+   ],
+   [
+    "movie_link_type",
+    25
+   ],
+   [
+    "non_polish_sequel_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "1642de78936277a657bc784cfc3f1017102a57b4a3e484caba5cee2893e91e47",
+  "row_count": 1,
+  "sha256": "1642de78936277a657bc784cfc3f1017102a57b4a3e484caba5cee2893e91e47"
+ },
+ "audit": null
+}

@@ -1,0 +1,141 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 20,
+   "Plan Width": 12,
+   "Output": [
+    "t.production_year",
+    "(count(*))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 122,
+     "Plan Width": 12,
+     "Output": [
+      "t.production_year",
+      "(count(*))"
+     ],
+     "Sort Key": [
+      "(count(*)) DESC",
+      "t.production_year"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Hashed",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 122,
+       "Plan Width": 12,
+       "Output": [
+        "t.production_year",
+        "count(*)"
+       ],
+       "Group Key": [
+        "t.production_year"
+       ],
+       "Planned Partitions": 0,
+       "Plans": [
+        {
+         "Node Type": "Hash Join",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Plan Rows": 97458,
+         "Plan Width": 4,
+         "Output": [
+          "t.production_year"
+         ],
+         "Inner Unique": true,
+         "Hash Cond": "(mc.movie_id = t.t_id)",
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "job_movie_companies",
+           "Schema": "public",
+           "Alias": "mc",
+           "Plan Rows": 2609129,
+           "Plan Width": 8,
+           "Output": [
+            "mc.movie_id",
+            "mc.company_id",
+            "mc.company_type",
+            "mc.region_id"
+           ],
+           "Filter": "(mc.company_type = ANY ('{production,distributor}'::text[]))"
+          },
+          {
+           "Node Type": "Hash",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Plan Rows": 94439,
+           "Plan Width": 12,
+           "Output": [
+            "t.production_year",
+            "t.t_id"
+           ],
+           "Plans": [
+            {
+             "Node Type": "Bitmap Heap Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "job_title",
+             "Schema": "public",
+             "Alias": "t",
+             "Plan Rows": 94439,
+             "Plan Width": 12,
+             "Output": [
+              "t.production_year",
+              "t.t_id"
+             ],
+             "Recheck Cond": "(t.region_id = 1)",
+             "Filter": "((t.production_year >= 1990) AND (t.production_year <= 2020) AND (t.kind = 'movie'::text))",
+             "Plans": [
+              {
+               "Node Type": "Bitmap Index Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Index Name": "job_title_region_idx",
+               "Plan Rows": 507685,
+               "Plan Width": 0,
+               "Index Cond": "(t.region_id = 1)"
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

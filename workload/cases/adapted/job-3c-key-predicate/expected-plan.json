@@ -1,0 +1,159 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Limit",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 16,
+   "Output": [
+    "t.region_id",
+    "(count(*))"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Plan Rows": 1,
+     "Plan Width": 16,
+     "Output": [
+      "t.region_id",
+      "(count(*))"
+     ],
+     "Sort Key": [
+      "(count(*)) DESC"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Sorted",
+       "Partial Mode": "Simple",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Plan Rows": 1,
+       "Plan Width": 16,
+       "Output": [
+        "t.region_id",
+        "count(*)"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Plan Rows": 3569,
+         "Plan Width": 8,
+         "Output": [
+          "t.region_id"
+         ],
+         "Inner Unique": false,
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Plan Rows": 125,
+           "Plan Width": 24,
+           "Output": [
+            "t.region_id",
+            "t.t_id",
+            "mc.movie_id"
+           ],
+           "Inner Unique": false,
+           "Plans": [
+            {
+             "Node Type": "Bitmap Heap Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "job_title",
+             "Schema": "public",
+             "Alias": "t",
+             "Plan Rows": 249,
+             "Plan Width": 16,
+             "Output": [
+              "t.t_id",
+              "t.kind",
+              "t.production_year",
+              "t.region_id",
+              "t.studio_id"
+             ],
+             "Recheck Cond": "((t.kind = 'movie'::text) AND (t.region_id = 1) AND ((t.t_id % '50'::bigint) = 0))",
+             "Filter": "((t.production_year >= 1980) AND (t.production_year <= 2005))",
+             "Plans": [
+              {
+               "Node Type": "Bitmap Index Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Index Name": "native_af_auth_job_title_kind_key",
+               "Plan Rows": 673,
+               "Plan Width": 0,
+               "Index Cond": "(t.kind = 'movie'::text)"
+              }
+             ]
+            },
+            {
+             "Node Type": "Index Only Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "job_movie_companies_movie_type_idx",
+             "Relation Name": "job_movie_companies",
+             "Schema": "public",
+             "Alias": "mc",
+             "Plan Rows": 3,
+             "Plan Width": 8,
+             "Output": [
+              "mc.movie_id",
+              "mc.company_type"
+             ],
+             "Index Cond": "((mc.movie_id = t.t_id) AND (mc.company_type = 'distributor'::text))"
+            }
+           ]
+          },
+          {
+           "Node Type": "Index Only Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Scan Direction": "Forward",
+           "Index Name": "job_cast_info_movie_role_idx",
+           "Relation Name": "job_cast_info",
+           "Schema": "public",
+           "Alias": "ci",
+           "Plan Rows": 29,
+           "Plan Width": 8,
+           "Output": [
+            "ci.movie_id",
+            "ci.role_id"
+           ],
+           "Index Cond": "((ci.movie_id = mc.movie_id) AND (ci.role_id <= 4))"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

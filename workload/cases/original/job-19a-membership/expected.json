@@ -1,0 +1,23 @@
+{
+ "case": "original/job-19a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "voicing_actress",
+    25
+   ],
+   [
+    "voiced_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "5ddde912c17a7e834943c8579146940dbea8435e0a50e8ac252a265ec59ff5fd",
+  "row_count": 1,
+  "sha256": "5ddde912c17a7e834943c8579146940dbea8435e0a50e8ac252a265ec59ff5fd"
+ },
+ "audit": null
+}

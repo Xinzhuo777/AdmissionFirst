@@ -1,0 +1,31 @@
+{
+ "case": "adapted-sf10/tpch-q3-equality",
+ "database": "tpch_sf10",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "l_orderkey",
+    20
+   ],
+   [
+    "revenue",
+    1700
+   ],
+   [
+    "o_orderdate",
+    1082
+   ],
+   [
+    "o_shippriority",
+    23
+   ]
+  ],
+  "command": "SELECT 10",
+  "multiset_sha256": "c1742686339adfdb35128c9e205ba9bcb6e8a425f121664acf0439bdc5c34e3d",
+  "row_count": 10,
+  "sha256": "75ed8b4713be16199d53cf06470dcaec978e6d4913fe416b28b1e735d2174e73"
+ },
+ "audit": null
+}

@@ -1,0 +1,19 @@
+{
+ "case": "daily-requests/q05-invoice-region-purpose-join",
+ "database": "application",
+ "role": "caprls_e10_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "count",
+    20
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "f3c750bd86fa679a21ecf14e4885cab5e1260391f45802e4125ef64a097dfad7",
+  "row_count": 1,
+  "sha256": "f3c750bd86fa679a21ecf14e4885cab5e1260391f45802e4125ef64a097dfad7"
+ },
+ "audit": null
+}

@@ -1,0 +1,27 @@
+{
+ "case": "original/job-28a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "movie_company",
+    25
+   ],
+   [
+    "rating",
+    25
+   ],
+   [
+    "complete_euro_dark_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "e160cec97c9973ba7c77cbf1bc7e913ce13eaf6f0e316677b9fd8fb528b20869",
+  "row_count": 1,
+  "sha256": "e160cec97c9973ba7c77cbf1bc7e913ce13eaf6f0e316677b9fd8fb528b20869"
+ },
+ "audit": null
+}

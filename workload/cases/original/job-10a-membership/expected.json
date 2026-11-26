@@ -1,0 +1,23 @@
+{
+ "case": "original/job-10a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "uncredited_voiced_character",
+    25
+   ],
+   [
+    "russian_movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "88be7ad76c028263b143c1c6012d1d26ca75451581e6f3a115c8b31a4669075e",
+  "row_count": 1,
+  "sha256": "88be7ad76c028263b143c1c6012d1d26ca75451581e6f3a115c8b31a4669075e"
+ },
+ "audit": null
+}

@@ -1,0 +1,27 @@
+{
+ "case": "original/job-29a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "voiced_char",
+    25
+   ],
+   [
+    "voicing_actress",
+    25
+   ],
+   [
+    "voiced_animation",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "cd6ff1e6f3628a6c4b5494968b4a4cc0e0a0142fdb497fa98bb643a1dde6bc28",
+  "row_count": 1,
+  "sha256": "cd6ff1e6f3628a6c4b5494968b4a4cc0e0a0142fdb497fa98bb643a1dde6bc28"
+ },
+ "audit": null
+}

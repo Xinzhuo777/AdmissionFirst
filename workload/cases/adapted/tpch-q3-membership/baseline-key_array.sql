@@ -1,0 +1,39 @@
+BEGIN;
+DO $check$ BEGIN
+IF NOT EXISTS (SELECT 1 FROM pg_roles r WHERE rolname='caprls_e3_rls_user' AND rolcanlogin AND NOT rolsuper AND NOT rolbypassrls AND NOT rolcreaterole AND NOT rolcreatedb AND NOT rolreplication AND NOT rolinherit AND NOT EXISTS (SELECT 1 FROM pg_auth_members m WHERE m.member=r.oid)) THEN RAISE EXCEPTION 'requires original ordinary direct login'; END IF;
+IF NOT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid='public.tpch_customer'::regclass AND attname='c_custkey' AND atttypid='bigint'::regtype AND attnotnull AND NOT attisdropped) THEN RAISE EXCEPTION 'requires original BIGINT NOT NULL key public.tpch_customer.c_custkey'; END IF;
+IF NOT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid='public.job_title'::regclass AND attname='t_id' AND atttypid='bigint'::regtype AND attnotnull AND NOT attisdropped) THEN RAISE EXCEPTION 'requires original BIGINT NOT NULL key public.job_title.t_id'; END IF;
+IF NOT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid='public.share_acl'::regclass AND attname='rid' AND atttypid='bigint'::regtype AND attnotnull AND NOT attisdropped) THEN RAISE EXCEPTION 'requires original BIGINT NOT NULL key public.share_acl.rid'; END IF;
+IF NOT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid='public.share_acl'::regclass AND attname='group_id' AND atttypid='bigint'::regtype AND attnotnull AND NOT attisdropped) THEN RAISE EXCEPTION 'requires original BIGINT NOT NULL key public.share_acl.group_id'; END IF;
+IF NOT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid='public.group_membership'::regclass AND attname='group_id' AND atttypid='bigint'::regtype AND attnotnull AND NOT attisdropped) THEN RAISE EXCEPTION 'requires original BIGINT NOT NULL key public.group_membership.group_id'; END IF;
+END $check$;
+ALTER TABLE public.tpch_customer ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tpch_customer FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS caprls_e3_policy_tpch_customer ON public.tpch_customer;
+DROP POLICY IF EXISTS a032_manual_in_tpch_customer ON public.tpch_customer;
+DROP POLICY IF EXISTS a032_manual_array_tpch_customer ON public.tpch_customer;
+ALTER TABLE public.job_title ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.job_title FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS caprls_e3_policy_job_title ON public.job_title;
+DROP POLICY IF EXISTS a032_manual_in_job_title ON public.job_title;
+DROP POLICY IF EXISTS a032_manual_array_job_title ON public.job_title;
+DROP POLICY IF EXISTS caprls_e3_policy_tpch_customer ON public.tpch_customer;
+CREATE POLICY caprls_e3_policy_tpch_customer ON public.tpch_customer FOR SELECT TO caprls_e3_rls_user USING (EXISTS (
+  SELECT 1
+  FROM public.share_acl s
+  JOIN public.group_membership m ON m.group_id = s.group_id
+  WHERE m.user_id = 'e3_user'
+    AND s.relname = 'public.tpch_customer'
+    AND s.rid = c_custkey
+    AND s.permission = 'read'
+));
+DROP POLICY IF EXISTS caprls_e3_policy_tpch_customer ON public.tpch_customer;
+CREATE POLICY caprls_e3_policy_tpch_customer ON public.tpch_customer FOR SELECT TO caprls_e3_rls_user USING (c_custkey = ANY ((
+  SELECT COALESCE(array_agg(s.rid), ARRAY[]::bigint[])
+  FROM public.share_acl s
+  JOIN public.group_membership m ON m.group_id = s.group_id
+  WHERE m.user_id = 'e3_user'
+    AND s.relname = 'public.tpch_customer'
+    AND s.permission = 'read'
+)::bigint[]));
+COMMIT;

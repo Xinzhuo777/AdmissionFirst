@@ -1,0 +1,1004 @@
+{
+ "index_definitions": {
+  "a031_b_marker_pkey": "CREATE UNIQUE INDEX a031_b_marker_pkey ON public.a031_b_marker USING btree (identity)",
+  "aka_name_pkey": "CREATE UNIQUE INDEX aka_name_pkey ON public.aka_name USING btree (id)",
+  "aka_title_pkey": "CREATE UNIQUE INDEX aka_title_pkey ON public.aka_title USING btree (id)",
+  "cast_info_pkey": "CREATE UNIQUE INDEX cast_info_pkey ON public.cast_info USING btree (id)",
+  "char_name_pkey": "CREATE UNIQUE INDEX char_name_pkey ON public.char_name USING btree (id)",
+  "comp_cast_type_pkey": "CREATE UNIQUE INDEX comp_cast_type_pkey ON public.comp_cast_type USING btree (id)",
+  "company_id_movie_companies": "CREATE INDEX company_id_movie_companies ON public.movie_companies USING btree (company_id)",
+  "company_name_pkey": "CREATE UNIQUE INDEX company_name_pkey ON public.company_name USING btree (id)",
+  "company_type_id_movie_companies": "CREATE INDEX company_type_id_movie_companies ON public.movie_companies USING btree (company_type_id)",
+  "company_type_pkey": "CREATE UNIQUE INDEX company_type_pkey ON public.company_type USING btree (id)",
+  "complete_cast_pkey": "CREATE UNIQUE INDEX complete_cast_pkey ON public.complete_cast USING btree (id)",
+  "customer_nation_idx": "CREATE INDEX customer_nation_idx ON public.customer USING btree (c_nationkey)",
+  "customer_pkey": "CREATE UNIQUE INDEX customer_pkey ON public.customer USING btree (c_custkey)",
+  "customer_segment_idx": "CREATE INDEX customer_segment_idx ON public.customer USING btree (c_mktsegment)",
+  "group_membership_pkey": "CREATE UNIQUE INDEX group_membership_pkey ON public.group_membership USING btree (user_id, group_id)",
+  "info_type_id_movie_info": "CREATE INDEX info_type_id_movie_info ON public.movie_info USING btree (info_type_id)",
+  "info_type_id_movie_info_idx": "CREATE INDEX info_type_id_movie_info_idx ON public.movie_info_idx USING btree (info_type_id)",
+  "info_type_id_person_info": "CREATE INDEX info_type_id_person_info ON public.person_info USING btree (info_type_id)",
+  "info_type_pkey": "CREATE UNIQUE INDEX info_type_pkey ON public.info_type USING btree (id)",
+  "keyword_id_movie_keyword": "CREATE INDEX keyword_id_movie_keyword ON public.movie_keyword USING btree (keyword_id)",
+  "keyword_pkey": "CREATE UNIQUE INDEX keyword_pkey ON public.keyword USING btree (id)",
+  "kind_id_aka_title": "CREATE INDEX kind_id_aka_title ON public.aka_title USING btree (kind_id)",
+  "kind_id_title": "CREATE INDEX kind_id_title ON public.title USING btree (kind_id)",
+  "kind_type_pkey": "CREATE UNIQUE INDEX kind_type_pkey ON public.kind_type USING btree (id)",
+  "lineitem_part_supplier_idx": "CREATE INDEX lineitem_part_supplier_idx ON public.lineitem USING btree (l_partkey, l_suppkey)",
+  "lineitem_pkey": "CREATE UNIQUE INDEX lineitem_pkey ON public.lineitem USING btree (l_orderkey, l_linenumber)",
+  "lineitem_supplier_idx": "CREATE INDEX lineitem_supplier_idx ON public.lineitem USING btree (l_suppkey)",
+  "link_type_id_movie_link": "CREATE INDEX link_type_id_movie_link ON public.movie_link USING btree (link_type_id)",
+  "link_type_pkey": "CREATE UNIQUE INDEX link_type_pkey ON public.link_type USING btree (id)",
+  "linked_movie_id_movie_link": "CREATE INDEX linked_movie_id_movie_link ON public.movie_link USING btree (linked_movie_id)",
+  "movie_companies_pkey": "CREATE UNIQUE INDEX movie_companies_pkey ON public.movie_companies USING btree (id)",
+  "movie_id_aka_title": "CREATE INDEX movie_id_aka_title ON public.aka_title USING btree (movie_id)",
+  "movie_id_cast_info": "CREATE INDEX movie_id_cast_info ON public.cast_info USING btree (movie_id)",
+  "movie_id_complete_cast": "CREATE INDEX movie_id_complete_cast ON public.complete_cast USING btree (movie_id)",
+  "movie_id_movie_companies": "CREATE INDEX movie_id_movie_companies ON public.movie_companies USING btree (movie_id)",
+  "movie_id_movie_info": "CREATE INDEX movie_id_movie_info ON public.movie_info USING btree (movie_id)",
+  "movie_id_movie_info_idx": "CREATE INDEX movie_id_movie_info_idx ON public.movie_info_idx USING btree (movie_id)",
+  "movie_id_movie_keyword": "CREATE INDEX movie_id_movie_keyword ON public.movie_keyword USING btree (movie_id)",
+  "movie_id_movie_link": "CREATE INDEX movie_id_movie_link ON public.movie_link USING btree (movie_id)",
+  "movie_info_idx_pkey": "CREATE UNIQUE INDEX movie_info_idx_pkey ON public.movie_info_idx USING btree (id)",
+  "movie_info_pkey": "CREATE UNIQUE INDEX movie_info_pkey ON public.movie_info USING btree (id)",
+  "movie_keyword_pkey": "CREATE UNIQUE INDEX movie_keyword_pkey ON public.movie_keyword USING btree (id)",
+  "movie_link_pkey": "CREATE UNIQUE INDEX movie_link_pkey ON public.movie_link USING btree (id)",
+  "name_pkey": "CREATE UNIQUE INDEX name_pkey ON public.name USING btree (id)",
+  "nation_pkey": "CREATE UNIQUE INDEX nation_pkey ON public.nation USING btree (n_nationkey)",
+  "nation_region_idx": "CREATE INDEX nation_region_idx ON public.nation USING btree (n_regionkey)",
+  "native_af_auth_customer_segment_key": "CREATE INDEX native_af_auth_customer_segment_key ON public.customer USING btree (c_mktsegment, c_custkey) WHERE ((tenant_id = 1) AND ((c_custkey % (50)::bigint) = 0))",
+  "native_af_auth_title_kind_key": "CREATE INDEX native_af_auth_title_kind_key ON public.title USING btree (kind_id, id) WHERE ((tenant_id = 1) AND ((id % (50)::bigint) = 0))",
+  "orders_customer_date_idx": "CREATE INDEX orders_customer_date_idx ON public.orders USING btree (o_custkey, o_orderdate)",
+  "orders_date_idx": "CREATE INDEX orders_date_idx ON public.orders USING btree (o_orderdate)",
+  "orders_pkey": "CREATE UNIQUE INDEX orders_pkey ON public.orders USING btree (o_orderkey)",
+  "part_pkey": "CREATE UNIQUE INDEX part_pkey ON public.part USING btree (p_partkey)",
+  "partsupp_pkey": "CREATE UNIQUE INDEX partsupp_pkey ON public.partsupp USING btree (ps_partkey, ps_suppkey)",
+  "partsupp_supplier_idx": "CREATE INDEX partsupp_supplier_idx ON public.partsupp USING btree (ps_suppkey)",
+  "person_id_aka_name": "CREATE INDEX person_id_aka_name ON public.aka_name USING btree (person_id)",
+  "person_id_cast_info": "CREATE INDEX person_id_cast_info ON public.cast_info USING btree (person_id)",
+  "person_id_person_info": "CREATE INDEX person_id_person_info ON public.person_info USING btree (person_id)",
+  "person_info_pkey": "CREATE UNIQUE INDEX person_info_pkey ON public.person_info USING btree (id)",
+  "person_role_id_cast_info": "CREATE INDEX person_role_id_cast_info ON public.cast_info USING btree (person_role_id)",
+  "region_pkey": "CREATE UNIQUE INDEX region_pkey ON public.region USING btree (r_regionkey)",
+  "role_id_cast_info": "CREATE INDEX role_id_cast_info ON public.cast_info USING btree (role_id)",
+  "role_type_pkey": "CREATE UNIQUE INDEX role_type_pkey ON public.role_type USING btree (id)",
+  "share_acl_group_idx": "CREATE INDEX share_acl_group_idx ON public.share_acl USING btree (group_id, relname, permission)",
+  "share_acl_lookup_idx": "CREATE INDEX share_acl_lookup_idx ON public.share_acl USING btree (relname, rid, permission, group_id)",
+  "share_acl_pkey": "CREATE UNIQUE INDEX share_acl_pkey ON public.share_acl USING btree (relname, rid, group_id, permission)",
+  "supplier_nation_idx": "CREATE INDEX supplier_nation_idx ON public.supplier USING btree (s_nationkey)",
+  "supplier_pkey": "CREATE UNIQUE INDEX supplier_pkey ON public.supplier USING btree (s_suppkey)",
+  "title_pkey": "CREATE UNIQUE INDEX title_pkey ON public.title USING btree (id)"
+ },
+ "indexes": {
+  "a031_b_marker_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 1.0,
+   "toast_relpages": 0
+  },
+  "aka_name_pkey": {
+   "kind": "i",
+   "main_bytes": 20267008,
+   "relallvisible": 0,
+   "relpages": 2474,
+   "reltuples": 901343.0,
+   "toast_relpages": 0
+  },
+  "aka_title_pkey": {
+   "kind": "i",
+   "main_bytes": 8142848,
+   "relallvisible": 0,
+   "relpages": 994,
+   "reltuples": 361472.0,
+   "toast_relpages": 0
+  },
+  "cast_info_pkey": {
+   "kind": "i",
+   "main_bytes": 814137344,
+   "relallvisible": 0,
+   "relpages": 99382,
+   "reltuples": 36238172.0,
+   "toast_relpages": 0
+  },
+  "char_name_pkey": {
+   "kind": "i",
+   "main_bytes": 70565888,
+   "relallvisible": 0,
+   "relpages": 8614,
+   "reltuples": 3140295.0,
+   "toast_relpages": 0
+  },
+  "comp_cast_type_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 4.0,
+   "toast_relpages": 0
+  },
+  "company_id_movie_companies": {
+   "kind": "i",
+   "main_bytes": 22831104,
+   "relallvisible": 0,
+   "relpages": 2787,
+   "reltuples": 2609129.0,
+   "toast_relpages": 0
+  },
+  "company_name_pkey": {
+   "kind": "i",
+   "main_bytes": 5308416,
+   "relallvisible": 0,
+   "relpages": 648,
+   "reltuples": 234997.0,
+   "toast_relpages": 0
+  },
+  "company_type_id_movie_companies": {
+   "kind": "i",
+   "main_bytes": 18104320,
+   "relallvisible": 0,
+   "relpages": 2210,
+   "reltuples": 2609129.0,
+   "toast_relpages": 0
+  },
+  "company_type_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 4.0,
+   "toast_relpages": 0
+  },
+  "complete_cast_pkey": {
+   "kind": "i",
+   "main_bytes": 3063808,
+   "relallvisible": 0,
+   "relpages": 374,
+   "reltuples": 135086.0,
+   "toast_relpages": 0
+  },
+  "customer_nation_idx": {
+   "kind": "i",
+   "main_bytes": 1064960,
+   "relallvisible": 0,
+   "relpages": 130,
+   "reltuples": 150000.0,
+   "toast_relpages": 0
+  },
+  "customer_pkey": {
+   "kind": "i",
+   "main_bytes": 3391488,
+   "relallvisible": 0,
+   "relpages": 414,
+   "reltuples": 150000.0,
+   "toast_relpages": 0
+  },
+  "customer_segment_idx": {
+   "kind": "i",
+   "main_bytes": 1073152,
+   "relallvisible": 0,
+   "relpages": 131,
+   "reltuples": 150000.0,
+   "toast_relpages": 0
+  },
+  "group_membership_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 1.0,
+   "toast_relpages": 0
+  },
+  "info_type_id_movie_info": {
+   "kind": "i",
+   "main_bytes": 102858752,
+   "relallvisible": 0,
+   "relpages": 12556,
+   "reltuples": 14733490.0,
+   "toast_relpages": 0
+  },
+  "info_type_id_movie_info_idx": {
+   "kind": "i",
+   "main_bytes": 9584640,
+   "relallvisible": 0,
+   "relpages": 1170,
+   "reltuples": 1380035.0,
+   "toast_relpages": 0
+  },
+  "info_type_id_person_info": {
+   "kind": "i",
+   "main_bytes": 20570112,
+   "relallvisible": 0,
+   "relpages": 2511,
+   "reltuples": 2967010.0,
+   "toast_relpages": 0
+  },
+  "info_type_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 113.0,
+   "toast_relpages": 0
+  },
+  "keyword_id_movie_keyword": {
+   "kind": "i",
+   "main_bytes": 34414592,
+   "relallvisible": 0,
+   "relpages": 4201,
+   "reltuples": 4523930.0,
+   "toast_relpages": 0
+  },
+  "keyword_pkey": {
+   "kind": "i",
+   "main_bytes": 3039232,
+   "relallvisible": 0,
+   "relpages": 371,
+   "reltuples": 134170.0,
+   "toast_relpages": 0
+  },
+  "kind_id_aka_title": {
+   "kind": "i",
+   "main_bytes": 2531328,
+   "relallvisible": 0,
+   "relpages": 309,
+   "reltuples": 361472.0,
+   "toast_relpages": 0
+  },
+  "kind_id_title": {
+   "kind": "i",
+   "main_bytes": 17547264,
+   "relallvisible": 0,
+   "relpages": 2142,
+   "reltuples": 2528483.0,
+   "toast_relpages": 0
+  },
+  "kind_type_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 7.0,
+   "toast_relpages": 0
+  },
+  "lineitem_part_supplier_idx": {
+   "kind": "i",
+   "main_bytes": 68173824,
+   "relallvisible": 0,
+   "relpages": 8322,
+   "reltuples": 6000912.0,
+   "toast_relpages": 0
+  },
+  "lineitem_pkey": {
+   "kind": "i",
+   "main_bytes": 189251584,
+   "relallvisible": 0,
+   "relpages": 23102,
+   "reltuples": 6000912.0,
+   "toast_relpages": 0
+  },
+  "lineitem_supplier_idx": {
+   "kind": "i",
+   "main_bytes": 42622976,
+   "relallvisible": 0,
+   "relpages": 5203,
+   "reltuples": 6000912.0,
+   "toast_relpages": 0
+  },
+  "link_type_id_movie_link": {
+   "kind": "i",
+   "main_bytes": 229376,
+   "relallvisible": 0,
+   "relpages": 28,
+   "reltuples": 29997.0,
+   "toast_relpages": 0
+  },
+  "link_type_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 18.0,
+   "toast_relpages": 0
+  },
+  "linked_movie_id_movie_link": {
+   "kind": "i",
+   "main_bytes": 524288,
+   "relallvisible": 0,
+   "relpages": 64,
+   "reltuples": 29997.0,
+   "toast_relpages": 0
+  },
+  "movie_companies_pkey": {
+   "kind": "i",
+   "main_bytes": 58630144,
+   "relallvisible": 0,
+   "relpages": 7157,
+   "reltuples": 2609129.0,
+   "toast_relpages": 0
+  },
+  "movie_id_aka_title": {
+   "kind": "i",
+   "main_bytes": 6553600,
+   "relallvisible": 0,
+   "relpages": 800,
+   "reltuples": 361472.0,
+   "toast_relpages": 0
+  },
+  "movie_id_cast_info": {
+   "kind": "i",
+   "main_bytes": 299573248,
+   "relallvisible": 0,
+   "relpages": 36569,
+   "reltuples": 36238172.0,
+   "toast_relpages": 0
+  },
+  "movie_id_complete_cast": {
+   "kind": "i",
+   "main_bytes": 2875392,
+   "relallvisible": 0,
+   "relpages": 351,
+   "reltuples": 135086.0,
+   "toast_relpages": 0
+  },
+  "movie_id_movie_companies": {
+   "kind": "i",
+   "main_bytes": 42106880,
+   "relallvisible": 0,
+   "relpages": 5140,
+   "reltuples": 2609129.0,
+   "toast_relpages": 0
+  },
+  "movie_id_movie_info": {
+   "kind": "i",
+   "main_bytes": 152887296,
+   "relallvisible": 0,
+   "relpages": 18663,
+   "reltuples": 14733490.0,
+   "toast_relpages": 0
+  },
+  "movie_id_movie_info_idx": {
+   "kind": "i",
+   "main_bytes": 22667264,
+   "relallvisible": 0,
+   "relpages": 2767,
+   "reltuples": 1380035.0,
+   "toast_relpages": 0
+  },
+  "movie_id_movie_keyword": {
+   "kind": "i",
+   "main_bytes": 41426944,
+   "relallvisible": 0,
+   "relpages": 5057,
+   "reltuples": 4523930.0,
+   "toast_relpages": 0
+  },
+  "movie_id_movie_link": {
+   "kind": "i",
+   "main_bytes": 352256,
+   "relallvisible": 0,
+   "relpages": 43,
+   "reltuples": 29997.0,
+   "toast_relpages": 0
+  },
+  "movie_info_idx_pkey": {
+   "kind": "i",
+   "main_bytes": 31023104,
+   "relallvisible": 0,
+   "relpages": 3787,
+   "reltuples": 1380035.0,
+   "toast_relpages": 0
+  },
+  "movie_info_pkey": {
+   "kind": "i",
+   "main_bytes": 333250560,
+   "relallvisible": 0,
+   "relpages": 40680,
+   "reltuples": 14733490.0,
+   "toast_relpages": 0
+  },
+  "movie_keyword_pkey": {
+   "kind": "i",
+   "main_bytes": 101638144,
+   "relallvisible": 0,
+   "relpages": 12407,
+   "reltuples": 4523930.0,
+   "toast_relpages": 0
+  },
+  "movie_link_pkey": {
+   "kind": "i",
+   "main_bytes": 688128,
+   "relallvisible": 0,
+   "relpages": 84,
+   "reltuples": 29997.0,
+   "toast_relpages": 0
+  },
+  "name_pkey": {
+   "kind": "i",
+   "main_bytes": 93634560,
+   "relallvisible": 0,
+   "relpages": 11430,
+   "reltuples": 4167557.0,
+   "toast_relpages": 0
+  },
+  "nation_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 25.0,
+   "toast_relpages": 0
+  },
+  "nation_region_idx": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 25.0,
+   "toast_relpages": 0
+  },
+  "native_af_auth_customer_segment_key": {
+   "kind": "i",
+   "main_bytes": 139264,
+   "relallvisible": 0,
+   "relpages": 17,
+   "reltuples": 2880.0,
+   "toast_relpages": 0
+  },
+  "native_af_auth_title_kind_key": {
+   "kind": "i",
+   "main_bytes": 1605632,
+   "relallvisible": 0,
+   "relpages": 196,
+   "reltuples": 49053.0,
+   "toast_relpages": 0
+  },
+  "orders_customer_date_idx": {
+   "kind": "i",
+   "main_bytes": 47226880,
+   "relallvisible": 0,
+   "relpages": 5765,
+   "reltuples": 1500000.0,
+   "toast_relpages": 0
+  },
+  "orders_date_idx": {
+   "kind": "i",
+   "main_bytes": 10887168,
+   "relallvisible": 0,
+   "relpages": 1329,
+   "reltuples": 1500000.0,
+   "toast_relpages": 0
+  },
+  "orders_pkey": {
+   "kind": "i",
+   "main_bytes": 33718272,
+   "relallvisible": 0,
+   "relpages": 4116,
+   "reltuples": 1500000.0,
+   "toast_relpages": 0
+  },
+  "part_pkey": {
+   "kind": "i",
+   "main_bytes": 4513792,
+   "relallvisible": 0,
+   "relpages": 551,
+   "reltuples": 200000.0,
+   "toast_relpages": 0
+  },
+  "partsupp_pkey": {
+   "kind": "i",
+   "main_bytes": 25247744,
+   "relallvisible": 0,
+   "relpages": 3082,
+   "reltuples": 800000.0,
+   "toast_relpages": 0
+  },
+  "partsupp_supplier_idx": {
+   "kind": "i",
+   "main_bytes": 5505024,
+   "relallvisible": 0,
+   "relpages": 672,
+   "reltuples": 800000.0,
+   "toast_relpages": 0
+  },
+  "person_id_aka_name": {
+   "kind": "i",
+   "main_bytes": 17293312,
+   "relallvisible": 0,
+   "relpages": 2111,
+   "reltuples": 901343.0,
+   "toast_relpages": 0
+  },
+  "person_id_cast_info": {
+   "kind": "i",
+   "main_bytes": 327639040,
+   "relallvisible": 0,
+   "relpages": 39995,
+   "reltuples": 36238172.0,
+   "toast_relpages": 0
+  },
+  "person_id_person_info": {
+   "kind": "i",
+   "main_bytes": 33095680,
+   "relallvisible": 0,
+   "relpages": 4040,
+   "reltuples": 2967010.0,
+   "toast_relpages": 0
+  },
+  "person_info_pkey": {
+   "kind": "i",
+   "main_bytes": 66592768,
+   "relallvisible": 0,
+   "relpages": 8129,
+   "reltuples": 2967010.0,
+   "toast_relpages": 0
+  },
+  "person_role_id_cast_info": {
+   "kind": "i",
+   "main_bytes": 306667520,
+   "relallvisible": 0,
+   "relpages": 37435,
+   "reltuples": 36238172.0,
+   "toast_relpages": 0
+  },
+  "region_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 5.0,
+   "toast_relpages": 0
+  },
+  "role_id_cast_info": {
+   "kind": "i",
+   "main_bytes": 251191296,
+   "relallvisible": 0,
+   "relpages": 30663,
+   "reltuples": 36238172.0,
+   "toast_relpages": 0
+  },
+  "role_type_pkey": {
+   "kind": "i",
+   "main_bytes": 16384,
+   "relallvisible": 0,
+   "relpages": 2,
+   "reltuples": 12.0,
+   "toast_relpages": 0
+  },
+  "share_acl_group_idx": {
+   "kind": "i",
+   "main_bytes": 1949696,
+   "relallvisible": 0,
+   "relpages": 238,
+   "reltuples": 267831.0,
+   "toast_relpages": 0
+  },
+  "share_acl_lookup_idx": {
+   "kind": "i",
+   "main_bytes": 15802368,
+   "relallvisible": 0,
+   "relpages": 1929,
+   "reltuples": 267831.0,
+   "toast_relpages": 0
+  },
+  "share_acl_pkey": {
+   "kind": "i",
+   "main_bytes": 20258816,
+   "relallvisible": 0,
+   "relpages": 2473,
+   "reltuples": 267831.0,
+   "toast_relpages": 0
+  },
+  "supplier_nation_idx": {
+   "kind": "i",
+   "main_bytes": 90112,
+   "relallvisible": 0,
+   "relpages": 11,
+   "reltuples": 10000.0,
+   "toast_relpages": 0
+  },
+  "supplier_pkey": {
+   "kind": "i",
+   "main_bytes": 245760,
+   "relallvisible": 0,
+   "relpages": 30,
+   "reltuples": 10000.0,
+   "toast_relpages": 0
+  },
+  "title_pkey": {
+   "kind": "i",
+   "main_bytes": 56811520,
+   "relallvisible": 0,
+   "relpages": 6935,
+   "reltuples": 2528483.0,
+   "toast_relpages": 0
+  }
+ },
+ "tables": {
+  "a031_b_marker": {
+   "content": "107a32a168221d6598aaf2a543108d7c",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "c6c8bd750e320adc33e07a16013607fa801683e4e69997576810614fd398bcf6",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 1.0,
+   "rows": 1,
+   "toast_relpages": 0
+  },
+  "aka_name": {
+   "content": "64832a61df6b3e57002d73e7172af20a",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 100925440,
+   "physical": "67e635e453a97ccf0906a1802c7726b1a5ec78c46ae66a7f3b5bfda0cc6683ab",
+   "relallvisible": 12295,
+   "relpages": 12320,
+   "reltuples": 901343.0,
+   "rows": 901343,
+   "toast_relpages": 0
+  },
+  "aka_title": {
+   "content": "53748daa7dcee716014adff17be0d352",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 56360960,
+   "physical": "f8f045cdde95b592d895cdeca644988a32fda9400783d653aaafa9068be866be",
+   "relallvisible": 6853,
+   "relpages": 6880,
+   "reltuples": 361472.0,
+   "rows": 361472,
+   "toast_relpages": 0
+  },
+  "cast_info": {
+   "content": "2ae46fbea7d82f8f1cbecc4406f72066",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 2730557440,
+   "physical": "4dff542aa4ba1c54c4f4038721cfb22a78d6794aa418bae0115d4707c76a2223",
+   "relallvisible": 333302,
+   "relpages": 333320,
+   "reltuples": 36238172.0,
+   "rows": 36244344,
+   "toast_relpages": 0
+  },
+  "char_name": {
+   "content": "51d5d0a190b5c9594fdc3fd2b4af4eff",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 311689216,
+   "physical": "2578ed3a261c48808a73d01b34a9a04df0733a842b667c5522bc2079826fd57a",
+   "relallvisible": 38035,
+   "relpages": 38048,
+   "reltuples": 3140295.0,
+   "rows": 3140339,
+   "toast_relpages": 0
+  },
+  "comp_cast_type": {
+   "content": "7b2a8b10a4e7f937bd01face1c81888d",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "3fa6d3c3643f972364b407bbdef6063bb49581a7a1138bb920a764f540479049",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 4.0,
+   "rows": 4,
+   "toast_relpages": 0
+  },
+  "company_name": {
+   "content": "12c8a71b3690de59d4e9cd4b2810f632",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 25952256,
+   "physical": "0e3b4bf5aaed2d4d429091dcff6bb6aa4201da4ea33797be20afc7640f3b7fd4",
+   "relallvisible": 3113,
+   "relpages": 3168,
+   "reltuples": 234997.0,
+   "rows": 234997,
+   "toast_relpages": 0
+  },
+  "company_type": {
+   "content": "a2c03b44aafbd7194ff4ae8094faf5b3",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "4153a7db3445f48a122b7a25cad43c6d2c0d4d6a3b9a3b4cfc52211ad3e4a1c2",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 4.0,
+   "rows": 4,
+   "toast_relpages": 0
+  },
+  "complete_cast": {
+   "content": "eeafeba6188cd4f2c89bb32b8cbc26f3",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8388608,
+   "physical": "7e2e1a8bd090e04ea0122c7ba75bb87378081e1d6f30200947494dc21565c44e",
+   "relallvisible": 994,
+   "relpages": 1024,
+   "reltuples": 135086.0,
+   "rows": 135086,
+   "toast_relpages": 0
+  },
+  "customer": {
+   "content": "16d6e165c41abbfbded341a70f033d77",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 32145408,
+   "physical": "c63c11e46258da97630c5a2a8ed8d12d7e1bc690750e8cba453ae2eee16d89c1",
+   "relallvisible": 3924,
+   "relpages": 3924,
+   "reltuples": 150000.0,
+   "rows": 150000,
+   "toast_relpages": 0
+  },
+  "group_membership": {
+   "content": "e75ad4181200b615e4524ed31866cf59",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "c5ae3e390f980cf2bcf54e7046ee0f58ca46b76ae709b9c6e5b17a0bd2139e43",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 1.0,
+   "rows": 1,
+   "toast_relpages": 0
+  },
+  "info_type": {
+   "content": "905cd05d94410fcdc255c2ad77ac0fc7",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "05b73e9b273b17960a29246bc4a362a293e860204cfe0db1633e8c7d853b206c",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 113.0,
+   "rows": 113,
+   "toast_relpages": 0
+  },
+  "keyword": {
+   "content": "fd38e76977535d39ac321aea95323196",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8388608,
+   "physical": "dc9ce6c044bb61f259d64250fdff40ec859d0b2b2fde1ae424f3d8b425f7ee97",
+   "relallvisible": 1016,
+   "relpages": 1024,
+   "reltuples": 134170.0,
+   "rows": 134170,
+   "toast_relpages": 0
+  },
+  "kind_type": {
+   "content": "8ccc3bdc65e8cfa8c584ddc5d8d97342",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "a44712bf6254f33faf139eb9992028c1ac55ec6d8e14dab96bcea556570ea6ea",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 7.0,
+   "rows": 7,
+   "toast_relpages": 0
+  },
+  "lineitem": {
+   "content": "87a76955a84ca08a6e1098288d4d83e1",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 1043890176,
+   "physical": "63c379dc09bca5f66df7ecd2d63a094a226cd339ba07eef0c66540a66a47c609",
+   "relallvisible": 127428,
+   "relpages": 127428,
+   "reltuples": 6000912.0,
+   "rows": 6001215,
+   "toast_relpages": 0
+  },
+  "link_type": {
+   "content": "ca6419c65a7c147a24c9a956cda8b620",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "2cbd34e62051feb6fffbbe49d3212ea84f16d4d9c59236bdf9cce6b6167b1b89",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 18.0,
+   "rows": 18,
+   "toast_relpages": 0
+  },
+  "movie_companies": {
+   "content": "eb9d588ac660343b872a16e5d06ef2cc",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 196280320,
+   "physical": "c4200119b9a56b25b29eb8cb92aabe6a1e0208a1202bc52c22269fd8dc5d3e6a",
+   "relallvisible": 23921,
+   "relpages": 23960,
+   "reltuples": 2609129.0,
+   "rows": 2609129,
+   "toast_relpages": 0
+  },
+  "movie_info": {
+   "content": "2e3ff0269d42d080ef5622d34c9be8e8",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 1493696512,
+   "physical": "79cca93ae8675b46c1d4f207401b9bcfe9d700082a9195dd46b880d11f4df69a",
+   "relallvisible": 182278,
+   "relpages": 182336,
+   "reltuples": 14733490.0,
+   "rows": 14835720,
+   "toast_relpages": 433
+  },
+  "movie_info_idx": {
+   "content": "2163a11779e761f577115a4edc212830",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 87031808,
+   "physical": "c56887e47decb047faec923c3007b6121b3c15cae0f719507f13898aebceae89",
+   "relallvisible": 10616,
+   "relpages": 10624,
+   "reltuples": 1380035.0,
+   "rows": 1380035,
+   "toast_relpages": 0
+  },
+  "movie_keyword": {
+   "content": "baf2f0ebcc269dc9bc0814e4fcd9d08e",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 236322816,
+   "physical": "0818730e81771fdb12fede3082c8edc5444d6631eda41498729514933485fc92",
+   "relallvisible": 28815,
+   "relpages": 28848,
+   "reltuples": 4523930.0,
+   "rows": 4523930,
+   "toast_relpages": 0
+  },
+  "movie_link": {
+   "content": "09f476f271f3b37251ef00758a468fd3",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 1810432,
+   "physical": "4b6b5f7322e60ac0a49b092e5df2c163b8d37879da71a8f8f7dbff8e235d78db",
+   "relallvisible": 221,
+   "relpages": 221,
+   "reltuples": 29997.0,
+   "rows": 29997,
+   "toast_relpages": 0
+  },
+  "name": {
+   "content": "2869581b860b5be3bd5b7a467b04c480",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 473759744,
+   "physical": "8ad668f7b1679ba68c3cfb1627e171ebcee4176f63f70dff4ecba449921e2099",
+   "relallvisible": 57828,
+   "relpages": 57832,
+   "reltuples": 4167557.0,
+   "rows": 4167491,
+   "toast_relpages": 0
+  },
+  "nation": {
+   "content": "49c3e462dea04f94b54e03f4b61c8517",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "a9a440c4479ee6a1ecafee43fa5a7533dbec0e92d8c875e3565c04c864ef4f1c",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 25.0,
+   "rows": 25,
+   "toast_relpages": 0
+  },
+  "orders": {
+   "content": "85277af7b6244263cc512ef66511da37",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 237936640,
+   "physical": "3d7c0f1ddba2d5bd932d0e86dc2d7b782bb73a541d761653ad9bff70d57628a7",
+   "relallvisible": 29045,
+   "relpages": 29045,
+   "reltuples": 1500000.0,
+   "rows": 1500000,
+   "toast_relpages": 0
+  },
+  "part": {
+   "content": "9cb20414b0a0e92a9b87d963e1058415",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 34357248,
+   "physical": "dffcecf3322daef15d114da0ab0962b1a6a5e837f1d53ec13fe8a9ee939f248d",
+   "relallvisible": 4194,
+   "relpages": 4194,
+   "reltuples": 200000.0,
+   "rows": 200000,
+   "toast_relpages": 0
+  },
+  "partsupp": {
+   "content": "775347a0215c78fd5f03fee9953a20c1",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 149446656,
+   "physical": "276547272e6585e523a211cd8954cc727202999d43b73e8157bb65cc698d3600",
+   "relallvisible": 18243,
+   "relpages": 18243,
+   "reltuples": 800000.0,
+   "rows": 800000,
+   "toast_relpages": 0
+  },
+  "person_info": {
+   "content": "cc6453f8067a82391d1fa665c229f1fa",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 453050368,
+   "physical": "db2dcea5ba274d3d04704349442f2b204bbe8f433bfa53932c83e0b4774afcb2",
+   "relallvisible": 55295,
+   "relpages": 55304,
+   "reltuples": 2967010.0,
+   "rows": 2963664,
+   "toast_relpages": 4680
+  },
+  "region": {
+   "content": "682f16b3f164d0cc5885a93a47c34c99",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "02c7b203a0d5451bbc52580e171fd37a455b5b33a593bbf4a1bd0031f281a270",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 5.0,
+   "rows": 5,
+   "toast_relpages": 0
+  },
+  "role_type": {
+   "content": "ce77ee7bb825d39f99337d1b2979b629",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 8192,
+   "physical": "91f0d7072f3faa8e13a99be5ccdfb052f9c8ba375f98bc57a5c70ba7eb7c889d",
+   "relallvisible": 1,
+   "relpages": 1,
+   "reltuples": 12.0,
+   "rows": 12,
+   "toast_relpages": 0
+  },
+  "share_acl": {
+   "content": "d9658a9b24d366a60e05701978ea0ba0",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 20512768,
+   "physical": "15874b694be6dc5ad765165d9446730618b8a7d1e444d6a50aa565ca1c4c074b",
+   "relallvisible": 2504,
+   "relpages": 2504,
+   "reltuples": 267831.0,
+   "rows": 267831,
+   "toast_relpages": 0
+  },
+  "supplier": {
+   "content": "dfa5a9b9c52a75162cbb782e6f205753",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 1925120,
+   "physical": "65ac4fb92988c37e8f284f7688eeb23198398cf97a0414326df8f882c10d77d0",
+   "relallvisible": 235,
+   "relpages": 235,
+   "reltuples": 10000.0,
+   "rows": 10000,
+   "toast_relpages": 0
+  },
+  "title": {
+   "content": "20327ac5da8453eed41c5f77bd2115c9",
+   "ctid_ordered_scan": true,
+   "kind": "r",
+   "main_bytes": 356057088,
+   "physical": "142f880e829cb929f857bdadcbba78dc901e88b8569f78d7e9bd29b9dd2bd231",
+   "relallvisible": 43464,
+   "relpages": 43464,
+   "reltuples": 2528483.0,
+   "rows": 2528312,
+   "toast_relpages": 0
+  }
+ }
+}

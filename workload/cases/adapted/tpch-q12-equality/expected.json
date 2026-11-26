@@ -1,0 +1,27 @@
+{
+ "case": "adapted/tpch-q12-equality",
+ "database": "tpch_job",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "o_shippriority",
+    23
+   ],
+   [
+    "early_ship_count",
+    20
+   ],
+   [
+    "late_ship_count",
+    20
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "a95667fbcfc05f39b92503f696abf81042dceb59b1f04f9472c13f39e9dd5a37",
+  "row_count": 1,
+  "sha256": "a95667fbcfc05f39b92503f696abf81042dceb59b1f04f9472c13f39e9dd5a37"
+ },
+ "audit": null
+}

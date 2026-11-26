@@ -1,0 +1,27 @@
+{
+ "case": "original/job-24a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "voiced_char_name",
+    25
+   ],
+   [
+    "voicing_actress_name",
+    25
+   ],
+   [
+    "voiced_action_movie_jap_eng",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "65153d12880ff19426278097e7e86c53e0786795753c4c02b638548f025e70d7",
+  "row_count": 1,
+  "sha256": "65153d12880ff19426278097e7e86c53e0786795753c4c02b638548f025e70d7"
+ },
+ "audit": null
+}

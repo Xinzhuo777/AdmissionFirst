@@ -1,0 +1,27 @@
+{
+ "case": "adapted-sf10/tpch-q7-membership",
+ "database": "tpch_sf10",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "region_id",
+    20
+   ],
+   [
+    "order_year",
+    23
+   ],
+   [
+    "revenue",
+    1700
+   ]
+  ],
+  "command": "SELECT 15",
+  "multiset_sha256": "0b8a913ee5cbaf7883dcc97a3bfbb8d9679d5b0157e46cc7794aa2e861673d97",
+  "row_count": 15,
+  "sha256": "b94ac4190efafc1b5918ebb28710bbcd83136bddabd018f9f7acfa79c531acc1"
+ },
+ "audit": null
+}

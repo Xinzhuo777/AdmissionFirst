@@ -1,0 +1,27 @@
+{
+ "case": "original/job-9a-membership",
+ "database": "original_queries",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "alternative_name",
+    25
+   ],
+   [
+    "character_name",
+    25
+   ],
+   [
+    "movie",
+    25
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "de66f1bd9ee66469b1aa548b39038ddadd5e63fe95ceafd8a6318b431aa7f50f",
+  "row_count": 1,
+  "sha256": "de66f1bd9ee66469b1aa548b39038ddadd5e63fe95ceafd8a6318b431aa7f50f"
+ },
+ "audit": null
+}

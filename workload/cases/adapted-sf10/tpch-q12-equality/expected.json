@@ -1,0 +1,27 @@
+{
+ "case": "adapted-sf10/tpch-q12-equality",
+ "database": "tpch_sf10",
+ "role": "caprls_e3_rls_user",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "o_shippriority",
+    23
+   ],
+   [
+    "early_ship_count",
+    20
+   ],
+   [
+    "late_ship_count",
+    20
+   ]
+  ],
+  "command": "SELECT 1",
+  "multiset_sha256": "b867f6ed311f97741265500ac2e2d84506b8524f9ff47cedb747d4af05d283be",
+  "row_count": 1,
+  "sha256": "b867f6ed311f97741265500ac2e2d84506b8524f9ff47cedb747d4af05d283be"
+ },
+ "audit": null
+}

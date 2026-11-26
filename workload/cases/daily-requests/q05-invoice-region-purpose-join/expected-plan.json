@@ -1,0 +1,96 @@
+[
+ {
+  "Plan": {
+   "Node Type": "Aggregate",
+   "Strategy": "Plain",
+   "Partial Mode": "Simple",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Plan Rows": 1,
+   "Plan Width": 8,
+   "Output": [
+    "count(*)"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Plan Rows": 1,
+     "Plan Width": 0,
+     "Inner Unique": true,
+     "Plans": [
+      {
+       "Node Type": "Index Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Scan Direction": "Forward",
+       "Index Name": "invoice_region_idx",
+       "Relation Name": "invoice",
+       "Schema": "public",
+       "Alias": "i",
+       "Plan Rows": 1,
+       "Plan Width": 8,
+       "Output": [
+        "i.invoice_id",
+        "i.tenant_id",
+        "i.account_id",
+        "i.amount",
+        "i.region",
+        "i.secret"
+       ],
+       "Index Cond": "((i.region = 'region_2'::text) AND (i.invoice_id <= 30000))",
+       "Filter": "(SubPlan 1)",
+       "Plans": [
+        {
+         "Node Type": "Index Only Scan",
+         "Parent Relationship": "SubPlan",
+         "Subplan Name": "SubPlan 1",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "purpose_policy_rel_rid_purpose_idx",
+         "Relation Name": "purpose_policy",
+         "Schema": "public",
+         "Alias": "pp",
+         "Plan Rows": 1,
+         "Plan Width": 0,
+         "Index Cond": "((pp.relname = 'invoice'::text) AND (pp.rid = i.invoice_id) AND (pp.purpose = 'purpose_2'::text))"
+        }
+       ]
+      },
+      {
+       "Node Type": "Index Only Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Scan Direction": "Forward",
+       "Index Name": "user_account_pkey",
+       "Relation Name": "user_account",
+       "Schema": "public",
+       "Alias": "u",
+       "Plan Rows": 1,
+       "Plan Width": 8,
+       "Output": [
+        "u.user_id"
+       ],
+       "Index Cond": "(u.user_id = i.account_id)"
+      }
+     ]
+    }
+   ]
+  },
+  "Settings": {
+   "work_mem": "16MB",
+   "effective_cache_size": "8GB",
+   "jit": "off",
+   "max_parallel_workers": "0",
+   "max_parallel_workers_per_gather": "0",
+   "search_path": "pg_catalog,public",
+   "plan_cache_mode": "force_generic_plan"
+  }
+ }
+]

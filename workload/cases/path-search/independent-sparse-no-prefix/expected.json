@@ -1,0 +1,31 @@
+{
+ "case": "path-search/independent-sparse-no-prefix",
+ "database": "path_search",
+ "role": "a027_ind_sparse",
+ "mode": "af",
+ "answer": {
+  "columns": [
+   [
+    "id",
+    20
+   ],
+   [
+    "tenant_id",
+    20
+   ],
+   [
+    "path",
+    25
+   ],
+   [
+    "title",
+    25
+   ]
+  ],
+  "command": "SELECT 1000",
+  "multiset_sha256": "2d26245d60a28ccad3ec62dc15e06e03179c86c69b5386cb261689d78ce9fea8",
+  "row_count": 1000,
+  "sha256": "21e7877325cbaa3e832fcbfeab7b79aaa993b4ea8397a73832924d57c7bc66a8"
+ },
+ "audit": null
+}
