@@ -24,6 +24,13 @@ build_dir=$(CDPATH='' cd -- "$1" && pwd)
 cd "$build_dir"
 jobs=${NATIVE_AF_BUILD_JOBS:-6}
 
+# SHA-256 helper: shasum on macOS and most Linux systems, sha256sum otherwise.
+if command -v shasum >/dev/null 2>&1; then
+    sha256() { shasum -a 256 "$@"; }
+else
+    sha256() { sha256sum "$@"; }
+fi
+
 # AdmissionFirst sources: compiled into the planner and included by it.
 modules="native_af native_af_sp native_af_keyed native_af_partial native_af_binding
          native_af_guard native_af_admission native_af_os_cache"
@@ -32,13 +39,13 @@ modules="native_af native_af_sp native_af_keyed native_af_partial native_af_bind
 version=16.11
 archive="postgresql-$version.tar.bz2"
 url="https://ftp.postgresql.org/pub/source/v$version/$archive"
-sha256=6deb08c23d03d77d8f8bd1c14049eeef64aef8968fd8891df2dfc0b42f178eac
+archive_sha256=6deb08c23d03d77d8f8bd1c14049eeef64aef8968fd8891df2dfc0b42f178eac
 if [ -n "${NATIVE_AF_SOURCE_ARCHIVE:-}" ]; then
     cp "$NATIVE_AF_SOURCE_ARCHIVE" "$archive"
 else
     curl --fail --location --silent --show-error "$url" -o "$archive"
 fi
-printf '%s  %s\n' "$sha256" "$archive" | shasum -a 256 -c -
+printf '%s  %s\n' "$archive_sha256" "$archive" | sha256 -c -
 printf '%s\n' d61dd817be70749d14e982a369e97fdda9d5cba6 > REL_16_11.commit
 
 # Record the digests of the AdmissionFirst inputs used for this build.
@@ -47,7 +54,7 @@ printf '%s\n' d61dd817be70749d14e982a369e97fdda9d5cba6 > REL_16_11.commit
         printf '%s\n' "$source_dir/$module.c" "$source_dir/$module.h"
     done
     printf '%s\n' "$source_dir/postgres16.patch"
-) | while read -r file; do shasum -a 256 "$file"; done > implementation.sha256
+) | while read -r file; do sha256 "$file"; done > implementation.sha256
 
 # 2. Patch the PostgreSQL tree and add the AdmissionFirst sources.
 tar -xjf "$archive"
@@ -64,11 +71,15 @@ for module in $modules; do
     cp "$source_dir/$module.h" src/include/optimizer/
 done
 
-# 3. Configure, build and install (pgcrypto is used by the application workload).
+# 3. Configure, build and install. Two standard contrib modules are added:
+#    pgcrypto (used by the application workload) and pg_prewarm (used by
+#    tools/replay.py to bring each database into the page cache).
 ./configure --prefix="$build_dir/install" --without-icu --without-readline \
     --without-zlib --with-openssl --enable-depend > "$build_dir/configure.log" 2>&1
 make -j "$jobs" > "$build_dir/build.log" 2>&1
 make install > "$build_dir/install.log" 2>&1
 make -C contrib/pgcrypto -j "$jobs" > "$build_dir/pgcrypto-build.log" 2>&1
 make -C contrib/pgcrypto install > "$build_dir/pgcrypto-install.log" 2>&1
+make -C contrib/pg_prewarm -j "$jobs" > "$build_dir/pg_prewarm-build.log" 2>&1
+make -C contrib/pg_prewarm install > "$build_dir/pg_prewarm-install.log" 2>&1
 "$build_dir/install/bin/postgres" --version

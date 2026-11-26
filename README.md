@@ -39,14 +39,17 @@ This takes about ten minutes and needs a C compiler, `make`, `patch`,
 1. downloads PostgreSQL 16.11, checks its SHA-256, applies the patch and
    builds it into `WORK/build` (an existing installation is never touched);
 2. runs the safety tests in a temporary cluster;
-3. recomputes every latency result of the paper from the measured requests
-   and checks that the result files are byte-for-byte identical to the
-   committed ones;
-4. redraws the paper's three latency figures if matplotlib is installed.
+3. recomputes every latency result of the paper from the measured requests,
+   checks that the result files are byte-for-byte identical to the committed
+   ones, and writes them to `WORK/tables` (the paper's latency table is
+   `WORK/tables/performance-table.md`);
+4. redraws the paper's three latency figures into `WORK/figures` if
+   matplotlib is installed.
 
 With the raw TPC-H and IMDb data, the script also rebuilds the evaluation
 databases, replays all 170 cases and compares each case's executable plan,
-complete answer and audit log with the recorded run:
+complete answer and audit log with the recorded run. AF's plans are saved in
+`WORK/replay/plans`:
 
 ```sh
 sh reproduce.sh /absolute/path/to/new/work-directory --replay /path/to/raw-data
@@ -56,12 +59,14 @@ See [workload/README.md](workload/README.md) for how to obtain the raw data
 and what the replay checks. The databases take about 30 GB of disk space in
 addition to the 15 GB of raw data; building them and replaying the cases took
 about 20 minutes on the test machine (an Apple M1 Pro with 32 GB of memory).
+The replay reads each database into the page cache before its cases, so the
+largest database (about 12 GB) should fit in memory.
 
 ### What is reproduced
 
 | Paper result | How it is reproduced |
 | --- | --- |
-| Performance table (request latency rows) | `results/summary.csv`, recomputed from `results/samples.csv.gz` |
+| Performance table (request latency rows) | `results/performance-table.md` and `summary.csv`, recomputed from `results/samples.csv.gz` |
 | Latency distribution, original queries, and path-search figures | `results/figures.py` |
 | Latency figures quoted in the evaluation text | `results/paper-numbers.json` |
 | Every AF request returns its reference answer | `tools/replay.py` compares all 170 answers |

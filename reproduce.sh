@@ -6,9 +6,11 @@
 # WORK_DIRECTORY must not exist yet; everything is created inside it:
 #   build/       PostgreSQL 16.11 with AdmissionFirst            (src/build.sh)
 #   tests/       safety tests in a temporary cluster             (tests/run_tests.sh)
+#   tables/      the paper's latency table and all reported latency numbers
 #   figures/     the paper's latency figures, if matplotlib is installed
 #   cluster/     with --replay: the six evaluation databases     (workload/databases/build_all.sh)
-#   replay/      with --replay: plan, answer and audit check of all 170 cases
+#   replay/      with --replay: plan, answer and audit check of all 170 cases,
+#                and every AF plan (replay/plans/)
 #   SUMMARY.txt  the outcome of every step
 #
 # Without --replay the script needs about ten minutes and no input data.
@@ -65,7 +67,8 @@ record "safety tests: passed (native, af and index_priority modes)"
 # 3. Results ---------------------------------------------------------------------
 step "3/5 Recomputing all reported latency results from the 30,600 measured requests"
 python3 "$repository/results/analyze.py" --check
-record "latency results: recomputed files identical to results/ (conditions, comparisons, summary, paper numbers)"
+python3 "$repository/results/analyze.py" --output "$work/tables" > /dev/null
+record "latency results: recomputed files identical to results/; table in $work/tables/performance-table.md"
 
 # 4. Figures ---------------------------------------------------------------------
 step "4/5 Drawing the latency figures"
@@ -90,7 +93,7 @@ else
     "$install/bin/pg_ctl" -D "$work/cluster" -l "$work/cluster.log" -w -t 600 start > /dev/null
     status=0
     python3 "$repository/tools/replay.py" --install "$install" --socket-dir "$socket" \
-        --port "$port" --admin postgres --output "$work/replay" || status=$?
+        --port "$port" --admin postgres --output "$work/replay" --save-plans || status=$?
     "$install/bin/pg_ctl" -D "$work/cluster" -m fast -w stop > /dev/null
     rmdir "$socket" 2>/dev/null || true
     record "replay: $(python3 -c "import json,sys; s=json.load(open(sys.argv[1])); print(\

@@ -6,7 +6,8 @@ Input:  results/samples.csv.gz  (one row per scheduled request)
         workload/cases/*/expected-plan.json (only to name AF's access methods)
 Output: conditions.csv   per-case median latency of each method
         comparisons.csv  per-case latency ratio to AF with its paired 95% interval
-        summary.csv      the paper's performance table (Table 2, latency rows)
+        summary.csv      the latency rows of the paper's performance table
+        performance-table.md  the same rows laid out as in the paper
         paper-numbers.json  every other latency figure quoted in the evaluation
 
 With --check, the freshly computed files are compared byte for byte with the
@@ -46,7 +47,7 @@ BASELINES = ("native", "index_priority", "in_rewrite", "key_array")
 REPORTED = ("af", "native", "index_priority", "in_rewrite")  # the four methods in the paper
 LABEL = {"native": "Native", "index_priority": "IndexPriority", "in_rewrite": "IN rewrite", "key_array": "key array"}
 DRAWS = tuple(itertools.product(range(4), repeat=4))
-OUTPUTS = ("conditions.csv", "comparisons.csv", "summary.csv", "paper-numbers.json")
+OUTPUTS = ("conditions.csv", "comparisons.csv", "summary.csv", "performance-table.md", "paper-numbers.json")
 
 
 # ---------------------------------------------------------------------------
@@ -157,6 +158,27 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+def write_table(path, table):
+    """The latency rows of the paper's performance table, with its layout and rounding."""
+    titles = dict(benchmark="Benchmark queries", application="Application workload")
+    lines = ["# Request latency (the paper's performance table)", "",
+             "| Comparison | Median | Geom. mean | AF outcome |", "| --- | ---: | ---: | --- |"]
+    for family in ("benchmark", "application"):
+        rows = [r for r in table if r["family"] == family]
+        lines.append(f"| **{titles[family]}** ({rows[0]['cases']} cases) | | | |")
+        for r in rows:
+            if r["comparison"] == "AF / fastest":
+                outcome = f"{r['af_fastest']}/{r['cases']} match"
+            else:
+                outcome = f"{r['af_wins']}/{r['unclear']}/{r['af_losses']} W/N/L"
+            lines.append(f"| {r['comparison']} | {r['median']:.3f} | {r['geometric_mean']:.2f} | {outcome} |")
+    lines += ["", "Ratios above one favor the denominator. W/N/L: AF wins, no clear difference, AF losses",
+              "(paired 95% intervals over whole measurement cycles). Match: AF's median is the lowest of the",
+              "four methods. The benchmark rows omit JOB 14a after the IndexPriority timeout. The planning-cost",
+              "row of the paper's table comes from a separate experiment and is not part of these measurements.", ""]
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
 def compute(output, samples_path, cases_path):
     cases, cells, rows = load(samples_path, cases_path)
     by_id = OrderedDict((c["case"], c) for c in cases)
@@ -213,6 +235,7 @@ def compute(output, samples_path, cases_path):
             geometric_mean=g["geometric_mean"], gm_ci_low="", gm_ci_high="", af_wins="", unclear="",
             af_losses="", af_fastest=g["af_fastest"], within_5_percent=g["within_5_percent"]))
     write_csv(output / "summary.csv", table)
+    write_table(output / "performance-table.md", table)
 
     # paper-numbers.json -- the other latency statements of the evaluation
     def ms(case, method):
@@ -319,6 +342,7 @@ def main():
                         help="compute into a temporary directory and compare with the committed files")
     args = parser.parse_args()
     if not args.check:
+        args.output.mkdir(parents=True, exist_ok=True)
         table, _ = compute(args.output, args.samples, args.cases)
         report(table)
         return 0

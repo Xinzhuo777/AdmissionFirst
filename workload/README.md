@@ -103,16 +103,20 @@ again, and compares:
   and the audited document search with 1,400).
 
 The report is written to `replay.csv` and `summary.json` in the output
-directory; plans that differ are saved there for inspection. Use `--case`
+directory; plans that differ are saved in its `plans/` directory, and
+`--save-plans` saves every plan. Use `--case`
 to select cases (for example `--case 'path-search/*'`).
 
 AF's cost model takes into account how much of a relation is already cached
 in shared buffers and in the operating system's page cache
 (`native_af.cache_aware_cost`, `native_af.os_cache_cost`). The measurements
-ran with warm caches, and the replay therefore executes each query once
-before recording its plan. On a busy machine or with little memory, a case
-whose alternatives have close costs can still choose another plan; its
-answer must match regardless. In our end-to-end test, run directly after
-building all six databases, one of the 170 plans (the aggregation strategy
-of an SF10 query) differed in the first pass and matched in three later runs
-(`--case 'adapted-sf10/*'`).
+ran on warm data: each query had already run many times, under five methods,
+when its plan was recorded. The replay reproduces this state. Before the
+cases of a database it reads all of the database's tables and indexes into
+the operating system's page cache (`pg_prewarm` in `read` mode; the
+extension is built by `src/build.sh` and created only for this step), and it
+runs each query once before recording the plan. With a cold cache, AF
+estimates more I/O; for one SF10 query this turns a hash aggregation into a
+sort-based one, because the two then cost within PostgreSQL's 1% tolerance.
+The machine therefore needs enough memory to hold the largest database
+(about 12 GB). `--no-prewarm` skips this step; answers must match either way.

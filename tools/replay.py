@@ -15,8 +15,11 @@ and then checks three things against `workload/cases/<case>/expected.json`:
 * audit  -- for the audited searches, the logging function received the
             recorded number of inputs and none of them was unauthorized.
 
-The databases must already exist (see workload/databases/). Every case
-restores the policy and state it changed, so the databases can be reused.
+The databases must already exist (see workload/databases/). Before the
+cases of a database, its tables and indexes are read into the page cache
+(pg_prewarm), because the measurements ran on warm data and AF's costs take
+cached pages into account. Every case restores the policy and state it
+changed, so the databases can be reused.
 
 Example:
     python3 tools/replay.py --install /path/to/build/install \
@@ -177,6 +180,34 @@ def load_cases(workload, patterns):
     return cases
 
 
+def prewarm(admin):
+    """Read every table and index of the connected database into the OS page cache.
+
+    The measurements ran on warm data: every query had run many times, under
+    five methods, before its plan was recorded. AF's cost model takes cached
+    pages into account (native_af.os_cache_cost), so a cold cache can change a
+    close cost-based choice. pg_prewarm's 'read' mode reads each relation into
+    the operating system's page cache without filling shared buffers. The
+    extension is created only for this step and dropped again. Returns the
+    number of blocks read, or None if pg_prewarm is not installed.
+    """
+    if not admin.execute("SELECT 1 FROM pg_available_extensions WHERE name = 'pg_prewarm'").rows:
+        return None
+    created = not admin.execute("SELECT 1 FROM pg_extension WHERE extname = 'pg_prewarm'").rows
+    if created:
+        admin.execute("CREATE EXTENSION pg_prewarm")
+    try:
+        blocks = admin.execute(
+            "SELECT coalesce(sum(pg_prewarm(c.oid, 'read')), 0) FROM pg_class c "
+            "JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE c.relkind IN ('r', 'i', 't', 'm') AND c.relpersistence <> 't' "
+            "AND n.nspname NOT IN ('pg_catalog', 'information_schema')").rows[0][0]
+    finally:
+        if created:
+            admin.execute("DROP EXTENSION pg_prewarm")
+    return int(blocks)
+
+
 def configure_reader(reader, role, session):
     """Apply the session settings used during the measurements and enable AF."""
     for name, value in session.items():
@@ -188,7 +219,7 @@ def configure_reader(reader, role, session):
         raise RuntimeError(f"{role} must be an ordinary login without BYPASSRLS, got {identity}")
 
 
-def replay_case(case, folder, admin, reader, session, output, warmups):
+def replay_case(case, folder, admin, reader, session, output, warmups, save_plans=False):
     expected = json.loads((folder / "expected.json").read_text(encoding="utf-8"))
     query = (folder / "query.sql").read_text(encoding="utf-8")
     row = OrderedDict(case=case["case"], plan="", answer="", audit="", audit_inputs="", unauthorized_inputs="",
@@ -213,7 +244,7 @@ def replay_case(case, folder, admin, reader, session, output, warmups):
         plan = normalize_plan(json.loads(reader.execute(EXPLAIN + query).rows[0][0]), index_namer(admin))
         recorded = json.loads((folder / "expected-plan.json").read_text(encoding="utf-8"))
         row["plan"] = "match" if plan == recorded else "different"
-        if row["plan"] != "match":
+        if row["plan"] != "match" or save_plans:
             target = output / "plans" / (case["case"] + ".json")
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(json.dumps(plan, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -263,6 +294,10 @@ def main():
                         help="use database ACTUAL for the workload database NAME (repeatable)")
     parser.add_argument("--warmups", type=int, default=1,
                         help="executions of each query before its plan is recorded (default 1)")
+    parser.add_argument("--save-plans", action="store_true",
+                        help="save every recorded AF plan in OUTPUT/plans (default: only plans that differ)")
+    parser.add_argument("--no-prewarm", action="store_true",
+                        help="do not read each database into the page cache before its cases")
     args = parser.parse_args()
 
     workload = args.workload.resolve()
@@ -277,19 +312,24 @@ def main():
 
     rows = []
     with ExitStack() as connections:
-        admins, readers = {}, {}
+        admins, readers, current = {}, {}, None
         for case in cases:
             database = renamed.get(case["database"], case["database"])
             if database not in admins:
                 admins[database] = connections.enter_context(
                     client.connect(**endpoint, database=database, role=args.admin))
                 admins[database].execute("SET search_path TO pg_catalog, public; SET TimeZone TO 'UTC'")
+            if database != current and not args.no_prewarm:
+                blocks = prewarm(admins[database])
+                print(f"-- {database}: " + (f"read {blocks} blocks into the page cache" if blocks is not None else
+                      "pg_prewarm is not installed; plans may differ on a cold cache"), flush=True)
+            current = database
             if (database, case["role"]) not in readers:
                 readers[database, case["role"]] = connections.enter_context(
                     client.connect(**endpoint, database=database, role=case["role"]))
             folder = workload / "cases" / case["case"]
             row = replay_case(case, folder, admins[database], readers[database, case["role"]], session, output,
-                              args.warmups)
+                              args.warmups, args.save_plans)
             rows.append(row)
             print(f"{row['case']:<58} plan {row['plan']:<9} answer {row['answer']:<9} {row['audit']}", flush=True)
 

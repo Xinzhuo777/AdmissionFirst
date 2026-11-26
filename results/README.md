@@ -19,6 +19,7 @@ python3 results/figures.py           # redraw the three latency figures (needs m
 | `conditions.csv` | Median latency of each method in each case (milliseconds) |
 | `comparisons.csv` | Per case and baseline: latency ratio to AF, paired 95% interval, outcome |
 | `summary.csv` | The latency rows of the paper's performance table |
+| `performance-table.md` | The same rows, laid out and rounded as in the paper |
 | `paper-numbers.json` | The other latency figures quoted in the evaluation text |
 | `analyze.py` | Computes the four files above |
 | `figures.py` | Draws the latency CDF, the original-query bars and the path-search figure |
