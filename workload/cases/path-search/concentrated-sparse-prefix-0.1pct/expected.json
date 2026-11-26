@@ -23,6 +23,7 @@
    ]
   ],
   "command": "SELECT 527",
+  "ordered": true,
   "multiset_sha256": "49f593211a29f4c96ac14318ab7959507e807751316d04c512ed6c9de4f120bd",
   "row_count": 527,
   "sha256": "cef7ff648ced1e26793d53ec90f8a6343201df569c500db99334372e8cab065f"

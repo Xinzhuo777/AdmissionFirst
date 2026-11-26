@@ -23,6 +23,7 @@
    ]
   ],
   "command": "SELECT 1000",
+  "ordered": true,
   "multiset_sha256": "2d26245d60a28ccad3ec62dc15e06e03179c86c69b5386cb261689d78ce9fea8",
   "row_count": 1000,
   "sha256": "21e7877325cbaa3e832fcbfeab7b79aaa993b4ea8397a73832924d57c7bc66a8"

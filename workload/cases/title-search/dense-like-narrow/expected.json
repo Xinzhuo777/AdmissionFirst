@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 3057",
+  "ordered": true,
   "multiset_sha256": "99386308f247cd0fcf1a9026bd708dbcfc86e56368793807488da5bae4714001",
   "row_count": 3057,
   "sha256": "99386308f247cd0fcf1a9026bd708dbcfc86e56368793807488da5bae4714001"

@@ -23,6 +23,7 @@
    ]
   ],
   "command": "SELECT 10",
+  "ordered": true,
   "multiset_sha256": "2db0f17ec4d2dca380aee4d227c312b01f2fc7ab196f3a047ff89da0a16d48a0",
   "row_count": 10,
   "sha256": "42d2b50d943d1516f6b6f5d90b6331aa9f9b54ea7d48e9f2e9e51daa5abc71a2"

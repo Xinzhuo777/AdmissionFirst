@@ -23,6 +23,7 @@ python3 results/figures.py           # redraw the three latency figures (needs m
 | `paper-numbers.json` | The other latency figures quoted in the evaluation text |
 | `analyze.py` | Computes the four files above |
 | `figures.py` | Draws the latency CDF, the original-query bars and the path-search figure |
+| `compare.py` | Sets the numbers of a new measurement (`tools/measure.py`) beside the paper's |
 
 ### `samples.csv.gz`
 
@@ -88,7 +89,10 @@ this), but its latencies were not measured again.
 
 Timings depend on hardware, data placement and caching, so a new run gives
 different milliseconds. The plans and answers behind these measurements can
-be checked with `tools/replay.py` (see `workload/README.md`).
+be checked with `tools/replay.py` (see `workload/README.md`), and
+`tools/measure.py` repeats the measurement with the same protocol; its
+`samples.csv.gz` has the format described above and can be analyzed with
+`analyze.py --samples NEW --output DIR` and `compare.py DIR`.
 
 ## Not included
 

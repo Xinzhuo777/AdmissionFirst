@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 8",
+  "ordered": true,
   "multiset_sha256": "05217d536a4500592d944dee279a36f78f1878ed87699edb1375af55997e0120",
   "row_count": 8,
   "sha256": "05217d536a4500592d944dee279a36f78f1878ed87699edb1375af55997e0120"

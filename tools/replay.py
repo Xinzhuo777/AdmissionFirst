@@ -11,7 +11,8 @@ and then checks three things against `workload/cases/<case>/expected.json`:
             measurements;
 * answer -- the complete typed result (column names and types, every row
             and NULL, row order and the command tag) has the recorded
-            SHA-256 digest;
+            SHA-256 digest; for the 14 queries whose result order is not
+            defined, the multiset of rows is compared;
 * audit  -- for the audited searches, the logging function received the
             recorded number of inputs and none of them was unauthorized.
 
@@ -96,10 +97,12 @@ def answer_digest(result):
 
 
 def compare_answer(actual, expected):
+    """'match' if the answer is the recorded one; for queries whose result order
+    is not defined (expected["ordered"] is false), the same multiset of rows."""
     if actual["sha256"] == expected["sha256"]:
         return "match"
     if actual["multiset_sha256"] == expected["multiset_sha256"]:
-        return "same rows, different order"
+        return "wrong order" if expected.get("ordered", True) else "match"
     return "different"
 
 
@@ -341,7 +344,6 @@ def main():
         cases=len(rows),
         plans_matching=sum(r["plan"] == "match" for r in rows),
         answers_matching=sum(r["answer"] == "match" for r in rows),
-        answers_same_rows_other_order=sum(r["answer"] == "same rows, different order" for r in rows),
         audited_cases=sum(bool(r["audit"]) for r in rows),
         audits_ok=sum(r["audit"].startswith("ok") for r in rows),
         audit_inputs=sum(r["audit_inputs"] or 0 for r in rows),
@@ -349,8 +351,7 @@ def main():
     )
     (output / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=1))
-    failed = summary["answers_matching"] + summary["answers_same_rows_other_order"] < len(rows) or \
-        summary["audits_ok"] < summary["audited_cases"]
+    failed = summary["answers_matching"] < len(rows) or summary["audits_ok"] < summary["audited_cases"]
     return 1 if failed else 0
 
 

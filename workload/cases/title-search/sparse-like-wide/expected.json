@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 83",
+  "ordered": true,
   "multiset_sha256": "8f70b09750e087893a62e8ff6378d637828b5b798569d2b5726c84c4a8bd5473",
   "row_count": 83,
   "sha256": "8f70b09750e087893a62e8ff6378d637828b5b798569d2b5726c84c4a8bd5473"

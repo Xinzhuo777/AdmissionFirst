@@ -31,6 +31,7 @@
    ]
   ],
   "command": "SELECT 0",
+  "ordered": true,
   "multiset_sha256": "cf0282796a09ae06f6937851a71bd6615da9219ae1e4b705cc8ea1c0c5861c3a",
   "row_count": 0,
   "sha256": "cf0282796a09ae06f6937851a71bd6615da9219ae1e4b705cc8ea1c0c5861c3a"

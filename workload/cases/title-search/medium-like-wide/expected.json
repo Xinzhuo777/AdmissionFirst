@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 3306",
+  "ordered": true,
   "multiset_sha256": "0ee055bd258c670080756c70fa1bb38b2159706778f30508106c9757064bae80",
   "row_count": 3306,
   "sha256": "0ee055bd258c670080756c70fa1bb38b2159706778f30508106c9757064bae80"

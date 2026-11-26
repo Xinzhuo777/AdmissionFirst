@@ -12,6 +12,8 @@
 #   NATIVE_AF_SOURCE_ARCHIVE  use this local postgresql-16.11.tar.bz2 instead
 #                             of downloading it (it is checked the same way)
 #   NATIVE_AF_BUILD_JOBS      parallel make jobs (default 6)
+#   NATIVE_AF_STOCK=1         build unmodified PostgreSQL 16.11 instead (used
+#                             for the IN-rewrite and key-array baselines)
 set -eu
 
 if [ "$#" -ne 1 ]; then
@@ -23,6 +25,7 @@ mkdir "$1"
 build_dir=$(CDPATH='' cd -- "$1" && pwd)
 cd "$build_dir"
 jobs=${NATIVE_AF_BUILD_JOBS:-6}
+stock=${NATIVE_AF_STOCK:-0}
 
 # SHA-256 helper: shasum on macOS and most Linux systems, sha256sum otherwise.
 if command -v shasum >/dev/null 2>&1; then
@@ -49,11 +52,12 @@ printf '%s  %s\n' "$archive_sha256" "$archive" | sha256 -c -
 printf '%s\n' d61dd817be70749d14e982a369e97fdda9d5cba6 > REL_16_11.commit
 
 # Record the digests of the AdmissionFirst inputs used for this build.
+[ "$stock" = 1 ] && modules= && echo "building unmodified PostgreSQL $version"
 (
     for module in $modules; do
         printf '%s\n' "$source_dir/$module.c" "$source_dir/$module.h"
     done
-    printf '%s\n' "$source_dir/postgres16.patch"
+    [ "$stock" = 1 ] || printf '%s\n' "$source_dir/postgres16.patch"
 ) | while read -r file; do sha256 "$file"; done > implementation.sha256
 
 # 2. Patch the PostgreSQL tree and add the AdmissionFirst sources.
@@ -65,7 +69,7 @@ if [ "$(uname -s)" = Darwin ] && command -v brew >/dev/null 2>&1; then
     LDFLAGS="${LDFLAGS:-} -L$openssl_prefix/lib"
     export CPPFLAGS LDFLAGS
 fi
-patch -p1 < "$source_dir/postgres16.patch"
+[ "$stock" = 1 ] || patch -p1 < "$source_dir/postgres16.patch"
 for module in $modules; do
     cp "$source_dir/$module.c" src/backend/optimizer/plan/
     cp "$source_dir/$module.h" src/include/optimizer/

@@ -23,6 +23,7 @@
    ]
   ],
   "command": "SELECT 4",
+  "ordered": true,
   "multiset_sha256": "7d575968951841697560ef1261e60d0870d61ad37b1e6585f241dbb12e4841ba",
   "row_count": 4,
   "sha256": "7d575968951841697560ef1261e60d0870d61ad37b1e6585f241dbb12e4841ba"

@@ -23,6 +23,7 @@
    ]
   ],
   "command": "SELECT 409",
+  "ordered": true,
   "multiset_sha256": "48991777b3860b581852defdf347d5bedef0830d82dfd9f6e41389ef61ad6a67",
   "row_count": 409,
   "sha256": "16408396b727e9fcd7918f33a9e5b494b9574d741b488fe3d1dec644a5d1744f"

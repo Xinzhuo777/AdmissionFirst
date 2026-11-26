@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 799",
+  "ordered": true,
   "multiset_sha256": "eff0cfe099108540492870abefae7b0886c93a3012a61e3b6087fd6cb25e3332",
   "row_count": 799,
   "sha256": "eff0cfe099108540492870abefae7b0886c93a3012a61e3b6087fd6cb25e3332"

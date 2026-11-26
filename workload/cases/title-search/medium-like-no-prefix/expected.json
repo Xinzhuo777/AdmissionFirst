@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 6574",
+  "ordered": true,
   "multiset_sha256": "9281c03f845385c712b979c506c948d1ae3df9bc21a0bf34002bafb8b7b5da70",
   "row_count": 6574,
   "sha256": "9281c03f845385c712b979c506c948d1ae3df9bc21a0bf34002bafb8b7b5da70"

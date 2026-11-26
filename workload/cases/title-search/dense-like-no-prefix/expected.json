@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 103717",
+  "ordered": true,
   "multiset_sha256": "16aa0a6180081700339888dbbdde94cf02de7fb77dda3d0cc6850fcdf883ea28",
   "row_count": 103717,
   "sha256": "16aa0a6180081700339888dbbdde94cf02de7fb77dda3d0cc6850fcdf883ea28"

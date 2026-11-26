@@ -15,6 +15,7 @@
    ]
   ],
   "command": "SELECT 140",
+  "ordered": true,
   "multiset_sha256": "eab595cbe37dad5d7ef51602980ac6eff79f423e1add3a88b10a6f237d7c5c51",
   "row_count": 140,
   "sha256": "eab595cbe37dad5d7ef51602980ac6eff79f423e1add3a88b10a6f237d7c5c51"

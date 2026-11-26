@@ -22,7 +22,7 @@ PostgreSQL's normal cost-based search.
 | `src/` | The AF sources, the patch to PostgreSQL 16.11, and `build.sh` |
 | `tests/` | Safety tests on a small document table |
 | `workload/` | The 170 evaluation cases: queries, policies, recorded plans and answers, and scripts that build the databases |
-| `tools/` | `replay.py`, which replays the cases and compares them with the recorded run, and a small libpq client |
+| `tools/` | `replay.py`, which replays the cases and compares them with the recorded run; `measure.py`, which measures the latencies again; and a small libpq client |
 | `results/` | The 30,600 measured request latencies and the scripts that compute every reported latency result and figure |
 | `reproduce.sh` | Runs everything above with one command |
 | `review_appendix.pdf` | The paper's review appendix: proof notation, admission and replacement proofs, the six no-erasure witnesses, planner restrictions, and certificate checking |
@@ -62,6 +62,22 @@ about 20 minutes on the test machine (an Apple M1 Pro with 32 GB of memory).
 The replay reads each database into the page cache before its cases, so the
 largest database (about 12 GB) should fit in memory.
 
+To measure the latencies again on your machine, add `--measure`:
+
+```sh
+sh reproduce.sh /absolute/path/to/new/work-directory --replay /path/to/raw-data --measure
+```
+
+This also builds unmodified PostgreSQL 16.11 for the two SQL baselines and
+then repeats the paper's measurement with `tools/measure.py`: all five
+methods on the 170 cases, four cycles with one warmup and eight measured
+requests each (30,600 requests, about 8 hours on the test machine). Every
+answer and audit is checked. The new measurement is analyzed with the same
+scripts as the paper's: `WORK/measurement/tables` holds the latency table
+and numbers, `WORK/measurement/figures` the figures, and
+`WORK/measurement/comparison.md` sets every new number beside the paper's.
+Latencies depend on the hardware, so they will differ from the paper's.
+
 ### What is reproduced
 
 | Paper result | How it is reproduced |
@@ -74,8 +90,9 @@ largest database (about 12 GB) should fit in memory.
 | AF's plan choices (for example, guard, keys-first, hash check) | `tools/replay.py` compares the executable plans |
 | Admission rejects unsafe candidates and keeps order-sensitive ones | `tests/run_tests.sh` |
 
-The repository does not re-measure latencies: timings depend on the
-hardware, and a rerun gives different milliseconds. The planning-time and
+The paper's numbers come from the measured requests in `results/`; a new
+measurement (`--measure`) gives different milliseconds on other hardware.
+The planning-time and
 prepared-statement measurements, the component ablations, the sweep over all
 admitted search alternatives, and the diagnostic build that admits unsafe
 orders were separate experiments and are not included.

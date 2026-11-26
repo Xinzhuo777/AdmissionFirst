@@ -11,6 +11,7 @@
    ]
   ],
   "command": "SELECT 12478",
+  "ordered": false,
   "multiset_sha256": "a081a7bc5b5052bf9f23cac4cb347e197bc5314cea89671a085daa60d3c0add5",
   "row_count": 12478,
   "sha256": "838eedd6422e1e97a66622f825f9c1b50d9970b90e0d7250c2e4971aa4f1e759"

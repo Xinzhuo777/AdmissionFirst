@@ -19,6 +19,7 @@
    ]
   ],
   "command": "SELECT 1",
+  "ordered": true,
   "multiset_sha256": "1642de78936277a657bc784cfc3f1017102a57b4a3e484caba5cee2893e91e47",
   "row_count": 1,
   "sha256": "1642de78936277a657bc784cfc3f1017102a57b4a3e484caba5cee2893e91e47"
