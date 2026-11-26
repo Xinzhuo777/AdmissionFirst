@@ -2,7 +2,8 @@
 
 AdmissionFirst (AF) is a modification of the PostgreSQL 16.11 query planner
 for tables protected by row-level security (RLS). It is the implementation
-and experiment artifact of the paper *Same Rows Are Not Enough*.
+and experiment artifact of the paper *Same Rows Are Not Enough*. The proofs
+referred to in the paper are in the [review appendix](review_appendix.pdf).
 
 PostgreSQL normally evaluates an RLS policy exactly as written. AF adds other
 ways to evaluate a supported policy, for example starting from the keys a
@@ -24,6 +25,7 @@ PostgreSQL's normal cost-based search.
 | `tools/` | `replay.py`, which replays the cases and compares them with the recorded run, and a small libpq client |
 | `results/` | The 30,600 measured request latencies and the scripts that compute every reported latency result and figure |
 | `reproduce.sh` | Runs everything above with one command |
+| `review_appendix.pdf` | The paper's review appendix: proof notation, admission and replacement proofs, the six no-erasure witnesses, planner restrictions, and certificate checking |
 
 ## Reproducing the results
 
