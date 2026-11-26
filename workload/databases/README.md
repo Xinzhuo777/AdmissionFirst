@@ -7,7 +7,7 @@ for its options.
 
 | Directory / script | Databases | Inputs | Time on the test machine |
 | --- | --- | --- | --- |
-| `tpch_job/build.sh` | `tpch_job`, `tpch_sf10` | TPC-H SF1 and SF10, five IMDb tables | see below |
+| `tpch_job/build.sh` | `tpch_job`, `tpch_sf10` | TPC-H SF1 and SF10, five IMDb tables | about 10 minutes |
 | `original_queries/build.sh` | `original_queries` | TPC-H SF1, all 21 IMDb tables | about 5 minutes |
 | `searches/build_title_search.sh` | `title_search` | generated | under 10 seconds |
 | `searches/build_path_search.sh` | `path_search` | generated | under 30 seconds |

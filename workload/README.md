@@ -112,4 +112,7 @@ in shared buffers and in the operating system's page cache
 ran with warm caches, and the replay therefore executes each query once
 before recording its plan. On a busy machine or with little memory, a case
 whose alternatives have close costs can still choose another plan; its
-answer must match regardless.
+answer must match regardless. In our end-to-end test, run directly after
+building all six databases, one of the 170 plans (the aggregation strategy
+of an SF10 query) differed in the first pass and matched in three later runs
+(`--case 'adapted-sf10/*'`).

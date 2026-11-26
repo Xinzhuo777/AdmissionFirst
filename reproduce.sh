@@ -12,8 +12,8 @@
 #   SUMMARY.txt  the outcome of every step
 #
 # Without --replay the script needs about ten minutes and no input data.
-# --replay needs the raw TPC-H and IMDb files (see workload/README.md), about
-# 60 GB of free disk space and roughly an hour.
+# --replay needs the raw TPC-H and IMDb files (see workload/README.md) and
+# about 30 GB of free disk space; it adds about 20 minutes on the test machine.
 #
 # Environment:
 #   AF_INSTALL                reuse this AdmissionFirst installation instead of building one

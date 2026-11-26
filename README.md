@@ -51,8 +51,9 @@ sh reproduce.sh /absolute/path/to/new/work-directory --replay /path/to/raw-data
 ```
 
 See [workload/README.md](workload/README.md) for how to obtain the raw data
-and what the replay checks. This step needs about 60 GB of free disk space and
-takes about an hour.
+and what the replay checks. The databases take about 30 GB of disk space in
+addition to the 15 GB of raw data; building them and replaying the cases took
+about 20 minutes on the test machine (an Apple M1 Pro with 32 GB of memory).
 
 ### What is reproduced
 

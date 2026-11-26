@@ -1,0 +1,82 @@
+{
+  "description": "Raw input files and their SHA-256 values. Paths are relative to the raw data directory.",
+  "datasets": {
+    "tpch_sf1": {
+      "directory": "tpch/sf1",
+      "files": {
+        "customer.tbl": {
+          "size": 24346144,
+          "sha256": "4483680548a965833877c911ed43e795f4d3543c7a3f7d1dba9ccb24ea5989d6"
+        },
+        "orders.tbl": {
+          "size": 171952161,
+          "sha256": "8709061d7bbc81932356fdfc664f8d582252747c2d7e204ae6d3cde624586357"
+        },
+        "lineitem.tbl": {
+          "size": 759863287,
+          "sha256": "96d555e07a1ae8cf5196387d9edd9427f9af70c56fa5f4b18affee5555ddb184"
+        },
+        "nation.tbl": {
+          "size": 2224,
+          "sha256": "66f96949939fa8fdf1c4ffed1e5f6c2842fe11a14b51fdc6ed1e17460031e8c5"
+        }
+      }
+    },
+    "tpch_sf10": {
+      "directory": "tpch/sf10",
+      "files": {
+        "customer.tbl": {
+          "size": 244847642,
+          "sha256": "d4ba00a59ddb3bdaabeb1bcf560a182f8874366c9db51cedc3bd5ec9d64d03bd"
+        },
+        "orders.tbl": {
+          "size": 1749195031,
+          "sha256": "f226ed1f69337bfd0dd2db00aa1c53d31ffb58dc03aa9386a80c7efcc24802c2"
+        },
+        "lineitem.tbl": {
+          "size": 7775727688,
+          "sha256": "9a7b308b6ca31a88880421f5d1a8a540c6b9ff377d698b0401ed688534c7344d"
+        },
+        "nation.tbl": {
+          "size": 2224,
+          "sha256": "66f96949939fa8fdf1c4ffed1e5f6c2842fe11a14b51fdc6ed1e17460031e8c5"
+        }
+      }
+    },
+    "imdb": {
+      "directory": "imdb/csv",
+      "files": {
+        "title.csv": {
+          "size": 203877939,
+          "sha256": "663c5bc45f08440cd2e09d97f22768a82ea4f1f7a049e6b9dfc17fb7b34da0f4"
+        },
+        "movie_companies.csv": {
+          "size": 93112104,
+          "sha256": "38755ab1706a8e384810dd1cce0d1032839386c9c37cc7834f36a45d177cd683"
+        },
+        "cast_info.csv": {
+          "size": 1418137141,
+          "sha256": "bfd359eeca7dc571272cd52d560d0178beaf722130feec128ad4681ee493a7c7"
+        },
+        "kind_type.csv": {
+          "size": 85,
+          "sha256": "423b4c5a6c22eb51945fed746610520b07dc6c84219cf2c6b1b8a676e1ce439e"
+        },
+        "company_type.csv": {
+          "size": 92,
+          "sha256": "27f13bddd29d5f8921bbc9710d95c4454cc5e072bc4c1288d8a312a2260e5a26"
+        }
+      }
+    }
+  },
+  "databases": {
+    "tpch_job": {
+      "tpch": "tpch_sf1",
+      "imdb": "imdb"
+    },
+    "tpch_sf10": {
+      "tpch": "tpch_sf10",
+      "imdb": null
+    }
+  }
+}
