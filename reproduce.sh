@@ -20,7 +20,7 @@
 # Without --replay the script needs about ten minutes and no input data.
 # --replay needs the raw TPC-H and IMDb files (see workload/README.md) and
 # about 30 GB of free disk space; it adds about 20 minutes on the test machine.
-# --measure adds a new latency measurement: 30,600 requests, about 8 hours.
+# --measure adds a new latency measurement: 30,600 requests, about 9 hours.
 #
 # Environment:
 #   AF_INSTALL                reuse this AdmissionFirst installation instead of building one

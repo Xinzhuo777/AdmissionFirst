@@ -36,7 +36,7 @@ python3 results/figures.py           # redraw the three latency figures (needs m
 | `kind` | `warmup` (one per cycle) or `measured` (eight per cycle) |
 | `round` | Warmup: the cycle; measured: 0–31 |
 | `latency_ms` | Time from submitting the SQL text to receiving the complete result |
-| `status` | `ok` (completed and returned the correct answer) or `not_run` |
+| `status` | `ok` (completed and returned the correct answer) or `not_run`; a new measurement also records `timeout` |
 
 Every completed request returned the correct, complete answer. 72 positions
 were not run: IndexPriority on the original JOB 14a query timed out in a

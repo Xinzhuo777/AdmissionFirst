@@ -71,8 +71,11 @@ sh reproduce.sh /absolute/path/to/new/work-directory --replay /path/to/raw-data 
 This also builds unmodified PostgreSQL 16.11 for the two SQL baselines and
 then repeats the paper's measurement with `tools/measure.py`: all five
 methods on the 170 cases, four cycles with one warmup and eight measured
-requests each (30,600 requests, about 8 hours on the test machine). Every
-answer and audit is checked. The new measurement is analyzed with the same
+requests each (30,600 requests, about 9 hours on the test machine). Every
+answer and audit is checked. As in the paper's measurement, IndexPriority on
+JOB 14a and the key-array policy on JOB 32a exceed the 120-second statement
+timeout; each stops after its first request, and its remaining positions are
+recorded as not run. The new measurement is analyzed with the same
 scripts as the paper's: `WORK/measurement/tables` holds the latency table
 and numbers, `WORK/measurement/figures` the figures, and
 `WORK/measurement/comparison.md` sets every new number beside the paper's.
