@@ -34,7 +34,12 @@ sh reproduce.sh /absolute/path/to/new/work-directory
 ```
 
 This takes about ten minutes and needs a C compiler, `make`, `patch`,
-`curl`, OpenSSL development files, and Python 3 (standard library only). It
+`curl`, `bzip2`, OpenSSL development files, and Python 3.9 or later
+(standard library only; the figures also need matplotlib). On Ubuntu:
+`apt-get install build-essential curl patch bzip2 libssl-dev python3
+python3-matplotlib`. Run it as an ordinary user, since PostgreSQL refuses to
+start as root. The script was tested on macOS 26 (Apple M1 Pro) and on
+Ubuntu 24.04. It
 
 1. downloads PostgreSQL 16.11, checks its SHA-256, applies the patch and
    builds it into `WORK/build` (an existing installation is never touched);
@@ -60,7 +65,9 @@ and what the replay checks. The databases take about 30 GB of disk space in
 addition to the 15 GB of raw data; building them and replaying the cases took
 about 20 minutes on the test machine (an Apple M1 Pro with 32 GB of memory).
 The replay reads each database into the page cache before its cases, so the
-largest database (about 12 GB) should fit in memory.
+largest database (about 12 GB) and 2 GB of shared buffers should fit in
+memory together (32 GB is enough, 16 GB is borderline; see
+workload/README.md).
 
 To measure the latencies again on your machine, add `--measure`:
 

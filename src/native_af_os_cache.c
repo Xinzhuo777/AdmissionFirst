@@ -7,9 +7,11 @@
  * af_os_cache_probe_fd() maps one relation segment with PROT_NONE and asks
  * mincore() whether a deterministic sample of its pages is resident.  No
  * mapped byte is read.  The AF cost model (native_af.os_cache_cost) uses
- * the resident fraction to lower the I/O part of a candidate's cost.  The
- * probe is validated on macOS only; elsewhere it reports "unknown" and
- * the ordinary cost is kept.
+ * the resident fraction to lower the I/O part of a candidate's cost.  On
+ * macOS the probe first checks that vm.self_region_footprint is off, so that
+ * mincore() describes the file cache; on Linux mincore() describes the page
+ * cache of the mapped file directly.  If any step fails, the probe reports
+ * "unknown" and the ordinary cost is kept.
  *
  *-------------------------------------------------------------------------
  */
@@ -87,8 +89,6 @@ af_os_cache_probe_fd(int fd, size_t budget, AfOsCacheResult *r)
 		if (footprint != 0)
 			return unknown(r, ENOTSUP, "footprint_mode_not_file_cache", start);
 	}
-#else
-	return unknown(r, ENOTSUP, "platform_not_validated", start);
 #endif
 	page_bytes = sysconf(_SC_PAGESIZE);
 	if (page_bytes <= 0)
@@ -116,7 +116,8 @@ af_os_cache_probe_fd(int fd, size_t budget, AfOsCacheResult *r)
 
 		if (bytes > r->os_page_bytes)
 			bytes = r->os_page_bytes;
-		if (mincore((char *) mapping + offset, (size_t) bytes, &state) != 0)
+		/* macOS declares the vector as char *, Linux as unsigned char * */
+		if (mincore((char *) mapping + offset, (size_t) bytes, (void *) &state) != 0)
 		{
 			saved_error = errno;
 			break;

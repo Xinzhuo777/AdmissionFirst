@@ -122,5 +122,11 @@ extension is built by `src/build.sh` and created only for this step), and it
 runs each query once before recording the plan. With a cold cache, AF
 estimates more I/O; for one SF10 query this turns a hash aggregation into a
 sort-based one, because the two then cost within PostgreSQL's 1% tolerance.
-The machine therefore needs enough memory to hold the largest database
-(about 12 GB). `--no-prewarm` skips this step; answers must match either way.
+The machine therefore needs enough memory to keep the largest database
+(about 12 GB) in the page cache next to the 2 GB of shared buffers. With
+32 GB all 170 plans matched. 16 GB is borderline: on a Linux machine with
+16 GB, all 170 plans matched in one replay, while in another part of that
+database was evicted during its cases and one plan (the original TPC-H Q3
+under the membership policy) used an index scan where the recorded plan uses
+a bitmap scan; it matched once its tables were read into the cache again.
+`--no-prewarm` skips this step; answers must match either way.
