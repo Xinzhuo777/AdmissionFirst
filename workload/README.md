@@ -72,8 +72,12 @@ raw-data/imdb/csv/   the 21 CSV files of the JOB IMDb snapshot (aka_name.csv ...
   [TPC](https://www.tpc.org/tpc_documents_current_versions/current_specifications5.asp)
   (its license does not allow redistribution), build `dbgen` from
   `makefile.suite` (`DATABASE=DB2 MACHINE=LINUX WORKLOAD=TPCH`; recent
-  compilers also need `-fcommon -Wno-implicit-function-declaration`), and run
-  `./dbgen -s 1 -f` and `./dbgen -s 10 -f`.
+  compilers also need `-fcommon -Wno-implicit-function-declaration`; the same
+  settings work on macOS), and run `./dbgen -s 1 -f` and `./dbgen -s 10 -f`
+  (set `DSS_PATH` to choose the output directory). Other generators do not
+  give the same files: `tpch-kit` (dbgen 2.17.3), for example, drops the
+  final `|` of every line and generates different customer and supplier
+  addresses, so its output fails the checksum test below.
 * IMDb: download `imdb.tgz` of the Join Order Benchmark from CWI (linked from
   the [JOB repository](https://github.com/gregrahn/join-order-benchmark)) and
   unpack it into `raw-data/imdb/csv/`.
